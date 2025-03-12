@@ -9,6 +9,25 @@
 [查看版本文档 (Versioning)](Ping9719.IoT/docs/VERSION.md)   
 #
 
+### 亮点（Merit）
+常用设备实现接口“IIoT”可进行读写 
+```CSharp
+client.Read<bool>("abc");//读1个
+client.Read<bool>("abc",5);//读5个
+client.Write<bool>("abc",true);//写值
+client.Write<int>("abc",10,20,30);//写多个
+```
+通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
+```CSharp
+var client1 = new TcpClient(ip, port);//Tcp方式
+var client2 = new SerialPortClient(portName, baudRate);//串口方式
+var client3 = new UdpClient(ip, port);//Udp方式
+
+var plc = new OmronCipClient(client1);//使用的方式
+plc.Client.Open();//打开通道
+plc.Read<bool>("abc");//读
+```
+
 ### 内容树：[Content tree]
 
 # [Ping9719.IoT](Ping9719.IoT/docs/README.md)   
