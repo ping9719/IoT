@@ -182,7 +182,7 @@ namespace Ping9719.IoT.PLC
                 }
                 catch (Exception ex)
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError(ex);
                     
                     return result.ToEnd();
@@ -232,7 +232,7 @@ namespace Ping9719.IoT.PLC
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError("连接超时");
@@ -587,7 +587,7 @@ namespace Ping9719.IoT.PLC
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError("连接超时") ;
@@ -644,7 +644,7 @@ namespace Ping9719.IoT.PLC
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError ( "连接超时");

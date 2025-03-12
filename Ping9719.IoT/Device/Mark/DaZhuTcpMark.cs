@@ -1,30 +1,32 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Communication;
+using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Device.Mark
 {
     /// <summary>
     /// 大族激光刻印
     /// </summary>
-    public class DaZhuTcpMark : SocketBase
+    public class DaZhuTcpMark
     {
-        /// <summary>
-        /// 使用Tcp的方式
-        /// </summary>
-        public DaZhuTcpMark(string ip, int port = 9001, int timeout = 60000)
+        public ClientBase Client { get; private set; }
+        public DaZhuTcpMark(ClientBase client, int timeout = 60000)
         {
-            if (socket == null)
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
         }
+
+        public DaZhuTcpMark(string ip, int port = 9001) : this(new TcpClient(ip, port)) { }
 
         /// <summary>
         /// 加载指定模板
@@ -35,19 +37,12 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>可替换的文本数</returns>
         public IoTResult<int> Initialize(string name, string id, bool isClose = false)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<int>(conn).ToEnd();
-            }
-
             string comm = $"<Initialize,{id},{(isClose ? 1 : 0)},{name}>";
 
             var result = new IoTResult<int>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<int>(aaa).ToEnd();
 
@@ -59,13 +54,7 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -81,18 +70,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns></returns>
         public IoTResult Offset(string id, int type, float x, float y, float a)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string[]>(conn).ToEnd();
-            }
-
             string comm = $"<Offset,{id},{type},{x},{y},{a}>";
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<string[]>(aaa).ToEnd();
 
@@ -105,11 +87,6 @@ namespace Ping9719.IoT.Device.Mark
             catch (Exception ex)
             {
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -120,19 +97,12 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns></returns>
         public IoTResult Uninstall()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return conn.ToEnd();
-            }
-
             string comm = $"<Uninstall>";
 
             var result = new IoTResult();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
@@ -142,13 +112,7 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -159,19 +123,12 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>卡号</returns>
         public IoTResult<string[]> GetCard()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string[]>(conn).ToEnd();
-            }
-
             string comm = $"<GetCard>";
 
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<string[]>(aaa).ToEnd();
 
@@ -183,13 +140,7 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -203,18 +154,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns></returns>
         public IoTResult Data(string key, string value, string id)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string[]>(conn).ToEnd();
-            }
-
             string comm = $"<Data,{id},{key},{value}>";
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<string[]>(aaa).ToEnd();
 
@@ -226,13 +170,7 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -243,18 +181,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>打印时间（秒）</returns>
         public IoTResult<double> MarkStart(params string[] id)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<double>(conn).ToEnd();
-            }
-
             string comm = $"<MarkStart,{string.Join(",", id)}>";
             var result = new IoTResult<double>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<double>(aaa).ToEnd();
 
@@ -266,13 +197,7 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -283,18 +208,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>预览时间（秒）</returns>
         public IoTResult<double> RedStart(params string[] id)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<double>(conn).ToEnd();
-            }
-
             string comm = $"<RedStart,{string.Join(",", id)}>";
             var result = new IoTResult<double>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<double>(aaa).ToEnd();
 
@@ -306,13 +224,8 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -322,18 +235,11 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         public IoTResult Stop(params string[] id)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string[]>(conn).ToEnd();
-            }
-
             string comm = $"<Stop,{string.Join(",", id)}>";
             var result = new IoTResult();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
@@ -343,13 +249,8 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -359,18 +260,11 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         public IoTResult StopAll()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return conn.ToEnd();
-            }
-
             string comm = $"<Stop>";
             var result = new IoTResult();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
@@ -380,13 +274,8 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -398,18 +287,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>值：Run/Ready</returns>
         public IoTResult<string> State(string id)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-
             string comm = $"<State,{id}>";
             var result = new IoTResult<string>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<string>(aaa).ToEnd();
 
@@ -421,13 +303,8 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -438,18 +315,11 @@ namespace Ping9719.IoT.Device.Mark
         /// <returns>值：Run/Ready</returns>
         public IoTResult<string> State()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-
             string comm = $"<State>";
             var result = new IoTResult<string>();
             try
             {
-                var aaa = SendPackageSingle(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
                 if (!aaa.IsSucceed)
                     return new IoTResult<string>(aaa).ToEnd();
 
@@ -461,13 +331,8 @@ namespace Ping9719.IoT.Device.Mark
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -477,7 +342,7 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         /// <param name="str">返回的结果</param>
         /// <returns></returns>
-        private IoTResult<string[]> Analysis(string str)
+        private static IoTResult<string[]> Analysis(string str)
         {
             IoTResult<string[]> result = new IoTResult<string[]>();
             if (str.StartsWith("<") && str.EndsWith(">"))
@@ -489,12 +354,12 @@ namespace Ping9719.IoT.Device.Mark
                 }
                 else if (con.Length > 0 && con[0] == "NG")
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError( string.Join(",", con.Skip(1)));
                 }
                 else
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError($"不是有效的格式【{con}】");
                 }
             }

@@ -151,19 +151,19 @@ namespace Ping9719.IoT.Modbus
 
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。响应结果校验失败");
                     SafeClose();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError(ModbusHelper.ErrMsg(dataPackage[8]));
                 }
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。连接超时");
@@ -1150,7 +1150,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError("连接超时");
@@ -1205,13 +1205,13 @@ namespace Ping9719.IoT.Modbus
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError( ModbusHelper.ErrMsg(dataPackage[8]));
                 }
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError("连接超时");

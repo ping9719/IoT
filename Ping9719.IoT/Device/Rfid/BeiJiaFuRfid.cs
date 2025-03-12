@@ -1,9 +1,11 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Communication;
+using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,20 +14,21 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 倍加福Rfid。支持B17等
     /// </summary>
-    public class BeiJiaFuRfid : SocketBase
+    public class BeiJiaFuRfid
     {
-
-        /// <summary>
-        /// 使用Tcp的方式
-        /// </summary>
-        public BeiJiaFuRfid(string ip, int port = 10000, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public BeiJiaFuRfid(ClientBase client, int timeout = 1500)
         {
-            if (socket == null)
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
         }
+        public BeiJiaFuRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }
+        public BeiJiaFuRfid(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
+
 
         /// <summary>
         /// 读取，并尝试将读取的结果转为数字
@@ -56,24 +59,13 @@ namespace Ping9719.IoT.Device.Rfid
         /// <returns></returns>
         public IoTResult<string> Read(int index = 0)
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-
             byte[] ReadLabelMessage1 = new byte[6] { 0x00, 0x06, 0x10, 0x22, 0x00, 0x00 };//读取1通道标签信息
             ReadLabelMessage1[3] = Convert.ToByte(ReadLabelMessage1[3] + index * 2);
 
             IoTResult<string> result = new IoTResult<string>();
             try
             {
-                var aaa = SendPackageSingle(ReadLabelMessage1);
-                if (!aaa.IsSucceed)
-                    return new IoTResult<string>(aaa).ToEnd();
-
-                var bbb = SocketRead();
+                var bbb = Client.SendReceive(ReadLabelMessage1);
                 if (!bbb.IsSucceed)
                     return new IoTResult<string>(bbb).ToEnd();
 
@@ -92,13 +84,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -111,15 +97,8 @@ namespace Ping9719.IoT.Device.Rfid
             IoTResult result = new IoTResult();
             if (value.Length != 8)
             {
-                result.IsSucceed = false;
                 result.AddError("写入字符串长度必须为8");
                 return result;
-            }
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
             }
 
             byte[] WriteLabelMessage = new byte[6] { 0x00, 0x0E, 0x40, 0x22, 0x00, 0x00 };//写标签信息
@@ -132,11 +111,11 @@ namespace Ping9719.IoT.Device.Rfid
 
             try
             {
-                var aaa = SendPackageSingle(getall);
+                var aaa = Client.SendReceive(getall);
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
-                var bbb = SocketRead();
+                var bbb = Client.Receive();
                 if (!bbb.IsSucceed)
                     return bbb.ToEnd();
 
@@ -147,13 +126,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -162,24 +135,16 @@ namespace Ping9719.IoT.Device.Rfid
         /// 设置模式
         /// </summary>
         public IoTResult SetMode()
-
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-
             byte[] SetLabelType = new byte[6] { 0x00, 0x06, 0x04, 0x02, 0x33, 0x33 };
             IoTResult result = new IoTResult();
             try
             {
-                var aaa = SendPackageSingle(SetLabelType);
+                var aaa = Client.SendReceive(SetLabelType);
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
-                var bbb = SocketRead();
+                var bbb = Client.Receive();
                 if (!bbb.IsSucceed)
                     return bbb.ToEnd();
 
@@ -190,13 +155,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }

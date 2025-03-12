@@ -24,6 +24,7 @@ Install-Package Ping9719.IoT
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
+    - SerialPortClient （待开发） 
 - [算法 (Algorithm)](#算法 (Algorithm))
     - CRC
     - 傅立叶算法(Fourier) （待开发） 
@@ -39,8 +40,8 @@ Install-Package Ping9719.IoT
         - 泰和森Rfid (TaiHeSenRfid)
         - 万全Rfid (WanQuanRfid)
     - 扫码枪 (Scanner)
-        - 霍尼韦尔扫码器 (HoneywellScanner,HoneywellTcpScanner)
-        - 民德扫码器 (MindeoScanner,MindeoTcpScanner)
+        - 霍尼韦尔扫码器 (HoneywellScanner)
+        - 民德扫码器 (MindeoScanner)
     - 螺丝机 (Screw)
         - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)
         - 米勒螺丝机 (MiLeScrew)
@@ -54,7 +55,6 @@ Install-Package Ping9719.IoT
 书写中...
 
 # Modbus
-## 例子（code） 
 ```CSharp
 ModBusTcpClient client = new ModBusTcpClient("127.0.0.1", 502);
 //ModbusRtuClient client = new ModbusRtuClient("COM1");

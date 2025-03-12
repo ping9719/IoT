@@ -42,7 +42,7 @@ namespace Ping9719.IoT.Device.Screw
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
                 return result.ToEnd();
             }
@@ -93,7 +93,7 @@ namespace Ping9719.IoT.Device.Screw
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
                 return result.ToEnd();
             }

@@ -16,8 +16,7 @@ namespace Ping9719.IoT.Device.Scanner
         /// <summary>
         /// 进行一次扫码
         /// </summary>
-        /// <param name="timeout">超时时间（毫秒）</param>
         /// <returns>结果</returns>
-        IoTResult<string> ReadOne(int timeout);
+        IoTResult<string> ReadOne();
     }
 }

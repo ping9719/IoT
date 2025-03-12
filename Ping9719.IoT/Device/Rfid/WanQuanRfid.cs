@@ -1,7 +1,9 @@
 ﻿using Ping9719.IoT;
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Communication.SerialPort;
+using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -16,29 +18,25 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 万全Rfid
     /// </summary>
-    public class WanQuanRfid : SerialPortBase
+    public class WanQuanRfid
     {
         //设备地址 
         private byte stationNumber = 1;
 
-        public WanQuanRfid(string portName, int baudRate = 115200,
-                            Parity parity = Parity.None,
-                            int dataBits = 8, StopBits stopBits = StopBits.One,
-                            byte stationNumber = 0x01, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public WanQuanRfid(ClientBase client, byte stationNumber = 0x01, int timeout = 1500)
         {
-            //设置串口参数
-            if (serialPort == null)
-                serialPort = new SerialPort();
-            serialPort.PortName = portName;
-            serialPort.BaudRate = baudRate;
-            serialPort.DataBits = dataBits;
-            serialPort.StopBits = stopBits;
-            serialPort.Encoding = Encoding.UTF8;
-            serialPort.Parity = parity;
-            serialPort.ReadTimeout = timeout;
-            serialPort.WriteTimeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
+
             this.stationNumber = stationNumber;
         }
+        public WanQuanRfid(string ip, int port) : this(new TcpClient(ip, port)) { }
+        public WanQuanRfid(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
         /// <summary>
         /// 【命令模式】读取标签 传入天线号 返回对应天线读取的EPC编号字符串
@@ -72,7 +70,7 @@ namespace Ping9719.IoT.Device.Rfid
             bytes[4] = BitConverter.GetBytes(34)[1];
             bytes[5] = BitConverter.GetBytes(34)[0];//表示request 寄存器的长度(寄存器个数)
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed)
             {
                 sendResult.Value = new byte[] { };
@@ -104,7 +102,6 @@ namespace Ping9719.IoT.Device.Rfid
             };
         }
 
-
         /// <summary>
         /// 写入标签
         /// </summary>
@@ -119,7 +116,7 @@ namespace Ping9719.IoT.Device.Rfid
             if (string.IsNullOrEmpty(values) || values.Length % 4 != 0)
             {
                 var result = new IoTResult<string>();
-                result.AddError ( "输入长度错误，应为4的倍数");
+                result.AddError("输入长度错误，应为4的倍数");
                 return result;
             }
 
@@ -164,7 +161,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
 
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed)
             {
                 sendResult.Value = new byte[] { };
@@ -190,6 +187,5 @@ namespace Ping9719.IoT.Device.Rfid
             //写入成功
             return sendResult;
         }
-
     }
 }

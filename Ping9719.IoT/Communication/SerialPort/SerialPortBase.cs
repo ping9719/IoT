@@ -73,7 +73,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             } 
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             return result;

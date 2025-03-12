@@ -59,19 +59,19 @@ namespace Ping9719.IoT.Modbus
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
                 else if (!CRC.CheckCrc16(responsePackage))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果CRC16验证失败");
                     //return result.ToEnd();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError( ModbusHelper.ErrMsg(responsePackage[2]));
                 }
 
@@ -86,7 +86,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally
@@ -122,19 +122,19 @@ namespace Ping9719.IoT.Modbus
 
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
                 else if (!CRC.CheckCrc16(responsePackage))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果CRC16验证失败");
                     //return result.ToEnd();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError(ModbusHelper.ErrMsg(responsePackage[2]));
                 }
                 byte[] resultBuffer = new byte[responsePackage.Length - 2];
@@ -143,7 +143,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally
@@ -179,19 +179,19 @@ namespace Ping9719.IoT.Modbus
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
                 else if (!CRC.CheckCrc16(responsePackage))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果CRC16验证失败");
                     //return result.ToEnd();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError(ModbusHelper.ErrMsg(responsePackage[2]));
                 }
                 byte[] resultBuffer = new byte[responsePackage.Length - 2];
@@ -200,7 +200,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally

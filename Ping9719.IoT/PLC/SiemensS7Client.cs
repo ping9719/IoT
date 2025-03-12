@@ -218,7 +218,7 @@ namespace Ping9719.IoT.PLC
                 }
                 catch (Exception ex)
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError(ex);
                     
                     return result.ToEnd();
@@ -277,19 +277,19 @@ namespace Ping9719.IoT.PLC
                     {
                         if (dataPackage[21] == 0x0A && dataPackage[22] == 0x00)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError ( $"读取{address}失败，请确认是否存在地址{address}");
                             return result;
                         }
                         else if (dataPackage[21] == 0x05 && dataPackage[22] == 0x00)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"读取{address}失败，请确认是否存在地址{address}");
                             return result;
                         }
                         else if (dataPackage[21] != 0xFF)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"读取{address}失败，异常代码[{21}]:{dataPackage[21]}");
                             return result;
                         }
@@ -298,7 +298,7 @@ namespace Ping9719.IoT.PLC
             }
             catch (SocketException ex)
             {
-                result.IsSucceed = false;
+                
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
                     result.AddError($"读取{address}失败，连接超时");
@@ -716,24 +716,24 @@ namespace Ping9719.IoT.PLC
                         var offset = 21 + i;
                         if (dataPackage[offset] == 0x0A)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError( $"写入{arg[i].Address}失败，请确认是否存在地址{arg[i].Address}，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                         else if (dataPackage[offset] == 0x05)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"写入{arg[i].Address}失败，请确认是否存在地址{arg[i].Address}，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                         else if (dataPackage[offset] != 0xFF)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"写入{string.Join(",", arg.Select(t => t.Address))}失败，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                     }
                 }
                 else
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError($"写入数据数量和响应结果数量不一致，写入数据：{arg.Length} 响应数量：{dataPackage.Length - 21}");
                 }
             }
@@ -829,19 +829,19 @@ namespace Ping9719.IoT.PLC
                     var offset = dataPackage.Length - 1;
                     if (dataPackage[offset] == 0x0A)
                     {
-                        result.IsSucceed = false;
+                        
                         result.AddError( $"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }
                     else if (dataPackage[offset] == 0x05)
                     {
-                        result.IsSucceed = false;
+                        
                         result.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }
                     else if (dataPackage[offset] != 0xFF)
                     {
-                        result.IsSucceed = false;
+                        
                         result.AddError($"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }

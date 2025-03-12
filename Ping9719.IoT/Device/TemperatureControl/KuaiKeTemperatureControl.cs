@@ -10,6 +10,8 @@ using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Enums;
 using Ping9719.IoT;
+using Ping9719.IoT.Communication;
+using Ping9719.IoT.Communication.TCP;
 
 namespace Ping9719.IoT.Device.TemperatureControl
 {
@@ -18,46 +20,39 @@ namespace Ping9719.IoT.Device.TemperatureControl
     /// 378FA通讯协议.docx
     /// 快克_通用串口通讯协议.docx
     /// </summary>
-    public class KuaiKeTemperatureControl : SerialPortBase
+    public class KuaiKeTemperatureControl
     {
         protected EndianFormat format;
         private byte stationNumber = 1;
 
-        public KuaiKeTemperatureControl(string portName, int baudRate = 115200, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 20)
+        public ClientBase Client { get; private set; }
+        public KuaiKeTemperatureControl(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 20)
         {
-            if (serialPort == null) serialPort = new SerialPort();
-            serialPort.PortName = portName;
-            serialPort.BaudRate = baudRate;
-            serialPort.DataBits = dataBits;
-            serialPort.StopBits = stopBits;
-            serialPort.Encoding = Encoding.ASCII;
-            serialPort.Parity = parity;
-
-            serialPort.ReadTimeout = timeout;
-            serialPort.WriteTimeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            //Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
 
             this.format = format;
             this.stationNumber = stationNumber;
         }
+        public KuaiKeTemperatureControl(string ip, int port = 55256) : this(new TcpClient(ip, port)) { }
+        public KuaiKeTemperatureControl(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
+
 
         public IoTResult<byte[]> Read(int address, int number)
         {
             try
             {
-                if (isAutoOpen)
-                {
-                    var conn = Connect();
-                    if (!conn.IsSucceed)
-                        return new IoTResult<byte[]>(conn);
-                }
-
                 byte[] bytes = new byte[4];
                 bytes[0] = stationNumber;
                 bytes[1] = 0x67;
                 bytes[2] = Convert.ToByte(address);
                 bytes[3] = Convert.ToByte(number);
                 var commandCRC16 = CRC.Crc16(bytes.ToArray());
-                var sendResult = SendPackageReliable(commandCRC16);
+                var sendResult = Client.SendReceive(commandCRC16);
                 if (!sendResult.IsSucceed)
                 {
                     sendResult.Value = new byte[] { };
@@ -65,14 +60,12 @@ namespace Ping9719.IoT.Device.TemperatureControl
                 }
                 if (sendResult.Value.Length != 6 + number)
                 {
-                    sendResult.IsSucceed = false;
                     sendResult.Value = new byte[] { };
                     sendResult.AddError("数据长度验证不合格");
                     return sendResult;
                 }
                 if (!CRC.CheckCrc16(sendResult.Value))
                 {
-                    sendResult.IsSucceed = false;
                     sendResult.Value = new byte[] { };
                     sendResult.AddError("数据CRC16验证不合格");
                     return sendResult;
@@ -86,23 +79,12 @@ namespace Ping9719.IoT.Device.TemperatureControl
             {
                 return new IoTResult<byte[]>().AddError(ex);
             }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
-            }
         }
 
         public IoTResult Write(int address, params byte[] values)
         {
             try
             {
-                if (isAutoOpen)
-                {
-                    var conn = Connect();
-                    if (!conn.IsSucceed)
-                        return conn;
-                }
 
                 byte[] bytes = new byte[4 + values.Length];
                 bytes[0] = stationNumber;
@@ -112,7 +94,7 @@ namespace Ping9719.IoT.Device.TemperatureControl
                 Array.Copy(values, 0, bytes, 4, values.Length);
 
                 var commandCRC16 = CRC.Crc16(bytes.ToArray());
-                var sendResult = SendPackageReliable(commandCRC16);
+                var sendResult = Client.SendReceive(commandCRC16);
 
                 if (!sendResult.IsSucceed)
                 {
@@ -121,14 +103,12 @@ namespace Ping9719.IoT.Device.TemperatureControl
                 }
                 if (sendResult.Value.Length != 6 + values.Length)
                 {
-                    sendResult.IsSucceed = false;
                     sendResult.Value = new byte[] { };
                     sendResult.AddError("数据长度验证不合格");
                     return sendResult;
                 }
                 if (!CRC.CheckCrc16(sendResult.Value))
                 {
-                    sendResult.IsSucceed = false;
                     sendResult.Value = new byte[] { };
                     sendResult.AddError("数据CRC16验证不合格");
                     return sendResult;
@@ -140,12 +120,6 @@ namespace Ping9719.IoT.Device.TemperatureControl
             {
                 return new IoTResult<byte[]>().AddError(ex);
             }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
-            }
-
         }
 
         /// <summary>

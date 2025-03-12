@@ -208,7 +208,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally

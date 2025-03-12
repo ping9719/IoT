@@ -59,7 +59,7 @@ namespace Ping9719.IoT.Modbus.Models
                     }
                     else
                     {
-                        result.IsSucceed = false;
+                        
                         result.AddError($"address地址[{address}]格式不正确。无法解析其中的地址（0-65535）。");
                         
                         return result;
@@ -71,7 +71,7 @@ namespace Ping9719.IoT.Modbus.Models
                     {
                         if (!byte.TryParse(itemSplit[1], out s))
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的站号（0-255）。");
                             
                             return result;
@@ -81,14 +81,14 @@ namespace Ping9719.IoT.Modbus.Models
                     {
                         if (!byte.TryParse(itemSplit[1], out x))
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的功能码（1-255）。");
                             
                             return result;
                         }
                         if (x == 0)
                         {
-                            result.IsSucceed = false;
+                            
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的功能码（1-255）。");
                             
                             return result;
@@ -99,7 +99,7 @@ namespace Ping9719.IoT.Modbus.Models
 
             if (!isaok)
             {
-                result.IsSucceed = false;
+                
                 result.AddError($"address地址[{address}]格式不正确。无法找到其中的地址（0-65535）。");
                 
                 return result;

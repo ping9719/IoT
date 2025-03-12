@@ -10,6 +10,19 @@ namespace Ping9719.IoT
     public class IoTResult
     {
         /// <summary>
+        /// 创建实例
+        /// </summary>
+        public static IoTResult Create() => new IoTResult();
+        /// <summary>
+        /// 创建实例
+        /// </summary>
+        public static IoTResult<T> Create<T>() => new IoTResult<T>();
+        /// <summary>
+        /// 创建实例
+        /// </summary>
+        public static IoTResult<T> Create<T>(T data) => new IoTResult<T>(data);
+
+        /// <summary>
         /// 是否成功
         /// </summary>
         public bool IsSucceed { get; set; } = true;

@@ -67,7 +67,7 @@ namespace Ping9719.IoT.Modbus
 
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -77,7 +77,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -92,7 +92,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally
@@ -134,7 +134,7 @@ namespace Ping9719.IoT.Modbus
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -144,7 +144,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -153,7 +153,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally
@@ -195,7 +195,7 @@ namespace Ping9719.IoT.Modbus
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -205,7 +205,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    result.IsSucceed = false;
+                    
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -214,7 +214,7 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
+                
                 result.AddError(ex);
             }
             finally

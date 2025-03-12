@@ -1,9 +1,11 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Communication;
+using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,21 +14,20 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 泰和森Rfid
     /// </summary>
-    public class TaiHeSenRfid : SocketBase
+    public class TaiHeSenRfid
     {
-        public Encoding encoding = Encoding.ASCII;
-
-        /// <summary>
-        /// 使用Tcp的方式
-        /// </summary>
-        public TaiHeSenRfid(string ip, int port = 4000, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public TaiHeSenRfid(ClientBase client, int timeout = 1500)
         {
-            if (socket == null)
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
         }
+        public TaiHeSenRfid(string ip, int port = 4000) : this(new TcpClient(ip, port)) { }
+        public TaiHeSenRfid(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
         /// <summary>
         /// 读取
@@ -34,18 +35,11 @@ namespace Ping9719.IoT.Device.Rfid
         /// <returns></returns>
         public IoTResult<string> Read()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-
             byte[] ReadLabelMessage = new byte[7] { 0xAA, 0xFF, 0x22, 0x00, 0x00, 0x21, 0xBB };//发送读值指令，固定编码格式
             IoTResult<string> result = new IoTResult<string>();
             try
             {
-                var retValue_Send = SendPackageSingle(ReadLabelMessage);
+                var retValue_Send = Client.SendReceive(ReadLabelMessage);
                 if (!retValue_Send.IsSucceed)
                     return new IoTResult<string>(retValue_Send).ToEnd();
 
@@ -56,18 +50,12 @@ namespace Ping9719.IoT.Device.Rfid
 
                 int datalength = retValue_Send.Value[4] - 5;//实际数据长度
                 byte[] ThisByte = retValue_Send.Value.Skip(8).Take(datalength).ToArray();
-                var aaa = encoding.GetString(ThisByte, 0, ThisByte.Length);
+                var aaa = Client.Encoding.GetString(ThisByte, 0, ThisByte.Length);
                 result.Value = aaa;
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }
@@ -80,24 +68,16 @@ namespace Ping9719.IoT.Device.Rfid
             IoTResult result = new IoTResult();
             if (value.Length > 12 || value.Length < 2)
             {
-                result.IsSucceed = false;
                 result.AddError("写入字符串长度必须为2-12字");
                 return result;
             }
             if (value.Length % 2 != 0)
             {
-                result.IsSucceed = false;
                 result.AddError("写入字符串长度必须为偶数");
                 return result;
             }
 
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn).ToEnd();
-            }
-            var sendByte = encoding.GetBytes(value);
+            var sendByte = Client.Encoding.GetBytes(value);
 
             //组合成发送指令码
             List<byte> WriteLabelMessage = new List<byte>
@@ -117,7 +97,7 @@ namespace Ping9719.IoT.Device.Rfid
 
             try
             {
-                var retValue = SendPackageSingle(WriteLabelMessage.ToArray());
+                var retValue = Client.SendReceive(WriteLabelMessage.ToArray());
                 if (!retValue.IsSucceed)
                     return retValue.ToEnd();
 
@@ -128,13 +108,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
             catch (Exception ex)
             {
-                result.IsSucceed = false;
                 result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
             }
             return result.ToEnd();
         }

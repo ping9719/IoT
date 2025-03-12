@@ -1,5 +1,7 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Communication.SerialPort;
+using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -18,65 +20,40 @@ namespace Ping9719.IoT.Device.Scanner
     /// 文档：https://prod-edam.honeywell.com/content/dam/honeywell-edam/sps/ppr/en-us/public/products/barcode-scanners/fixed-mount/hf800/sps-ppr-hf800-en-qs.pdf?download=false
     /// 下载软件：https://hsmftp.honeywell.com/
     /// </summary>
-    public class HoneywellScanner : SerialPortBase, IScannerBase
+    public class HoneywellScanner : IScannerBase
     {
-        public string stateCode = "TRIGGER";//开始扫描
-        public string endCode = "UNTRIG";//取消扫描
-
-        /// <summary>
-        /// 使用串口的方式
-        /// </summary>
-        public HoneywellScanner(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One)
+        public ClientBase Client { get; private set; }
+        public HoneywellScanner(ClientBase client, int timeout = 1500)
         {
-            if (serialPort == null)
-                serialPort = new SerialPort();
-            serialPort.PortName = portName;
-            serialPort.BaudRate = baudRate;
-            serialPort.DataBits = dataBits;
-            serialPort.StopBits = stopBits;
-            serialPort.Encoding = Encoding.UTF8;
-            serialPort.Parity = parity;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.TimeOut = timeout;
+            Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
         }
+        public HoneywellScanner(string ip, int port = 55256) : this(new TcpClient(ip, port)) { }
+        public HoneywellScanner(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
+
 
         /// <summary>
         /// 在外部触发模式下执行一次
         /// </summary>
         /// <param name="timeout">保持时长（毫秒），填写解码设置：触发超时时间设置的值</param>
         /// <returns></returns>
-        public IoTResult<string> ReadOne(int timeout)
+        public IoTResult<string> ReadOne()
         {
-            if (isAutoOpen)
-            {
-                var conn = Connect();
-                if (!conn.IsSucceed)
-                    return new IoTResult<string>(conn);
-            }
+            return Client.SendReceive("TRIGGER");
+        }
 
-            serialPort.ReadTimeout = timeout;
-            serialPort.WriteTimeout = timeout;
-            var result = new IoTResult<string>();
-            try
-            {
-                //清空字符,还原状态
-                serialPort.DiscardInBuffer();
-                serialPort.Write(stateCode);
-                var aaa = SerialPortRead();
-                if (!aaa.IsSucceed)
-                    return new IoTResult<string>(aaa);
-
-                result.Value = Encoding.UTF8.GetString(aaa.Value);
-            }
-            catch (Exception ex)
-            {
-                result.IsSucceed = false;
-                result.AddError(ex);
-            }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
-            }
-            return result.ToEnd();
+        /// <summary>
+        /// 取消扫描
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns></returns>
+        public IoTResult<string> ReadCancel()
+        {
+            return Client.SendReceive("UNTRIG");
         }
     }
 }

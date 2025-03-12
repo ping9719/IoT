@@ -1,7 +1,7 @@
 # Ping9719.IoT
 
-### 工业互联网通讯库。
-##### Industrial Internet communications library.
+### 工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议。
+##### Iot device communication protocol implementation, including mainstream PLC, ModBus, CIP, MC, FINS...... Such common protocols.
 #
 
 ### 全部文档：[doc]
@@ -13,9 +13,9 @@
 
 # [Ping9719.IoT](Ping9719.IoT/docs/README.md)   
 - Modbus
-    - ModbusRtu
-    - ModbusTcp
-    - ModbusAscii
+    - ModbusRtu (ModbusRtuClient,ModbusRtuOverTcpClient)
+    - ModbusTcp (ModbusTcpClient)
+    - ModbusAscii (ModbusAsciiClient)
 - PLC
     - 罗克韦尔 (AllenBradleyCipClient) （未测试）  
     - 汇川 (InovanceModbusTcpClient)
@@ -32,6 +32,7 @@
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
+    - SerialPortClient （待开发） 
 - 算法 (Algorithm)
     - CRC
     - 傅立叶算法(Fourier) （待开发） 
@@ -47,8 +48,8 @@
         - 泰和森Rfid (TaiHeSenRfid)
         - 万全Rfid (WanQuanRfid)
     - 扫码枪 (Scanner)
-        - 霍尼韦尔扫码器 (HoneywellScanner,HoneywellTcpScanner)
-        - 民德扫码器 (MindeoScanner,MindeoTcpScanner)
+        - 霍尼韦尔扫码器 (HoneywellScanner)
+        - 民德扫码器 (MindeoScanner)
     - 螺丝机 (Screw)
         - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)
         - 米勒螺丝机 (MiLeScrew)
