@@ -1,6 +1,7 @@
 ﻿
 # 安装包 [NuGet]
 ```CSharp
+//等待稳定后发布，现在请自行拉取代码 
 Install-Package Ping9719.IoT
 ```
 # Ping9719.IoT
