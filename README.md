@@ -10,14 +10,14 @@
 #
 
 ### 亮点（Merit）
-常用设备实现接口“IIoT”可进行读写 
+1.常用设备实现接口“IIoT”可进行读写 
 ```CSharp
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc",5);//读5个
 client.Write<bool>("abc",true);//写值
 client.Write<int>("abc",10,20,30);//写多个
 ```
-通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
+2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
 var client1 = new TcpClient(ip, port);//Tcp方式
 var client2 = new SerialPortClient(portName, baudRate);//串口方式
@@ -26,6 +26,21 @@ var client3 = new UdpClient(ip, port);//Udp方式
 var plc = new OmronCipClient(client1);//使用的方式
 plc.Client.Open();//打开通道
 plc.Read<bool>("abc");//读
+```
+3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
+```CSharp
+ClientBase client1 = new TcpClient(ip, port);//Tcp方式
+client1.IsAutoOpen=fasle;//自动打开
+client1.IsReconnection=true;//断线重连
+client1.Open();
+client1.Opened = (a) =>{Log.AddLog("链接成功")};
+client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
+client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
+
+client1.Send("abc");//发送
+client1.Receive();//等待并接受
+client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
+client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
 ```
 
 ### 内容树：[Content tree]
