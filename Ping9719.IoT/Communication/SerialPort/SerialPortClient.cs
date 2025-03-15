@@ -86,7 +86,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -104,7 +104,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -119,7 +119,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open().ToVal<byte[]>(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -137,7 +137,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -152,7 +152,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open().ToVal<byte[]>(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -175,7 +175,7 @@ namespace Ping9719.IoT.Communication.SerialPort
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -226,7 +226,7 @@ namespace Ping9719.IoT.Communication.SerialPort
                             //    Close2(false);
                             //}
                         }
-                        else if (IsReconnection && !IsAutoOpen)
+                        else if (ConnectionMode == ConnectionMode.AutoReconnection)
                         {
                             Open2(true);
                         }

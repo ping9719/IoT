@@ -5,8 +5,8 @@
 #
 
 ### 全部文档：[doc]
-[查看入门文档 (Entry document)](Ping9719.IoT/docs/README.md)   
-[查看版本文档 (Versioning)](Ping9719.IoT/docs/VERSION.md)   
+[查看详细文档 (Detailed document)](Ping9719.IoT/docs/README.md)   
+[查看版本文档 (Version document)](Ping9719.IoT/docs/VERSION.md)   
 #
 
 ### 亮点（Merit）
@@ -30,12 +30,12 @@ plc.Read<bool>("abc");//读
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
-client1.IsAutoOpen=fasle;//自动打开
-client1.IsReconnection=true;//断线重连
-client1.Open();
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
+//client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client1.Opened = (a) =>{Log.AddLog("链接成功")};
 client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
 client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
+client1.Open();
 
 client1.Send("abc");//发送
 client1.Receive();//等待并接受
@@ -51,7 +51,7 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
     - ModbusTcp (ModbusTcpClient)
     - ModbusAscii (ModbusAsciiClient)
 - PLC
-    - 罗克韦尔 (AllenBradleyCipClient) （未测试）  
+    - 罗克韦尔 (AllenBradleyCipClient) （未通过测试） 
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
@@ -85,9 +85,9 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
         - 霍尼韦尔扫码器 (HoneywellScanner)
         - 民德扫码器 (MindeoScanner)
     - 螺丝机 (Screw)
-        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)
+        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)（不推荐） 
         - 米勒螺丝机 (MiLeScrew)
     - 温控 (TemperatureControl)
-        - 快克温控 (KuaiKeTemperatureControl)
+        - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
-        - 快克焊接机 (KuaiKeWeld)
+        - 快克焊接机 (KuaiKeWeld)（不推荐） 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Communication.TCP
 {
+    [Obsolete]
     public class TcpClient2 : ClientBase
     {
         public Socket Socket { get; private set; }
@@ -83,7 +84,7 @@ namespace Ping9719.IoT.Communication.TCP
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -101,7 +102,7 @@ namespace Ping9719.IoT.Communication.TCP
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -116,7 +117,7 @@ namespace Ping9719.IoT.Communication.TCP
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open().ToVal<byte[]>(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -134,7 +135,7 @@ namespace Ping9719.IoT.Communication.TCP
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -149,7 +150,7 @@ namespace Ping9719.IoT.Communication.TCP
             isSendReceive = true;
             try
             {
-                if (!IsOpen && IsAutoOpen && !IsReconnection)
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
                 { result = Open().ToVal<byte[]>(); isHmOpen = true; }
                 if (!result.IsSucceed)
                     return result;
@@ -172,7 +173,7 @@ namespace Ping9719.IoT.Communication.TCP
             }
             finally
             {
-                if (IsOpen && IsAutoOpen && !IsReconnection && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -257,7 +258,7 @@ namespace Ping9719.IoT.Communication.TCP
                             //    Close2(false);
                             //}
                         }
-                        else if (IsReconnection && !IsAutoOpen)
+                        else if (ConnectionMode == ConnectionMode.AutoReconnection)
                         {
                             Open2(true);
                         }

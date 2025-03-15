@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Ping9719.IoT.Interfaces
 {
     /// <summary>
-    /// IIoTClient 接口
+    /// 不推荐使用
     /// </summary>
     public interface IIoTClient
     {

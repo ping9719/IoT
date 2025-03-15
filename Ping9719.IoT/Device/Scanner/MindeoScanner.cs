@@ -26,8 +26,7 @@ namespace Ping9719.IoT.Device.Scanner
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.TimeOut = timeout;
-            Client.IsAutoOpen = true;
-            Client.IsAutoDiscard = true;
+            Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             Ver = ver;
         }

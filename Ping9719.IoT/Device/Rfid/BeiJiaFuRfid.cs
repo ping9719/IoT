@@ -23,8 +23,7 @@ namespace Ping9719.IoT.Device.Rfid
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.TimeOut = timeout;
-            Client.IsAutoOpen = true;
-            Client.IsAutoDiscard = true;
+            Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public BeiJiaFuRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }
         public BeiJiaFuRfid(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }

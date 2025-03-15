@@ -11,7 +11,7 @@ Install-Package Ping9719.IoT
     - ModbusTcp (ModbusTcpClient)
     - ModbusAscii (ModbusAsciiClient)
 - [PLC](#PLC)
-    - 罗克韦尔 (AllenBradleyCipClient) （未测试）  
+    - 罗克韦尔 (AllenBradleyCipClient) （未通过测试）   
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
@@ -45,12 +45,12 @@ Install-Package Ping9719.IoT
         - 霍尼韦尔扫码器 (HoneywellScanner)
         - 民德扫码器 (MindeoScanner)
     - 螺丝机 (Screw)
-        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)
+        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)（不推荐） 
         - 米勒螺丝机 (MiLeScrew)
     - 温控 (TemperatureControl)
-        - 快克温控 (KuaiKeTemperatureControl)
+        - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
-        - 快克焊接机 (KuaiKeWeld)
+        - 快克焊接机 (KuaiKeWeld)（不推荐） 
 
 
 # 前言、亮点（Merit）
@@ -74,12 +74,12 @@ plc.Read<bool>("abc");//读
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
-client1.IsAutoOpen=fasle;//自动打开
-client1.IsReconnection=true;//断线重连
-client1.Open();
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client1.Opened = (a) =>{Log.AddLog("链接成功")};
 client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
 client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
+client1.Open();
 
 client1.Send("abc");//发送
 client1.Receive();//等待并接受
@@ -106,6 +106,7 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
 
 ## 罗克韦尔 (AllenBradleyCipClient)
 ```CSharp
+//部分机器可使用OmronCipClient替代 
 AllenBradleyCipClient client = new AllenBradleyCipClient("127.0.0.1");
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
@@ -159,8 +160,7 @@ client.Pause();
 ## TcpClient
 ```CSharp
 TcpClient tcpClient = new TcpClient("127.0.0.1", 8080);
-tcpClient.IsReconnection = true;
-tcpClient.Open();
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 tcpClient.Opening = (a) =>
 {
     TextBoxLog.AddLog("连接中");
@@ -181,12 +181,13 @@ tcpClient.Closed = (a,b) =>
 };
 tcpClient.Received = (a,b) =>
 {
-    Log.AddLog("收到消息:"+ DataConvert.ByteArrayToString(b));
+    Log.AddLog("收到消息:"+ a.Encoding.GetString(b));
 };
 tcpClient.Warning = (a,b) =>
 {
     TextBoxLog.AddLog("错误"+ b.ToString());
 };
+tcpClient.Open();
 
 tcpClient.Send("abc");//发送
 tcpClient.Receive();//等待并接受

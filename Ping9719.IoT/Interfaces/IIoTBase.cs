@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Interfaces
 {
+    /// <summary>
+    /// 不推荐使用
+    /// </summary>
     public interface IIoTBase
     {
         /// <summary>

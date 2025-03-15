@@ -22,8 +22,7 @@ namespace Ping9719.IoT.Device.Mark
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.TimeOut = timeout;
-            Client.IsAutoOpen = true;
-            Client.IsAutoDiscard = true;
+            Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
         public DaZhuTcpMark(string ip, int port = 9001) : this(new TcpClient(ip, port)) { }

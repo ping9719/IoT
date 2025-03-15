@@ -30,8 +30,7 @@ namespace Ping9719.IoT.Device.Rfid
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.TimeOut = timeout;
-            Client.IsAutoOpen = true;
-            Client.IsAutoDiscard = true;
+            Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.stationNumber = stationNumber;
         }

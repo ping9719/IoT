@@ -19,17 +19,17 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public abstract bool IsOpen { get; }
         /// <summary>
-        /// 是否自动打开关闭，必须 <see cref="IsReconnection"/> 为 false。默认false。
+        /// 链接模式
         /// </summary>
-        public bool IsAutoOpen { get; set; }
-        /// <summary>
-        /// 是否断线重连，必须 <see cref="IsAutoOpen"/> 为 false。默认false。
-        /// </summary>
-        public bool IsReconnection { get; set; }
+        public ConnectionMode ConnectionMode { get; set; }
         /// <summary>
         /// 断线重连，最大重连时间。默认60秒。
         /// </summary>
         public int MaxReconnectionTime { get; set; } = 60 * 1000;
+        /// <summary>
+        /// 接受区，缓冲区大小（默认1Mb）
+        /// </summary>
+        public int ReceiveBufferSize { get; set; } = 1024 * 1024;
 
         /// <summary>
         /// 是否在发送和接受时丢弃来自缓冲区的数据
@@ -245,5 +245,24 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         ToString = 40,
         //Regex = 50,
+    }
+
+    /// <summary>
+    /// 连接模式
+    /// </summary>
+    public enum ConnectionMode
+    {
+        /// <summary>
+        /// 手动
+        /// </summary>
+        Manual,
+        /// <summary>
+        /// 自动打开。在没有执行Open()时每次发送和接受会自动打开和关闭。
+        /// </summary>
+        AutoOpen = 10,
+        /// <summary>
+        /// 自动断线重连。在执行Open()后断开后会自动打开。
+        /// </summary>
+        AutoReconnection,
     }
 }

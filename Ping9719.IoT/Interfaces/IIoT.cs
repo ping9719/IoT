@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ping9719.IoT.Communication;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace Ping9719.IoT.Interfaces
 {
     public interface IIoT
     {
+        ClientBase Client { get; }
+
         /// <summary>
         /// 读取
         /// </summary>
