@@ -281,11 +281,12 @@ namespace Ping9719.IoT.Communication.TCP
                 throw new TimeoutException("连接超时");
             tcpClient.EndConnect(connectResult);
 
-            Opened?.Invoke(this);
             IsOpen2 = true;
             stream = tcpClient.GetStream();
+            
             if (!IsReconnection)
                 GoRun();
+            Opened?.Invoke(this);
         }
 
         void Close2(bool isUser)
