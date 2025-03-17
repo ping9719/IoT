@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="Ping9719.IoT.WPF.BeiJiaFuRfidView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ping9719.IoT.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">读取通道</TextBlock>
+            <ComboBox Name="comboBox1" Grid.Column="1" Margin="5,0,5,0" SelectedIndex="0">
+                <ComboBoxItem>通道1</ComboBoxItem>
+                <ComboBoxItem>通道2</ComboBoxItem>
+                <ComboBoxItem>通道3</ComboBoxItem>
+                <ComboBoxItem>通道4</ComboBoxItem>
+            </ComboBox>
+            <Button Grid.Column="2" HorizontalAlignment="Left" Padding="30,0" Click="Button_Click">读取</Button>
+        </Grid>
+        <Grid Grid.Row="1" Margin="0,5,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">写入数据</TextBlock>
+            <TextBox x:Name="textBox1" Grid.Column="1" Margin="5,0,5,0"></TextBox>
+            <Button Grid.Column="2" HorizontalAlignment="Left" Padding="30,0" Click="Button_Click_1">写入</Button>
+        </Grid>
+        <TextBox x:Name="textBox2" Grid.Row="2" Margin="0,5,0,0" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Visible"></TextBox>
+    </Grid>
+</UserControl>

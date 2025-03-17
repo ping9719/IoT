@@ -13,10 +13,10 @@ namespace Ping9719.IoT.Device.Mark
     /// <summary>
     /// 大族激光刻印
     /// </summary>
-    public class DaZhuTcpMark
+    public class DaZhuMark
     {
         public ClientBase Client { get; private set; }
-        public DaZhuTcpMark(ClientBase client, int timeout = 60000)
+        public DaZhuMark(ClientBase client, int timeout = 60000)
         {
             Client = client;
             Client.ReceiveMode = ReceiveMode.ParseTime();
@@ -25,7 +25,7 @@ namespace Ping9719.IoT.Device.Mark
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
-        public DaZhuTcpMark(string ip, int port = 9001) : this(new TcpClient(ip, port)) { }
+        public DaZhuMark(string ip, int port = 9001) : this(new TcpClient(ip, port)) { }
 
         /// <summary>
         /// 加载指定模板

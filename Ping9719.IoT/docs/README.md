@@ -36,7 +36,7 @@ Install-Package Ping9719.IoT
     - Fct
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
-        - 大族激光刻印 (DaZhuTcpMark)
+        - 大族激光刻印 (DaZhuMark)
     - 无线射频 (Rfid)
         - 倍加福Rfid (BeiJiaFuRfid)
         - 泰和森Rfid (TaiHeSenRfid)

@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="Ping9719.IoT.WPF.DaZhuMarkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ping9719.IoT.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button HorizontalAlignment="Left" Padding="30,0" Click="jzk">加载卡</Button>
+            <StackPanel x:Name="stackPanel" Grid.Column="1" Margin="10,0,0,0" Orientation="Horizontal">
+                <!--<CheckBox Margin="0,0,5,0">卡1</CheckBox>
+                <CheckBox Margin="0,0,5,0">卡2</CheckBox>-->
+            </StackPanel>
+        </Grid>
+        <GroupBox Grid.Row="2" Margin="0,5,0,0" Style="{x:Null}" Header="选择卡操作">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center">模板名称</TextBlock>
+                    <TextBox x:Name="textBoxMbName" Grid.Column="1" Margin="5,0,0,0"></TextBox>
+                    <CheckBox x:Name="checkBox1" Grid.Column="2" Margin="5,0,0,0">关闭后在加载</CheckBox>
+                    <Button Grid.Column="3" Margin="5,0,0,0" Padding="20,0" Click="jzmb">加载模板</Button>
+                </Grid>
+                <Grid Grid.Row="1" Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center">替换名称</TextBlock>
+                    <TextBox x:Name="textBoxKey" Grid.Column="1" Margin="5,0,0,0"></TextBox>
+                    <TextBlock Grid.Column="2" Margin="5,0,0,0" VerticalAlignment="Center">替换数据</TextBlock>
+                    <TextBox  x:Name="textBoxName" Grid.Column="3" Margin="5,0,0,0"></TextBox>
+                    <Button Grid.Column="4" Margin="5,0,0,0" Padding="20,0" Click="ksth">开始替换</Button>
+                </Grid>
+                <StackPanel Grid.Row="2" Margin="0,5,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Margin="0,0,5,0" Click="ksky">开始刻印</Button>
+                    <Button Margin="0,0,5,0" Click="kshg">红光预览</Button>
+                    <Button Margin="0,0,5,0" Click="cxzt">查询状态</Button>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="3" Margin="0,5,0,0" Style="{x:Null}" Header="不选择卡操作">
+            <StackPanel Orientation="Horizontal">
+                <Button Margin="0,0,5,0" Click="tzsy">停止所有</Button>
+                <Button Margin="0,0,5,0" Click="cxzt2">查询状态</Button>
+            </StackPanel>
+        </GroupBox>
+        <TextBox x:Name="textBoxInfo" Grid.Row="4" Margin="0,5,0,0" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Visible"></TextBox>
+    </Grid>
+</UserControl>

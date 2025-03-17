@@ -5,8 +5,10 @@
 #
 
 ### 全部文档：[doc]
-[查看详细文档 (Detailed document)](Ping9719.IoT/docs/README.md)   
-[查看版本文档 (Version document)](Ping9719.IoT/docs/VERSION.md)   
+[查看IoT文档 (Iot document)](Ping9719.IoT/docs/README.md)   
+[查看IoT版本文档 (IoT Version document)](Ping9719.IoT/docs/VERSION.md)  
+
+[查看IoT.WPF文档 (Iot.WPF document)](Ping9719.IoT.WPF/README.md)   
 #
 
 ### 亮点（Merit）
@@ -68,7 +70,7 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
     - MqttServer （待开发） 
     - SerialPortClient （待开发） 
 - 算法 (Algorithm)
-    - CRC
+    - CRC （待开发） 
     - 傅立叶算法(Fourier) （待开发） 
     - PID （待开发） 
     - RSA （待开发） 
@@ -76,7 +78,7 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
     - Fct
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
-        - 大族激光刻印 (DaZhuTcpMark)
+        - 大族激光刻印 (DaZhuMark)
     - 无线射频 (Rfid)
         - 倍加福Rfid (BeiJiaFuRfid)
         - 泰和森Rfid (TaiHeSenRfid)
@@ -91,3 +93,46 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
         - 快克焊接机 (KuaiKeWeld)（不推荐） 
+
+
+# [Ping9719.IoT.WPF](Ping9719.IoT.WPF/README.md)   
+- Modbus
+    - ModbusRtu (...)（待开发） 
+    - ModbusTcp (...)（待开发） 
+    - ModbusAscii (...)（待开发） 
+- PLC
+    - 罗克韦尔 (...) （待开发） 
+    - 汇川 (...)（待开发） 
+    - 三菱 (...)（待开发） 
+    - 欧姆龙 (...)（待开发） 
+    - 西门子 (...)（待开发） 
+- 机器人 (Robot)
+    - 爱普生 (...) （待开发） 
+- 通讯 (Communication)
+    - TcpClient （待开发） 
+    - TcpServer （待开发） 
+    - UdpClient （待开发） 
+    - UdpServer （待开发） 
+    - HttpServer （待开发） 
+    - MqttClient （待开发） 
+    - MqttServer （待开发） 
+    - SerialPortClient （待开发） 
+- 算法 (Algorithm)
+    - CRC（...） 
+    - 傅立叶算法(...) （待开发） 
+    - PID （...） （待开发） 
+    - RSA （...） （待开发） 
+- 设备和仪器 (Device)
+    - Fct
+        - 盟讯电子 (...)（待开发） 
+    - 激光刻印 (Mark)
+        - 大族激光刻印 (...)
+    - 无线射频 (Rfid)
+        - 倍加福Rfid (BeiJiaFuRfidView)
+        - 泰和森Rfid (TaiHeSenRfidView)
+        - 万全Rfid (WanQuanRfidView)
+    - 扫码枪 (Scanner)
+        - 霍尼韦尔扫码器 (...)（待开发） 
+        - 民德扫码器 (...)（待开发） 
+    - 螺丝机 (Screw)
+        - 米勒螺丝机 (...)（待开发） 
