@@ -1,7 +1,9 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Communication.TCP;
+using Ping9719.IoT.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -12,10 +14,14 @@ using System.Threading.Tasks;
 namespace Ping9719.IoT.Device.Rfid
 {
     /// <summary>
-    /// 泰和森Rfid
+    /// 泰和森
     /// </summary>
     public class TaiHeSenRfid
     {
+        /// <summary>
+        /// 字节格式
+        /// </summary>
+        public EndianFormat format { get; set; } = EndianFormat.BADC;
         public ClientBase Client { get; private set; }
         public TaiHeSenRfid(ClientBase client, int timeout = 1500)
         {
@@ -32,25 +38,41 @@ namespace Ping9719.IoT.Device.Rfid
         /// 读取
         /// </summary>
         /// <returns></returns>
-        public IoTResult<string> Read()
+        public IoTResult<T> Read<T>()
         {
             byte[] ReadLabelMessage = new byte[7] { 0xAA, 0xFF, 0x22, 0x00, 0x00, 0x21, 0xBB };//发送读值指令，固定编码格式
-            IoTResult<string> result = new IoTResult<string>();
+            IoTResult<T> result = new IoTResult<T>();
             try
             {
                 var retValue_Send = Client.SendReceive(ReadLabelMessage);
                 if (!retValue_Send.IsSucceed)
-                    return new IoTResult<string>(retValue_Send).ToEnd();
+                    return new IoTResult<T>(retValue_Send).ToEnd();
 
                 if (retValue_Send.Value.Length <= 8 || retValue_Send.Value[2] == 0xFF)  //根据ths协议，读取失败有固定的编码格式
                 {
-                    return new IoTResult<string>(retValue_Send).AddError("读取失败，未读取到RFID信息").ToEnd();
+                    return new IoTResult<T>(retValue_Send).AddError("读取失败，未读取到RFID信息").ToEnd();
                 }
 
                 int datalength = retValue_Send.Value[4] - 5;//实际数据长度
-                byte[] ThisByte = retValue_Send.Value.Skip(8).Take(datalength).ToArray();
-                var aaa = Client.Encoding.GetString(ThisByte, 0, ThisByte.Length);
-                result.Value = aaa;
+                Byte[] byte1 = retValue_Send.Value.Skip(8).Take(datalength).ToArray();
+
+                if (typeof(T) == typeof(byte[]))
+                    result.Value = (T)(object)byte1;
+                else if (typeof(T) == typeof(Int16))
+                    result.Value = (T)(object)BitConverter.ToInt16(byte1.ToByteFormat(format), 0);
+                else if (typeof(T) == typeof(UInt16))
+                    result.Value = (T)(object)BitConverter.ToUInt16(byte1.ToByteFormat(format), 0);
+                else if (typeof(T) == typeof(Int32))
+                    result.Value = (T)(object)BitConverter.ToInt32(byte1.ToByteFormat(format), 0);
+                else if (typeof(T) == typeof(UInt32))
+                    result.Value = (T)(object)BitConverter.ToUInt32(byte1.ToByteFormat(format), 0);
+                else if (typeof(T) == typeof(string))
+                    result.Value = (T)(object)Client.Encoding.GetString(byte1);
+                else
+                {
+                    result.IsSucceed = false;
+                    result.AddError("不支持的类型");
+                }
             }
             catch (Exception ex)
             {
@@ -62,34 +84,60 @@ namespace Ping9719.IoT.Device.Rfid
         /// <summary>
         /// 写入
         /// </summary>
-        public IoTResult Write(string value)
+        public IoTResult Write<T>(T value)
         {
             IoTResult result = new IoTResult();
-            if (value.Length > 12 || value.Length < 2)
+            byte[] byte1 = null;
+            if (value is string vstr)
             {
-                result.AddError("写入字符串长度必须为2-12字");
-                return result;
+                if (vstr.Length > 12 || vstr.Length < 2)
+                {
+                    return result.AddError("写入字符串长度必须为2-12字");
+                }
+                if (vstr.Length % 2 != 0)
+                {
+                    return result.AddError("写入字符串长度必须为偶数");
+                }
+                byte1 = Client.Encoding.GetBytes(vstr);
             }
-            if (value.Length % 2 != 0)
+            else if (value is byte[] bytes)
             {
-                result.AddError("写入字符串长度必须为偶数");
-                return result;
+                if (bytes.Length > 12 || bytes.Length < 2)
+                {
+                    return result.AddError("写入字符串长度必须为2-12字");
+                }
+                if (bytes.Length % 2 != 0)
+                {
+                    return result.AddError("写入字符串长度必须为偶数");
+                }
+                byte1 = bytes;
+            }
+            else if (value is Int16 Int16)
+                byte1 = BitConverter.GetBytes(Int16);
+            else if (value is UInt16 UInt16)
+                byte1 = BitConverter.GetBytes(UInt16);
+            else if (value is Int32 Int32)
+                byte1 = BitConverter.GetBytes(Int32);
+            else if (value is UInt32 UInt32)
+                byte1 = BitConverter.GetBytes(UInt32);
+            else
+            {
+                return result.AddError("不支持的类型");
             }
 
-            var sendByte = Client.Encoding.GetBytes(value);
 
             //组合成发送指令码
             List<byte> WriteLabelMessage = new List<byte>
             {
                 0xAA, 0xFF, 0x51, //命令
-                0x00, (byte)(11+sendByte.Length), //长度
+                0x00, (byte)(11+byte1.Length), //长度
                 0x00, 0x00, 0x00, 0x00,//密码
                 0x01, //EPC
-                0x00, 0x01, 0x00, (byte)(sendByte.Length/2+1),//偏移地址+数据长度
-                (byte)(sendByte.Length*4), 0x00, //位数
+                0x00, 0x01, 0x00, (byte)(byte1.Length/2+1),//偏移地址+数据长度
+                (byte)(byte1.Length*4), 0x00, //位数
             };  //组合标签信息
 
-            WriteLabelMessage.AddRange(sendByte);
+            WriteLabelMessage.AddRange(byte1);
             var aaa = (byte)WriteLabelMessage.Skip(1).Sum(o => o);//检验吗
             WriteLabelMessage.Add(aaa);
             WriteLabelMessage.Add(0xBB);

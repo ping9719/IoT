@@ -1,4 +1,5 @@
 ﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Communication.TCP;
 using Ping9719.IoT.Interfaces;
 using Ping9719.IoT.PLC.Enums;
@@ -6,9 +7,9 @@ using Ping9719.IoT.PLC.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
@@ -17,18 +18,13 @@ namespace Ping9719.IoT.PLC
     /// <summary>
     /// 欧姆龙客户端（Cip协议）
     /// </summary>
-    public class OmronCipClient : SocketBase, IIoTBase
+    public class OmronCipClient : IIoT
     {
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
-
         /// <summary>
         /// 插槽
         /// </summary>
         public readonly byte Slot;
-        object objLock = new object();
+        //object objLock = new object();
 
         /// <summary>
         /// 字符串编码格式。默认ASCII
@@ -37,12 +33,71 @@ namespace Ping9719.IoT.PLC
 
         byte[] BoolTrueByteVal = new byte[] { 0x01, 0x00 };
 
-        public OmronCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public OmronCipClient(ClientBase client, byte slot = 0, int timeout = 1500)
         {
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.UTF8;
+            Client.TimeOut = timeout;
+            //Client.IsAutoOpen = true;
+            Client.IsAutoDiscard = true;
+            Client.Opened = (a) =>
+            {
+                try
+                {
+                    //注册命令
+                    byte[] RegisteredCommand = new byte[] {
+                    0x65,0x00,//注册请求
+                    0x04,0x00,//命令数据长度(单位字节)
+                    0x00,0x00,0x00,0x00,//会话句柄,初始值为0x00000000
+                    0x00,0x00,0x00,0x00,//状态，初始值为0x00000000（状态好）
+                    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,//请求通信一方的说明
+                    0x00,0x00,0x00,0x00,//选项，默认为0x00000000
+                    0x01,0x00,//协议版本（0x0001）
+                    0x00,0x00,//选项标记（0x0000
+                    };
+                    //result.Requests.Add(RegisteredCommand);
+                    Client.Send(RegisteredCommand);
+
+                    var socketReadResul = Client.Receive(ReceiveMode.ParseByte(28));
+                    if (!socketReadResul.IsSucceed)
+                    {
+                        Client.Close();
+                        return;
+                    }
+                    var response = socketReadResul.Value;
+                    //result.Responses.Add(response);
+
+                    //会话句柄
+                    SessionByte[0] = response[4];
+                    SessionByte[1] = response[5];
+                    SessionByte[2] = response[6];
+                    SessionByte[3] = response[7];
+                }
+                catch (Exception)
+                {
+
+                }
+            };
+            Client.Closing = (a) =>
+            {
+                try
+                {
+                    byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                    Client.Send(command);
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                return true;
+            };
+
             Slot = slot;
         }
+        public OmronCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500) : this(new TcpClient(ip, port), slot, timeout) { }
 
         /// <summary>
         /// 会话句柄
@@ -54,114 +109,23 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         public uint Session => BitConverter.ToUInt32(SessionByte, 0);
 
-        /// <summary>
-        /// 打开连接（如果已经是连接状态会先关闭再打开）
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Connect()
-        {
-            var result = new IoTResult();
-            SafeClose();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            try
-            {
-                //超时时间设置
-                socket.ReceiveTimeout = timeout;
-                socket.SendTimeout = timeout;
-
-                //连接
-                //socket.Connect(ipEndPoint);
-                IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-                //阻塞当前线程           
-                if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-                    throw new TimeoutException("连接超时");
-                socket.EndConnect(connectResult);
-
-                //注册命令
-                byte[] RegisteredCommand = new byte[] {
-                    0x65,0x00,//注册请求
-                    0x04,0x00,//命令数据长度(单位字节)
-                    0x00,0x00,0x00,0x00,//会话句柄,初始值为0x00000000
-                    0x00,0x00,0x00,0x00,//状态，初始值为0x00000000（状态好）
-                    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,//请求通信一方的说明
-                    0x00,0x00,0x00,0x00,//选项，默认为0x00000000
-                    0x01,0x00,//协议版本（0x0001）
-                    0x00,0x00,//选项标记（0x0000
-                };
-                result.Requests.Add(RegisteredCommand);
-                socket.Send(RegisteredCommand);
-
-                var socketReadResul = SocketRead(28);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var response = socketReadResul.Value;
-                result.Responses.Add(response);
-
-                //会话句柄
-                SessionByte[0] = response[4];
-                SessionByte[1] = response[5];
-                SessionByte[2] = response[6];
-                SessionByte[3] = response[7];
-            }
-            catch (Exception ex)
-            {
-                SafeClose();
-                result.AddError(ex);
-            }
-            return result.ToEnd();
-        }
-
-        /// <summary>
-        /// 关闭连接
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Dispose()
-        {
-            IoTResult result = new IoTResult();
-            try
-            {
-                //断开指令
-                {
-                    byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                    SendPackageReliable(command);
-                }
-
-                SafeClose();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.AddError(ex);
-                return result;
-            }
-        }
-
         #region Read
         public IoTResult<IEnumerable<object>> Read(string address, Encoding encoding = null)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<IEnumerable<object>>(connectResult);
-                }
-            }
             var result = new IoTResult<IEnumerable<object>>();
             try
             {
-                lock (objLock)
+                //lock (objLock)
                 {
                     var cpiadd = AllenBradleyAddress.Parse(address);
                     var command = GetReadCommand(cpiadd);
-                    
+
                     //发送命令 并获取响应报文
-                    var sendResult = SendPackageReliable(command);
+                    var sendResult = Client.SendReceive(command);
                     if (!sendResult.IsSucceed)
                         return new IoTResult<IEnumerable<object>>() { IsSucceed = false };
                     var dataPackage = sendResult.Value;
-                    
+
 
                     try
                     {
@@ -170,7 +134,7 @@ namespace Ping9719.IoT.PLC
                         var isok = BitConverter.ToUInt16(dataPackage, 42);//合格
                         if (isok != 0)
                         {
-                            
+
                             result.AddError("读取失败，错误代码：" + isok);
                             return result;
                         }
@@ -232,8 +196,8 @@ namespace Ping9719.IoT.PLC
                         }
                         else
                         {
-                            
-                            result.AddError ( "不支持的类型" + dTypt.ToString());
+
+                            result.AddError("不支持的类型" + dTypt.ToString());
                             return result;
                         }
                     }
@@ -246,27 +210,9 @@ namespace Ping9719.IoT.PLC
                 }
 
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -342,66 +288,40 @@ namespace Ping9719.IoT.PLC
         #region Write
         public IoTResult Write(string address, CipVariableType typeCode, byte[] data, ushort num = 1, Encoding encoding = null)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
             IoTResult result = new IoTResult();
             try
             {
-                lock (objLock)
+                //lock (objLock)
                 {
                     var abadd = AllenBradleyAddress.Parse(address);
                     byte[] command = GetWriteCommand(abadd, typeCode, data, num);
-                    
-                    var sendResult = SendPackageReliable(command);
+
+                    var sendResult = Client.SendReceive(command);
                     if (!sendResult.IsSucceed)
                         return sendResult;
 
                     var dataPackage = sendResult.Value;
-                    
+
 
                     if (dataPackage.Length < 43)
                     {
-                        
+
                         result.AddError("写入失败，数据长度验证失败");
                         return result;
                     }
                     var isok = BitConverter.ToUInt16(dataPackage, 42);//合格
                     if (isok != 0)
                     {
-                        
+
                         result.AddError("写入失败，错误代码：" + isok);
                         return result;
                     }
                 }
 
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -541,7 +461,7 @@ namespace Ping9719.IoT.PLC
                 else if (eType == typeof(DateTime))
                     return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (DateTime)o).ToList());
                 else
-                    return new IoTResult<T>(aaa).AddError("此类型不支持集合") ;
+                    return new IoTResult<T>(aaa).AddError("此类型不支持集合");
             }
             else if (typeof(T) == typeof(string))
             {
