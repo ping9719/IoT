@@ -9,7 +9,7 @@ namespace Ping9719.IoT.Common
 {
     public class JsonUtil
     {
-        public virtual T DeserializeObject<T>(string json)
+        public static T DeserializeObject<T>(string json)
         {
             return JsonMini.JsonFrom<T>(json);
             //DataContractJsonSerializer jsonFormator = new DataContractJsonSerializer(typeof(T));
@@ -19,7 +19,7 @@ namespace Ping9719.IoT.Common
             //}
         }
 
-        public virtual string SerializeObject(object obj)
+        public static string SerializeObject(object obj)
         {
             return JsonMini.JsonTo(obj);
             //DataContractJsonSerializer jsonFormator = new DataContractJsonSerializer(obj.GetType());
