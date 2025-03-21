@@ -403,72 +403,81 @@ namespace Ping9719.IoT.PLC
             if (!aaa.IsSucceed)
                 return new IoTResult<T>(aaa);
 
-            if (typeof(T).IsArray)
+            try
             {
-                var eType = typeof(T).GetElementType();
-                if (eType == typeof(bool))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (bool)o).ToArray());
-                else if (eType == typeof(byte))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (byte)o).ToArray());
-                else if (eType == typeof(float))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (float)o).ToArray());
-                else if (eType == typeof(double))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (double)o).ToArray());
-                else if (eType == typeof(short))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (short)o).ToArray());
-                else if (eType == typeof(int))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (int)o).ToArray());
-                else if (eType == typeof(long))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (long)o).ToArray());
-                else if (eType == typeof(ushort))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ushort)o).ToArray());
-                else if (eType == typeof(uint))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (uint)o).ToArray());
-                else if (eType == typeof(ulong))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ulong)o).ToArray());
-                //else if (eType == typeof(string))
-                //    return new IoTResult<T>(aaa, (T)(object)(aaa.Value.Select(o => (string)o).ToArray()));
-                else if (eType == typeof(DateTime))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (DateTime)o).ToArray());
-                else
-                    return new IoTResult<T>(aaa).AddError("此类型不支持数组");
+                if (typeof(T).IsArray)
+                {
+                    var eType = typeof(T).GetElementType();
+                    if (eType == typeof(bool))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (bool)o).ToArray());
+                    else if (eType == typeof(byte))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (byte)o).ToArray());
+                    else if (eType == typeof(float))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (float)o).ToArray());
+                    else if (eType == typeof(double))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (double)o).ToArray());
+                    else if (eType == typeof(short))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (short)o).ToArray());
+                    else if (eType == typeof(int))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (int)o).ToArray());
+                    else if (eType == typeof(long))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (long)o).ToArray());
+                    else if (eType == typeof(ushort))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ushort)o).ToArray());
+                    else if (eType == typeof(uint))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (uint)o).ToArray());
+                    else if (eType == typeof(ulong))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ulong)o).ToArray());
+                    //else if (eType == typeof(string))
+                    //    return new IoTResult<T>(aaa, (T)(object)(aaa.Value.Select(o => (string)o).ToArray()));
+                    else if (eType == typeof(DateTime))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (DateTime)o).ToArray());
+                    else
+                        return new IoTResult<T>(aaa).AddError("此类型不支持数组");
+                }
+                else if (typeof(ICollection).IsAssignableFrom(typeof(T)) && typeof(T) != typeof(string))
+                {
+                    var eType = typeof(T).GetGenericArguments().First();
+                    if (eType == typeof(bool))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (bool)o).ToList());
+                    else if (eType == typeof(byte))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (byte)o).ToList());
+                    else if (eType == typeof(float))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (float)o).ToList());
+                    else if (eType == typeof(double))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (double)o).ToList());
+                    else if (eType == typeof(short))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (short)o).ToList());
+                    else if (eType == typeof(int))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (int)o).ToList());
+                    else if (eType == typeof(long))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (long)o).ToList());
+                    else if (eType == typeof(ushort))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ushort)o).ToList());
+                    else if (eType == typeof(uint))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (uint)o).ToList());
+                    else if (eType == typeof(ulong))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ulong)o).ToList());
+                    //else if (eType == typeof(string))
+                    //    return new IoTResult<T>(aaa, (T)(object)(aaa.Value.Select(o => (string)o).ToArray()));
+                    else if (eType == typeof(DateTime))
+                        return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (DateTime)o).ToList());
+                    else
+                        return new IoTResult<T>(aaa).AddError("此类型不支持集合");
+                }
+                else if (typeof(T) == typeof(string))
+                {
+                    return new IoTResult<T>(aaa, (T)(aaa.Value.FirstOrDefault() ?? string.Empty));
+                }
+
+                return new IoTResult<T>(aaa, (T)aaa.Value.FirstOrDefault());
             }
-            else if (typeof(ICollection).IsAssignableFrom(typeof(T)) && typeof(T) != typeof(string))
+            catch (Exception ex)
             {
-                var eType = typeof(T).GetGenericArguments().First();
-                if (eType == typeof(bool))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (bool)o).ToList());
-                else if (eType == typeof(byte))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (byte)o).ToList());
-                else if (eType == typeof(float))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (float)o).ToList());
-                else if (eType == typeof(double))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (double)o).ToList());
-                else if (eType == typeof(short))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (short)o).ToList());
-                else if (eType == typeof(int))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (int)o).ToList());
-                else if (eType == typeof(long))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (long)o).ToList());
-                else if (eType == typeof(ushort))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ushort)o).ToList());
-                else if (eType == typeof(uint))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (uint)o).ToList());
-                else if (eType == typeof(ulong))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (ulong)o).ToList());
-                //else if (eType == typeof(string))
-                //    return new IoTResult<T>(aaa, (T)(object)(aaa.Value.Select(o => (string)o).ToArray()));
-                else if (eType == typeof(DateTime))
-                    return new IoTResult<T>(aaa, (T)(object)aaa.Value.Select(o => (DateTime)o).ToList());
-                else
-                    return new IoTResult<T>(aaa).AddError("此类型不支持集合");
-            }
-            else if (typeof(T) == typeof(string))
-            {
-                return new IoTResult<T>(aaa, (T)(aaa.Value.FirstOrDefault() ?? string.Empty));
+                return aaa.AddError(ex).ToVal<T>();
             }
 
-            return new IoTResult<T>(aaa, (T)aaa.Value.FirstOrDefault());
+
         }
 
         public IoTResult<string> ReadString(string address, int length, Encoding encoding)

@@ -159,40 +159,45 @@ client.Pause();
 # 通讯 (Communication)
 ## TcpClient
 ```CSharp
-TcpClient tcpClient = new TcpClient("127.0.0.1", 8080);
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
-tcpClient.Opening = (a) =>
+client1.Encoding = Encoding.UTF8;//如何解析字符串
+client1.TimeOut = 5000;//超时时间
+client1.Opening = (a) =>
 {
-    TextBoxLog.AddLog("连接中");
+    Console.WriteLine("连接中");
     return true;
 };
-tcpClient.Opened = (a) =>
+client1.Opened = (a) =>
 {
-    TextBoxLog.AddLog("连接成功");
+    Console.WriteLine("连接成功");
 };
-tcpClient.Closing = (a) =>
+client1.Closing = (a) =>
 {
-    TextBoxLog.AddLog("关闭中");
+    Console.WriteLine("关闭中");
     return true;
 };
-tcpClient.Closed = (a,b) =>
+client1.Closed = (a, b) =>
 {
-    TextBoxLog.AddLog("关闭成功"+ b);
+    Console.WriteLine("关闭成功" + b);
 };
-tcpClient.Received = (a,b) =>
+client1.Received = (a, b) =>
 {
-    Log.AddLog("收到消息:"+ a.Encoding.GetString(b));
+    Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
 };
-tcpClient.Warning = (a,b) =>
+client1.Warning = (a, b) =>
 {
-    TextBoxLog.AddLog("错误"+ b.ToString());
+    Console.WriteLine("错误" + b.ToString());
 };
-tcpClient.Open();
+//打开链接，设置所有属性必须在打开前
+client1.Open();
 
-tcpClient.Send("abc");//发送
-tcpClient.Receive();//等待并接受
-tcpClient.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
-tcpClient.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 
+client1.Send("abc");//发送
+client1.Receive();//等待并接受
+client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
+client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
+client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
+client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
 ```
 
 # 算法 (Algorithm)
@@ -223,29 +228,43 @@ CRC.CheckCrc32Sata(bytes)
 # 设备和仪器 (Device)
 ## Fct
 ```CSharp
-//编写中...（Writing...）
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
+MengXunFct dev1 = new MengXunFct(client1);
+dev1.Client.Open();
 ```
 ## 激光刻印 (Mark)
 ```CSharp
-//编写中...（Writing...）
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
+DaZhuMark dev1 = new DaZhuMark(client1);
+dev1.Client.Open();
 ```
 ## 无线射频 (Rfid)
 ```CSharp
-//编写中...（Writing...）
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
+BeiJiaFuRfid dev1 = new BeiJiaFuRfid(client1);
+DongJiRfid dev1 = new DongJiRfid(client1);
+TaiHeSenRfid dev1 = new TaiHeSenRfid(client1);
+WanQuanRfid dev1 = new WanQuanRfid(client1);
+dev1.Client.Open();
 ```
 ## 扫码枪 (Scanner)
 ```CSharp
-//编写中...（Writing...）
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
+HoneywellScanner dev1 = new HoneywellScanner(client1);
+MindeoScanner dev1 = new MindeoScanner(client1);
+dev1.Client.Open();
 ```
 ## 螺丝机 (Screw)
 ```CSharp
-//编写中...（Writing...）
+TcpClient client1 = new TcpClient("127.0.0.1", 8080);
+MiLeScrew dev1 = new MiLeScrew(client1);
+dev1.Client.Open();
 ```
 ## 温控 (TemperatureControl)
 ```CSharp
-//编写中...（Writing...）
+//快克品牌不推荐
 ```
 ## 焊接机 (Weld)
 ```CSharp
-//编写中...（Writing...）
+//快克品牌不推荐
 ```

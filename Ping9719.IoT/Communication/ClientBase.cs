@@ -27,12 +27,12 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public int MaxReconnectionTime { get; set; } = 60 * 1000;
         /// <summary>
-        /// 接受区，缓冲区大小（默认1Mb）
+        /// 接受区，缓冲区大小（默认1024 * 100）
         /// </summary>
-        public int ReceiveBufferSize { get; set; } = 1024 * 1024;
+        public int ReceiveBufferSize { get; set; } = 1024 * 100;
 
         /// <summary>
-        /// 是否在发送和接受时丢弃来自缓冲区的数据
+        /// 是否在发送和接受时丢弃来自缓冲区的数据（默认false）
         /// </summary>
         public virtual bool IsAutoDiscard { get; set; }
         /// <summary>

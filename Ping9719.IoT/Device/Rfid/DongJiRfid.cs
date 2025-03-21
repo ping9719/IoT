@@ -24,12 +24,35 @@ namespace Ping9719.IoT.Device.Rfid
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.TimeOut = timeout;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public DongJiRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }
         public DongJiRfid(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
-
+        /// <summary>
+        /// 开始寻卡
+        /// </summary>
+        /// <returns></returns>
+        public IoTResult Go()
+        {
+            IoTResult result = new IoTResult();
+            try
+            {
+                //开始寻卡
+                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 1 } }) + "$");
+                var retValue_Send = Client.Send(sendInfo);
+                if (!retValue_Send.IsSucceed)
+                {
+                    result.IsSucceed = false;
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            return result.ToEnd();
+        }
 
         /// <summary>
         /// 读取
@@ -107,7 +130,8 @@ namespace Ping9719.IoT.Device.Rfid
             try
             {
                 //停止寻卡
-                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
+                var aaaa = JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 });
+                var sendInfo = Client.Encoding.GetBytes(aaaa + "$");
                 var retValue_Send = Client.SendReceive(sendInfo);
                 //if (!retValue_Send.IsSucceed)
                 //    return new Result<string>(retValue_Send).EndTime();
@@ -185,7 +209,7 @@ namespace Ping9719.IoT.Device.Rfid
         public string epc { get; set; }
         //public string pc { get; set; }
         //public long readTime { get; set; }
-        //public int rssi { get; set; }
+        public int rssi { get; set; }
     }
 
 }

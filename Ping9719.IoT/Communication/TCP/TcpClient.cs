@@ -18,7 +18,7 @@ namespace Ping9719.IoT.Communication.TCP
     public class TcpClient : ClientBase
     {
         public override bool IsOpen => tcpClient?.Connected ?? false;
-
+        
         string ip;
         int port;
         object obj1 = new object();
@@ -28,6 +28,7 @@ namespace Ping9719.IoT.Communication.TCP
         private System.Net.Sockets.TcpClient tcpClient;
         private System.Net.Sockets.NetworkStream stream;
         QueueByteFixed dataEri;
+        Task task;
 
         public TcpClient(string ip, int port)
         {
@@ -126,6 +127,7 @@ namespace Ping9719.IoT.Communication.TCP
                 lock (obj1)
                 {
                     result.Value = Receive2(receiveMode);
+                    result.Responses.Add(result.Value);
                 }
 
             }
@@ -162,8 +164,10 @@ namespace Ping9719.IoT.Communication.TCP
                         dataEri.Clear();
                     }
 
+                    result.Requests.Add(data);
                     Send2(data);
                     result.Value = Receive2(receiveMode);
+                    result.Responses.Add(result.Value);
                 }
             }
             catch (Exception ex)
@@ -183,89 +187,96 @@ namespace Ping9719.IoT.Communication.TCP
         #region 内部
         void GoRun()
         {
-            Task.Run(() =>
+            task = new Task((a) =>
             {
-                byte[] data = new byte[ReceiveBufferSize];
-                while (true)
-                {
-                    try
-                    {
-                        if (IsOpen2 && IsOpen)
-                        {
-                            int readLength;
-                            try
-                            {
-                                var receiveResult1 = stream.BeginRead(data, 0, data.Length, null, null);
-                                receiveResult1.AsyncWaitHandle.WaitOne();
-                                readLength = stream.EndRead(receiveResult1);
-                            }
-                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
-                            {
-                                //警告：此错误代码（995）可能会更改。
-                                //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
-                                //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
+               var cc = (TcpClient)a;
+               byte[] data = new byte[ReceiveBufferSize];
+               while (true)
+               {
+                   try
+                   {
+                       if (cc.IsOpen2 && cc.IsOpen)
+                       {
+                           int readLength;
+                           try
+                           {
+                               var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
+                               receiveResult1.AsyncWaitHandle.WaitOne();
+                               readLength = cc.stream.EndRead(receiveResult1);
+                           }
+                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
+                           {
+                               //警告：此错误代码（995）可能会更改。
+                               //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
+                               //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
 
-                                //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
-                                readLength = -1;
-                            }
-                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
-                            {
-                                //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
-                                readLength = -1;
-                            }
-                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
-                            {
-                                //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
-                                readLength = -2;
-                            }
+                               //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
+                               readLength = -1;
+                           }
+                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
+                           {
+                               //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
+                               readLength = -1;
+                           }
+                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
+                           {
+                               //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
+                               readLength = -2;
+                           }
+                           catch (Exception ex)
+                           {
+                               //其他原因
+                               readLength = -3;
+                           }
 
-                            //断开
-                            if (readLength <= 0)
-                            {
-                                if (readLength == 0)
-                                {
-                                    //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
-                                }
-                                //closedTcs.TrySetResult(true);
-                                //OnClosed(readLength != -1);
-                                Close2(false);
-                                //return;
-                            }
-                            //收到消息
-                            else
-                            {
-                                dataEri.Enqueue(data, 0, readLength);
-                                if (Received != null && !isSendReceive)
-                                {
-                                    lock (obj1)
-                                    {
-                                        var bytes = Receive2(ReceiveModeReceived, true);
-                                        if (bytes != null && bytes.Length > 0)
-                                            Received?.Invoke(this, bytes);
-                                    }
-                                }
-                            }
+                           //断开
+                           if (readLength <= 0)
+                           {
+                               if (readLength == 0)
+                               {
+                                   //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
+                               }
 
-                        }
-                        else if (ConnectionMode == ConnectionMode.AutoReconnection)
-                        {
-                            Open2(true);
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
+                               if (cc.IsOpen2 && cc.IsOpen)
+                                   cc.Close2(false);
+                           }
+                           //收到消息
+                           else
+                           {
+                               cc.dataEri.Enqueue(data, 0, readLength);
+                               if (cc.Received != null && !cc.isSendReceive)
+                               {
+                                   lock (cc.obj1)
+                                   {
+                                       var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                       if (bytes != null && bytes.Length > 0)
+                                           cc.Received?.Invoke(this, bytes);
+                                   }
+                               }
+                           }
 
-                    }
-                    finally
-                    {
+                       }
+                       else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
+                       {
+                           cc.Open2(true);
+                       }
+                       else
+                       {
+                           break;
+                       }
+                   }
+                   catch (Exception ex)
+                   {
 
-                    }
-                }
-            });
+                   }
+                   finally
+                   {
+
+                   }
+               }
+            }, this);
+
+            task.Start();
         }
 
         void Open2(bool IsReconnection)
@@ -305,6 +316,9 @@ namespace Ping9719.IoT.Communication.TCP
             {
                 IsOpen2 = false;
                 Closed?.Invoke(this, isUser);
+
+                if (isUser)
+                    task?.Wait();
             }
         }
 
