@@ -23,9 +23,9 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public ConnectionMode ConnectionMode { get; set; }
         /// <summary>
-        /// 断线重连，最大重连时间。默认60秒。
+        /// 断线重连，最大重连时间。默认10秒。
         /// </summary>
-        public int MaxReconnectionTime { get; set; } = 60 * 1000;
+        public int MaxReconnectionTime { get; set; } = 10 * 1000;
         /// <summary>
         /// 接受区，缓冲区大小（默认1024 * 100）
         /// </summary>

@@ -65,14 +65,14 @@ namespace Ping9719.IoT.Communication
             var result = new IoTResult();
             try
             {
-                if (IsOpen)
-                {
-                    var aa = Closing?.Invoke(this);
-                    if (aa == false)
-                        throw new Exception("用户已拒绝断开");
+                //if (IsOpen)
+                //{
+                var aa = Closing?.Invoke(this);
+                if (aa == false)
+                    throw new Exception("用户已拒绝断开");
 
-                    Close2(true);
-                }
+                Close2(true);
+                //}
             }
             catch (Exception ex)
             {
@@ -257,7 +257,7 @@ namespace Ping9719.IoT.Communication
                                     //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
                                 }
 
-                                
+
                                 if (cc.IsOpen2 && cc.IsOpen)
                                     cc.Close2(false);
                             }
@@ -279,12 +279,12 @@ namespace Ping9719.IoT.Communication
                         }
                         else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
                         {
-                            if (IsUserClose)
-                                break;
-
                             ReconnectionCount++;
                             var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime);
                             System.Threading.Thread.Sleep(tz);
+
+                            if (IsUserClose)
+                                break;
 
                             cc.Open2(true);
                         }
@@ -340,7 +340,7 @@ namespace Ping9719.IoT.Communication
                 IsUserClose = isUser;
                 dataEri = null;
 
-                tcpClient?.Client.Shutdown(SocketShutdown.Both);
+                tcpClient?.Client?.Shutdown(SocketShutdown.Both);
                 tcpClient?.Close();
             }
             catch (Exception ex)
