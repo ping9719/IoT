@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Communication.SerialPort
+namespace Ping9719.IoT.Communication
 {
     /// <summary>
     /// 串口客户端
@@ -77,6 +77,11 @@ namespace Ping9719.IoT.Communication.SerialPort
                 result.AddError(ex);
             }
             return result.ToEnd();
+        }
+
+        public override IoTResult ClearAcceptCache()
+        {
+            throw new NotImplementedException();
         }
 
         public override IoTResult Send(byte[] data, int offset = 0, int count = -1)

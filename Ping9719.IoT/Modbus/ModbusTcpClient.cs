@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Ping9719.IoT.Communication.TCP;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Enums;
 using Ping9719.IoT.Interfaces;
 using Ping9719.IoT;

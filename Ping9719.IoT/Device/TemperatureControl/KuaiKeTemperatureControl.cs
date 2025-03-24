@@ -7,11 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Ping9719.IoT.Algorithm;
-using Ping9719.IoT.Communication.SerialPort;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Enums;
 using Ping9719.IoT;
-using Ping9719.IoT.Communication;
-using Ping9719.IoT.Communication.TCP;
 
 namespace Ping9719.IoT.Device.TemperatureControl
 {

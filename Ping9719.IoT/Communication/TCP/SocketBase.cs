@@ -1,12 +1,11 @@
-﻿using Ping9719.IoT.Common;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace Ping9719.IoT.Communication.TCP
+namespace Ping9719.IoT.Communication
 {
     /// <summary>
     /// Socket基类

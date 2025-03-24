@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ping9719.IoT.Common;
-using Ping9719.IoT.Communication.TCP;
+using Ping9719.IoT.Communication;
 
 namespace Ping9719.IoT.Robot
 {

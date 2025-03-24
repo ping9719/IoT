@@ -4,7 +4,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Threading;
 
-namespace Ping9719.IoT.Communication.SerialPort
+namespace Ping9719.IoT.Communication
 {
     /// <summary>
     /// SerialPort基类

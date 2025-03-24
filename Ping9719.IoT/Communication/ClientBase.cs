@@ -87,6 +87,11 @@ namespace Ping9719.IoT.Communication
         public abstract IoTResult Close();
 
         /// <summary>
+        /// 清空接受缓存
+        /// </summary>
+        public abstract IoTResult ClearAcceptCache();
+
+        /// <summary>
         /// 发送
         /// </summary>
         /// <param name="data">数据</param>

@@ -1,6 +1,6 @@
 ﻿using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Communication.TCP;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Interfaces;
 using Ping9719.IoT.PLC.Enums;
 using Ping9719.IoT.PLC.Models;

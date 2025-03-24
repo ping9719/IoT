@@ -1,7 +1,5 @@
 ﻿using Ping9719.IoT;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Communication.SerialPort;
-using Ping9719.IoT.Communication.TCP;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;

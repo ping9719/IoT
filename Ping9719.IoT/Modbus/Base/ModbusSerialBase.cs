@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
-using Ping9719.IoT.Communication.SerialPort;
 using Ping9719.IoT.Enums;
 using Ping9719.IoT.Interfaces;
 using Ping9719.IoT;
 using Ping9719.IoT.Modbus.Models;
+using Ping9719.IoT.Communication;
 
 namespace Ping9719.IoT.Modbus.Base
 {

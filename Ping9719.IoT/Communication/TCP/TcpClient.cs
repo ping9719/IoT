@@ -10,25 +10,27 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Communication.TCP
+namespace Ping9719.IoT.Communication
 {
     /// <summary>
     /// Tcp客户端
     /// </summary>
     public class TcpClient : ClientBase
     {
-        public override bool IsOpen => tcpClient?.Connected ?? false;
-        
+        public override bool IsOpen => tcpClient?.Connected ?? false && IsOpen2;
+
         string ip;
         int port;
         object obj1 = new object();
         bool IsOpen2 = false;
+        bool IsUserClose = false;//是否用户关闭
         bool isSendReceive = false;//是否正在发送和接受中
 
         private System.Net.Sockets.TcpClient tcpClient;
         private System.Net.Sockets.NetworkStream stream;
         QueueByteFixed dataEri;
         Task task;
+        int ReconnectionCount = 0;
 
         public TcpClient(string ip, int port)
         {
@@ -79,6 +81,19 @@ namespace Ping9719.IoT.Communication.TCP
             return result.ToEnd();
         }
 
+        public override IoTResult ClearAcceptCache()
+        {
+            try
+            {
+                dataEri?.Clear();
+                return new IoTResult().ToEnd();
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex).ToEnd();
+            }
+        }
+
         public override IoTResult Send(byte[] data, int offset = 0, int count = -1)
         {
             var result = new IoTResult();
@@ -126,6 +141,9 @@ namespace Ping9719.IoT.Communication.TCP
 
                 lock (obj1)
                 {
+                    if (IsAutoDiscard)
+                        ClearAcceptCache();
+
                     result.Value = Receive2(receiveMode);
                     result.Responses.Add(result.Value);
                 }
@@ -160,9 +178,7 @@ namespace Ping9719.IoT.Communication.TCP
                 lock (obj1)
                 {
                     if (IsAutoDiscard)
-                    {
-                        dataEri.Clear();
-                    }
+                        ClearAcceptCache();
 
                     result.Requests.Add(data);
                     Send2(data);
@@ -189,91 +205,103 @@ namespace Ping9719.IoT.Communication.TCP
         {
             task = new Task((a) =>
             {
-               var cc = (TcpClient)a;
-               byte[] data = new byte[ReceiveBufferSize];
-               while (true)
-               {
-                   try
-                   {
-                       if (cc.IsOpen2 && cc.IsOpen)
-                       {
-                           int readLength;
-                           try
-                           {
-                               var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
-                               receiveResult1.AsyncWaitHandle.WaitOne();
-                               readLength = cc.stream.EndRead(receiveResult1);
-                           }
-                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
-                           {
-                               //警告：此错误代码（995）可能会更改。
-                               //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
-                               //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
+                var cc = (TcpClient)a;
+                byte[] data = new byte[ReceiveBufferSize];
+                while (true)
+                {
+                    try
+                    {
+                        if (IsUserClose)
+                        {
+                            break;
+                        }
+                        else if (cc.IsOpen2 && cc.IsOpen)
+                        {
+                            int readLength;
+                            try
+                            {
+                                var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
+                                receiveResult1.AsyncWaitHandle.WaitOne();
+                                readLength = cc.stream.EndRead(receiveResult1);
+                            }
+                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
+                            {
+                                //警告：此错误代码（995）可能会更改。
+                                //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
+                                //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
 
-                               //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
-                               readLength = -1;
-                           }
-                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
-                           {
-                               //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
-                               readLength = -1;
-                           }
-                           catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
-                           {
-                               //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
-                               readLength = -2;
-                           }
-                           catch (Exception ex)
-                           {
-                               //其他原因
-                               readLength = -3;
-                           }
+                                //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
+                                readLength = -1;
+                            }
+                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
+                            {
+                                //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
+                                readLength = -1;
+                            }
+                            catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
+                            {
+                                //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
+                                readLength = -2;
+                            }
+                            catch (Exception ex)
+                            {
+                                //其他原因
+                                readLength = -3;
+                            }
 
-                           //断开
-                           if (readLength <= 0)
-                           {
-                               if (readLength == 0)
-                               {
-                                   //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
-                               }
+                            //断开
+                            if (readLength <= 0)
+                            {
+                                if (readLength == 0)
+                                {
+                                    //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
+                                }
 
-                               if (cc.IsOpen2 && cc.IsOpen)
-                                   cc.Close2(false);
-                           }
-                           //收到消息
-                           else
-                           {
-                               cc.dataEri.Enqueue(data, 0, readLength);
-                               if (cc.Received != null && !cc.isSendReceive)
-                               {
-                                   lock (cc.obj1)
-                                   {
-                                       var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
-                                       if (bytes != null && bytes.Length > 0)
-                                           cc.Received?.Invoke(this, bytes);
-                                   }
-                               }
-                           }
+                                
+                                if (cc.IsOpen2 && cc.IsOpen)
+                                    cc.Close2(false);
+                            }
+                            //收到消息
+                            else
+                            {
+                                cc.dataEri.Enqueue(data, 0, readLength);
+                                if (cc.Received != null && !cc.isSendReceive)
+                                {
+                                    lock (cc.obj1)
+                                    {
+                                        var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                        if (bytes != null && bytes.Length > 0)
+                                            cc.Received?.Invoke(this, bytes);
+                                    }
+                                }
+                            }
 
-                       }
-                       else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
-                       {
-                           cc.Open2(true);
-                       }
-                       else
-                       {
-                           break;
-                       }
-                   }
-                   catch (Exception ex)
-                   {
+                        }
+                        else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
+                        {
+                            if (IsUserClose)
+                                break;
 
-                   }
-                   finally
-                   {
+                            ReconnectionCount++;
+                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime);
+                            System.Threading.Thread.Sleep(tz);
 
-                   }
-               }
+                            cc.Open2(true);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                    finally
+                    {
+
+                    }
+                }
             }, this);
 
             task.Start();
@@ -294,9 +322,13 @@ namespace Ping9719.IoT.Communication.TCP
 
             IsOpen2 = true;
             stream = tcpClient.GetStream();
-            
+            ReconnectionCount = 0;
+
             if (!IsReconnection)
+            {
+                IsUserClose = false;
                 GoRun();
+            }
             Opened?.Invoke(this);
         }
 
@@ -304,7 +336,10 @@ namespace Ping9719.IoT.Communication.TCP
         {
             try
             {
+                IsOpen2 = false;
+                IsUserClose = isUser;
                 dataEri = null;
+
                 tcpClient?.Client.Shutdown(SocketShutdown.Both);
                 tcpClient?.Close();
             }
@@ -314,7 +349,6 @@ namespace Ping9719.IoT.Communication.TCP
             }
             finally
             {
-                IsOpen2 = false;
                 Closed?.Invoke(this, isUser);
 
                 if (isUser)
@@ -378,7 +412,7 @@ namespace Ping9719.IoT.Communication.TCP
             }
             else if (receiveMode.Type == ReceiveModeEnum.Char)
             {
-                var countMax = (int)receiveMode.Data*2;
+                var countMax = (int)receiveMode.Data * 2;
                 if (isevent)
                 {
                     if (dataEri.Count >= countMax)
@@ -435,7 +469,7 @@ namespace Ping9719.IoT.Communication.TCP
                 }
                 else
                 {
-                    
+
                     while (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc))
                     {
                         if (!IsOpen2)
