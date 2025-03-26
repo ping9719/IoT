@@ -165,6 +165,13 @@ namespace Ping9719.IoT.Common
             return Convert.ToString(value, 2).PadLeft(minLength, '0').Select(o => o == '1').ToArray();
         }
 
+        public static bool[] ByteToBinaryBoolArray(this byte[] value, bool isReverse = true)
+        {
+            if (isReverse)
+               return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1').Reverse()).SelectMany(o => o).ToArray();
+            return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1')).SelectMany(o => o).ToArray();
+        }
+
         /// <summary>
         /// 二进制转Int
         /// </summary>
