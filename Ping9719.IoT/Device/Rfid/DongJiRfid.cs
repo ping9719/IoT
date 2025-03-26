@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Ping9719.IoT.Device.Rfid
 {
     /// <summary>
-    /// 泰和森
+    /// 东集
     /// </summary>
     public class DongJiRfid
     {
@@ -38,6 +38,31 @@ namespace Ping9719.IoT.Device.Rfid
             {
                 //开始寻卡
                 var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 1 } }) + "$");
+                var retValue_Send = Client.Send(sendInfo);
+                if (!retValue_Send.IsSucceed)
+                {
+                    result.IsSucceed = false;
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 结束寻卡
+        /// </summary>
+        /// <returns></returns>
+        public IoTResult End()
+        {
+            IoTResult result = new IoTResult();
+            try
+            {
+                //开始寻卡
+                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
                 var retValue_Send = Client.Send(sendInfo);
                 if (!retValue_Send.IsSucceed)
                 {
