@@ -63,5 +63,24 @@ namespace Ping9719.IoT.Device.Screw
             var aaa = Read<short>("4128");
             return new IoTResult<double>(aaa, aaa.Value / 100.00);
         }
+
+        /// <summary>
+        /// 计时
+        /// </summary>
+        public IoTResult<double> ReadWorkTimes(int sleep = 0)
+        {
+            var tmp = Read<Int16>("4116");
+            return new IoTResult<double>(tmp, ((double)tmp.Value) / 100.00);
+        }
+
+        /// <summary>
+        /// 电批状态  拧螺丝状态，0=待机，1=正在拧螺丝
+        /// </summary>
+        public IoTResult<int> ReadScrewStatus(int sleep = 0)
+        {
+            var tmp = Read<Int16>("4102");
+            return new IoTResult<int>(tmp);
+        }
+
     }
 }
