@@ -40,7 +40,7 @@ namespace Ping9719.IoT.PLC
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.UTF8;
             Client.TimeOut = timeout;
-            //Client.IsAutoOpen = true;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
             Client.Opened = (a) =>
             {
@@ -57,18 +57,14 @@ namespace Ping9719.IoT.PLC
                     0x01,0x00,//协议版本（0x0001）
                     0x00,0x00,//选项标记（0x0000
                     };
-                    //result.Requests.Add(RegisteredCommand);
-                    Client.Send(RegisteredCommand);
 
-                    var socketReadResul = Client.Receive(ReceiveMode.ParseByte(28));
-                    if (!socketReadResul.IsSucceed)
+                    var socketReadResul = Client.SendReceive(RegisteredCommand);
+                    if (!socketReadResul.IsSucceed || socketReadResul.Value == null || socketReadResul.Value.Length < 8)
                     {
                         Client.Close();
                         return;
                     }
                     var response = socketReadResul.Value;
-                    //result.Responses.Add(response);
-
                     //会话句柄
                     SessionByte[0] = response[4];
                     SessionByte[1] = response[5];
@@ -123,10 +119,10 @@ namespace Ping9719.IoT.PLC
                     //发送命令 并获取响应报文
                     var sendResult = Client.SendReceive(command);
                     if (!sendResult.IsSucceed)
-                        return new IoTResult<IEnumerable<object>>() { IsSucceed = false };
+                        return sendResult.ToVal<IEnumerable<object>>();
                     var dataPackage = sendResult.Value;
 
-
+                    result = sendResult.ToVal<IEnumerable<object>>();
                     try
                     {
                         //解析
@@ -143,7 +139,7 @@ namespace Ping9719.IoT.PLC
                         var data = dataPackage.Skip(46).Take(count - 6).ToArray();//数据
                         if (dTypt == CipVariableType.BOOL)
                         {
-                            result.Value = data.Chunk(2).Select(o => (object)BitConverter.ToBoolean(o.ToArray(), 0));
+                            result.Value = DataConvert.ByteToBinaryBoolArray(data).Select(o => (object)o);
                         }
                         else if (dTypt == CipVariableType.BYTE)
                         {
@@ -477,7 +473,6 @@ namespace Ping9719.IoT.PLC
                 return aaa.AddError(ex).ToVal<T>();
             }
 
-
         }
 
         public IoTResult<string> ReadString(string address, int length, Encoding encoding)
@@ -497,56 +492,63 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult Write<T>(string address, T value)
         {
-            if (value is bool boolv)
+            try
             {
-                return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                if (value is bool boolv)
+                {
+                    return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                }
+                else if (value is byte bytev)
+                {
+                    return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                }
+                else if (value is float Singlev)
+                {
+                    return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
+                }
+                else if (value is double doublev)
+                {
+                    return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
+                }
+                else if (value is short Int16v)
+                {
+                    return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
+                }
+                else if (value is int Int32v)
+                {
+                    return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
+                }
+                else if (value is long Int64v)
+                {
+                    return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
+                }
+                else if (value is ushort UInt16v)
+                {
+                    return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
+                }
+                else if (value is uint UInt32v)
+                {
+                    return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
+                }
+                else if (value is ulong UInt64v)
+                {
+                    return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
+                }
+                else if (value is string stringv)
+                {
+                    return Write(address, CipVariableType.STRING, GetStringByte(stringv));
+                }
+                else if (value is DateTime DateTimev)
+                {
+                    return Write(address, CipVariableType.DATE_AND_TIME_NSEC, GetDateTimeByte(DateTimev));
+                }
+                else
+                    throw new NotImplementedException("暂不支持的类型");
             }
-            else if (value is byte bytev)
+            catch (Exception ex)
             {
-                return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                return new IoTResult().AddError(ex).ToEnd();
             }
-            else if (value is float Singlev)
-            {
-                return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
-            }
-            else if (value is double doublev)
-            {
-                return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
-            }
-            else if (value is short Int16v)
-            {
-                return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
-            }
-            else if (value is int Int32v)
-            {
-                return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
-            }
-            else if (value is long Int64v)
-            {
-                return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
-            }
-            else if (value is ushort UInt16v)
-            {
-                return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
-            }
-            else if (value is uint UInt32v)
-            {
-                return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
-            }
-            else if (value is ulong UInt64v)
-            {
-                return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
-            }
-            else if (value is string stringv)
-            {
-                return Write(address, CipVariableType.STRING, GetStringByte(stringv));
-            }
-            else if (value is DateTime DateTimev)
-            {
-                return Write(address, CipVariableType.DATE_AND_TIME_NSEC, GetDateTimeByte(DateTimev));
-            }
-            else
-                throw new NotImplementedException("暂不支持的类型");
         }
 
         public IoTResult WriteString(string address, string value, int length, Encoding encoding)
