@@ -1,6 +1,5 @@
 ﻿using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Communication;
 using Ping9719.IoT.Interfaces;
 using Ping9719.IoT.PLC.Enums;
 using Ping9719.IoT.PLC.Models;
@@ -44,10 +43,8 @@ namespace Ping9719.IoT.PLC
             Client.IsAutoDiscard = true;
             Client.Opened = (a) =>
             {
-                try
-                {
-                    //注册命令
-                    byte[] RegisteredCommand = new byte[] {
+                //注册命令
+                byte[] RegisteredCommand = new byte[] {
                     0x65,0x00,//注册请求
                     0x04,0x00,//命令数据长度(单位字节)
                     0x00,0x00,0x00,0x00,//会话句柄,初始值为0x00000000
@@ -58,23 +55,24 @@ namespace Ping9719.IoT.PLC
                     0x00,0x00,//选项标记（0x0000
                     };
 
-                    var socketReadResul = Client.SendReceive(RegisteredCommand);
-                    if (!socketReadResul.IsSucceed || socketReadResul.Value == null || socketReadResul.Value.Length < 8)
-                    {
-                        Client.Close();
-                        return;
-                    }
-                    var response = socketReadResul.Value;
-                    //会话句柄
-                    SessionByte[0] = response[4];
-                    SessionByte[1] = response[5];
-                    SessionByte[2] = response[6];
-                    SessionByte[3] = response[7];
-                }
-                catch (Exception)
+                var socketReadResul = Client.SendReceive(RegisteredCommand);
+                if (!socketReadResul.IsSucceed || socketReadResul.Value == null || socketReadResul.Value.Length < 8)
                 {
-
+                    SessionByte[0] = 0;
+                    SessionByte[1] = 0;
+                    SessionByte[2] = 0;
+                    SessionByte[3] = 0;
+                    Client.Close();
+                    throw new Exception("打开cip获取会话句柄失败。");
                 }
+
+                var response = socketReadResul.Value;
+                //会话句柄
+                SessionByte[0] = response[4];
+                SessionByte[1] = response[5];
+                SessionByte[2] = response[6];
+                SessionByte[3] = response[7];
+
             };
             Client.Closing = (a) =>
             {
