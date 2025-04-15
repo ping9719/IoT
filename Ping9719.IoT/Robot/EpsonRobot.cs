@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,71 +12,37 @@ namespace Ping9719.IoT.Robot
     /// <summary>
     /// 爱普生机器人
     /// </summary>
-    public class EpsonRobot : SocketBase
+    public class EpsonRobot
     {
-        public EpsonRobot(string ip, int port = 5000, int timeout = 3000)
+        public ClientBase Client { get; private set; }
+        public EpsonRobot(ClientBase client, int timeout = 3000)
         {
-            if (socket == null)
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
+            Client = client;
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.Manual;
+            Client.IsAutoDiscard = true;
         }
+        public EpsonRobot(string ip, int port = 5000, int timeout = 3000) : this(new TcpClient(ip, port), timeout) { }
 
-        //bool isxt = false;
-        //public IoTResult Open(string pwd = null)
-        //{
-        //    var aaa = Connect();
-        //    if (!aaa.IsSucceed)
-        //    {
-        //        return aaa;
-        //    }
-
-        //    string comm = $"$Login{(pwd == null ? "" : "," + pwd)}\r\n";
-        //    var bbb = SendPackageReliable(comm, Encoding.UTF8);
-
-        //    //if (!isxt)
-        //    //{
-        //    //    isxt = true;
-        //    //    Task.Run(() =>
-        //    //    {
-        //    //        while (true)
-        //    //        {
-        //    //            try
-        //    //            {
-        //    //                SendPackageSingle("$GetStatus\r\n", Encoding.UTF8);
-        //    //                Thread.Sleep(1000);
-        //    //            }
-        //    //            catch (Exception)
-        //    //            {
-
-        //    //            }
-        //    //        }
-        //    //    });
-        //    //}
-
-        //    return bbb;
-        //}
 
         /// <summary>
         /// 开始
         /// </summary>
         public IoTResult Start()
         {
-            if (!IsConnected)
-                Connect();
-
-            var info = SendPackageSingle("$Login\r\n");
+            var info = Client.SendReceive("$Login\r\n");
             if (info.IsSucceed && info.Value.StartsWith("#Login,0"))
             {
                 Thread.Sleep(300);
-                var returnms = SendPackageSingle("$Stop\r\n");
+                var returnms = Client.SendReceive("$Stop\r\n");
                 Thread.Sleep(300);
 
                 if (returnms.IsSucceed && returnms.Value.StartsWith("#Stop,0"))
                 {
                     Thread.Sleep(300);
-                    var mmooo = SendPackageSingle("$Start,0\r\n");
+                    var mmooo = Client.SendReceive("$Start,0\r\n");
                     if (mmooo.IsSucceed && mmooo.Value.Contains("#Start,0"))
                     {
                         return mmooo;
@@ -93,7 +58,7 @@ namespace Ping9719.IoT.Robot
         /// </summary>
         public IoTResult Pause()
         {
-            var returnmes = SendPackageSingle("$Pause\r\n");
+            var returnmes = Client.SendReceive("$Pause\r\n");
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Pause"))
                 return returnmes;
 
@@ -106,7 +71,7 @@ namespace Ping9719.IoT.Robot
         /// </summary>
         public IoTResult Continue()
         {
-            var returnmes = SendPackageSingle("$Continue\r\n");
+            var returnmes = Client.SendReceive("$Continue\r\n");
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Continue"))
                 return returnmes;
 
@@ -119,7 +84,7 @@ namespace Ping9719.IoT.Robot
         /// </summary>
         public IoTResult Reset()
         {
-            var returnmes = SendPackageSingle("$Reset\r\n");
+            var returnmes = Client.SendReceive("$Reset\r\n");
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Reset,0"))
                 return returnmes;
 
@@ -132,7 +97,7 @@ namespace Ping9719.IoT.Robot
         /// </summary>
         public IoTResult Stop()
         {
-            var returnmes = SendPackageSingle("$Stop\r\n");
+            var returnmes = Client.SendReceive("$Stop\r\n");
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Stop"))
                 return returnmes;
 
