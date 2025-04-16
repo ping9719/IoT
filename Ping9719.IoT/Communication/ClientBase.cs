@@ -76,10 +76,6 @@ namespace Ping9719.IoT.Communication
         /// 接收到信息
         /// </summary>
         public Action<ClientBase, byte[]> Received;
-        /// <summary>
-        /// 警告错误
-        /// </summary>
-        public Action<ClientBase, Exception> Warning;
 
         /// <summary>
         /// 打开
