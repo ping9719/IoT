@@ -18,7 +18,7 @@ namespace Ping9719.IoT.Device.Mark
         {
             Client = client;
             Client.ReceiveMode = ReceiveMode.ParseTime();
-            Client.Encoding = Encoding.ASCII;
+            Client.Encoding = Encoding.UTF8;
             Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
@@ -39,13 +39,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<int>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<int>(aaa).ToEnd();
+                    return aaa.ToVal<int>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<int>(bbb).ToEnd();
+                    return bbb.ToVal<int>().ToEnd();
 
                 result.Value = Convert.ToInt32(bbb.Value.FirstOrDefault());
             }
@@ -71,13 +71,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<string[]>(aaa).ToEnd();
+                    return aaa.ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<string[]>(bbb).ToEnd();
+                    return bbb.ToEnd();
 
                 result.Value = bbb.Value;
             }
@@ -99,13 +99,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return aaa.ToEnd();
+                    return bbb.ToEnd();
             }
             catch (Exception ex)
             {
@@ -125,13 +125,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<string[]>(aaa).ToEnd();
+                    return aaa.ToVal<string[]>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<string[]>(bbb).ToEnd();
+                    return bbb.ToVal<string[]>().ToEnd();
 
                 result.Value = bbb.Value;
             }
@@ -155,13 +155,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<string[]>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<string[]>(aaa).ToEnd();
+                    return aaa.ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<string[]>(bbb).ToEnd();
+                    return bbb.ToEnd();
 
                 result.Value = bbb.Value;
             }
@@ -182,13 +182,13 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<double>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<double>(aaa).ToEnd();
+                    return aaa.ToVal<double>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<double>(bbb).ToEnd();
+                    return bbb.ToVal<double>().ToEnd();
 
                 result.Value = Convert.ToDouble(bbb.Value.FirstOrDefault());
             }
@@ -209,19 +209,19 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<double>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<double>(aaa).ToEnd();
+                    return aaa.ToVal<double>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<double>(bbb).ToEnd();
+                    return bbb.ToVal<double>().ToEnd();
 
                 result.Value = Convert.ToDouble(bbb.Value.FirstOrDefault());
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             return result.ToEnd();
@@ -236,17 +236,17 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
                     return bbb.ToEnd();
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             return result.ToEnd();
@@ -261,17 +261,17 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
                     return aaa.ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
                     return bbb.ToEnd();
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             return result.ToEnd();
@@ -288,19 +288,19 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<string>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<string>(aaa).ToEnd();
+                    return aaa.ToVal<string>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<string>(bbb).ToEnd();
+                    return bbb.ToVal<string>().ToEnd();
 
                 result.Value = bbb.Value.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             return result.ToEnd();
@@ -316,19 +316,19 @@ namespace Ping9719.IoT.Device.Mark
             var result = new IoTResult<string>();
             try
             {
-                var aaa = Client.SendReceive(Encoding.UTF8.GetBytes(comm));
+                var aaa = Client.SendReceive(comm);
                 if (!aaa.IsSucceed)
-                    return new IoTResult<string>(aaa).ToEnd();
+                    return aaa.ToVal<string>().ToEnd();
 
-                var bbb = Analysis(Encoding.UTF8.GetString(aaa.Value));
+                var bbb = Analysis(aaa.Value);
                 if (!bbb.IsSucceed)
-                    return new IoTResult<string>(bbb).ToEnd();
+                    return bbb.ToVal<string>().ToEnd();
 
                 result.Value = bbb.Value.FirstOrDefault();
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             return result.ToEnd();
@@ -346,19 +346,11 @@ namespace Ping9719.IoT.Device.Mark
             {
                 var con = str.Substring(1, str.Length - 2).Split(',');
                 if (con.Length > 0 && con[0] == "OK")
-                {
                     result.Value = con.Skip(1).ToArray();
-                }
                 else if (con.Length > 0 && con[0] == "NG")
-                {
-                    
-                    result.AddError( string.Join(",", con.Skip(1)));
-                }
+                    result.AddError(string.Join(",", con.Skip(1)));
                 else
-                {
-                    
                     result.AddError($"不是有效的格式【{con}】");
-                }
             }
             else
             {
