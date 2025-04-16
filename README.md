@@ -5,21 +5,21 @@
 #
 
 ### 全部文档：[doc]
-[查看IoT文档 (Iot document)](Ping9719.IoT/docs/README.md)   
-[查看IoT版本文档 (IoT Version document)](Ping9719.IoT/docs/VERSION.md)  
+[查看 "IoT" 文档 ( "IoT" document)](Ping9719.IoT/docs/README.md)   
+[查看 "IoT" 版本文档 ( "IoT" Version document)](Ping9719.IoT/docs/VERSION.md)  
 
-[查看IoT.WPF文档 (Iot.WPF document)](Ping9719.IoT.WPF/README.md)   
+[查看 "IoT.WPF" 文档 ( "IoT.WPF" document)](Ping9719.IoT.WPF/README.md)   
 #
 
 ### 亮点（Merit）
-1.常用设备实现接口“IIoT”可进行读写 
+1.常用设备实现接口“IIoT”可进行读写 (read and write)   
 ```CSharp
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc",5);//读5个
 client.Write<bool>("abc",true);//写值
 client.Write<int>("abc",10,20,30);//写多个
 ```
-2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
+2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换  (Pipe switching)   
 ```CSharp
 var client1 = new TcpClient(ip, port);//Tcp方式
 var client2 = new SerialPortClient(portName, baudRate);//串口方式
@@ -29,7 +29,7 @@ var plc = new OmronCipClient(client1);//使用的方式
 plc.Client.Open();//打开通道
 plc.Read<bool>("abc");//读
 ```
-3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
+3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式  (The client implements ClientBase)   
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
@@ -93,46 +93,3 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
         - 快克焊接机 (KuaiKeWeld)（不推荐） 
-
-
-# [Ping9719.IoT.WPF](Ping9719.IoT.WPF/README.md)   
-- Modbus
-    - ModbusRtu (...)（待开发） 
-    - ModbusTcp (...)（待开发） 
-    - ModbusAscii (...)（待开发） 
-- PLC
-    - 罗克韦尔 (...) （待开发） 
-    - 汇川 (...)（待开发） 
-    - 三菱 (...)（待开发） 
-    - 欧姆龙 (...)（待开发） 
-    - 西门子 (...)（待开发） 
-- 机器人 (Robot)
-    - 爱普生 (...) （待开发） 
-- 通讯 (Communication)
-    - TcpClient （待开发） 
-    - TcpServer （待开发） 
-    - UdpClient （待开发） 
-    - UdpServer （待开发） 
-    - HttpServer （待开发） 
-    - MqttClient （待开发） 
-    - MqttServer （待开发） 
-    - SerialPortClient （待开发） 
-- 算法 (Algorithm)
-    - CRC（...） 
-    - 傅立叶算法(...) （待开发） 
-    - PID （...） （待开发） 
-    - RSA （...） （待开发） 
-- 设备和仪器 (Device)
-    - Fct
-        - 盟讯电子 (...)（待开发） 
-    - 激光刻印 (Mark)
-        - 大族激光刻印 (...)
-    - 无线射频 (Rfid)
-        - 倍加福Rfid (BeiJiaFuRfidView)
-        - 泰和森Rfid (TaiHeSenRfidView)
-        - 万全Rfid (WanQuanRfidView)
-    - 扫码枪 (Scanner)
-        - 霍尼韦尔扫码器 (...)（待开发） 
-        - 民德扫码器 (...)（待开发） 
-    - 螺丝机 (Screw)
-        - 米勒螺丝机 (...)（待开发） 

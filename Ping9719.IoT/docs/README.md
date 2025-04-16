@@ -37,6 +37,7 @@ Install-Package Ping9719.IoT
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
         - 大族激光刻印 (DaZhuMark)
+        - 华普激光刻印 (HuaPuMark)
     - 无线射频 (Rfid)
         - 倍加福Rfid (BeiJiaFuRfid)
         - 泰和森Rfid (TaiHeSenRfid)
@@ -152,6 +153,7 @@ client.Write<Int16>("BD100",10);//写
 ## 爱普生 (EpsonRobot)
 ```CSharp
 EpsonRobot client = new EpsonRobot("127.0.0.1");
+client.Client.Open();
 client.Start();
 client.Pause();
 ```
@@ -235,8 +237,10 @@ dev1.Client.Open();
 ## 激光刻印 (Mark)
 ```CSharp
 TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-DaZhuMark dev1 = new DaZhuMark(client1);
+DaZhuMark dev1 = new DaZhuMark(client1);//大族激光刻印
+HuaPuMark dev2 = new HuaPuMark(client1);//华普激光刻印
 dev1.Client.Open();
+dev2.Client.Open();
 ```
 ## 无线射频 (Rfid)
 ```CSharp
