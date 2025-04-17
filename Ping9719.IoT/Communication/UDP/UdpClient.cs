@@ -81,7 +81,7 @@ namespace Ping9719.IoT.Communication
             return result.ToEnd();
         }
 
-        public override IoTResult ClearAcceptCache()
+        public override IoTResult DiscardInBuffer()
         {
             try
             {
@@ -142,7 +142,7 @@ namespace Ping9719.IoT.Communication
                 lock (obj1)
                 {
                     if (IsAutoDiscard)
-                        ClearAcceptCache();
+                        DiscardInBuffer();
 
                     result.Value = Receive2(receiveMode);
                     result.Responses.Add(result.Value);
@@ -178,7 +178,7 @@ namespace Ping9719.IoT.Communication
                 lock (obj1)
                 {
                     if (IsAutoDiscard)
-                        ClearAcceptCache();
+                        DiscardInBuffer();
 
                     result.Requests.Add(data);
                     Send2(data);

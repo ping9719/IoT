@@ -2,10 +2,20 @@
 # 安装包 [NuGet]
 ```CSharp
 //等待稳定后发布，现在请自行拉取代码 
+//After it stabilizes, it will be released. Now, please pull the code by yourself
 Install-Package Ping9719.IoT
 ```
 # Ping9719.IoT
 - [前言](#前言、亮点（Merit）)
+- [通讯 (Communication)](#通讯 (Communication))
+    - TcpClient
+    - TcpServer （待开发） 
+    - SerialPortClient
+    - UdpClient （待开发） 
+    - UdpServer （待开发） 
+    - HttpServer （待开发） 
+    - MqttClient （待开发） 
+    - MqttServer （待开发） 
 - [Modbus](#Modbus)
     - ModbusRtu (ModbusRtuClient,ModbusRtuOverTcpClient)
     - ModbusTcp (ModbusTcpClient)
@@ -18,15 +28,6 @@ Install-Package Ping9719.IoT
     - 西门子 (SiemensS7Client)
 - [机器人 (Robot)](#机器人 (Robot))
     - 爱普生 (EpsonRobot) （进行中） 
-- [通讯 (Communication)](#通讯 (Communication))
-    - TcpClient （进行中） 
-    - TcpServer （待开发） 
-    - UdpClient （待开发） 
-    - UdpServer （待开发） 
-    - HttpServer （待开发） 
-    - MqttClient （待开发） 
-    - MqttServer （待开发） 
-    - SerialPortClient （待开发） 
 - [算法 (Algorithm)](#算法 (Algorithm))
     - CRC
     - 傅立叶算法(Fourier) （待开发） 
@@ -52,6 +53,8 @@ Install-Package Ping9719.IoT
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
         - 快克焊接机 (KuaiKeWeld)（不推荐） 
+- [扩展 (Rests)](#扩展 (Rests))
+    - [1.如何使用自定义协议 (Use a custom protocol)](#1.如何使用自定义协议 (Use a custom protocol))
 
 
 # 前言、亮点（Merit）
@@ -68,9 +71,8 @@ var client1 = new TcpClient(ip, port);//Tcp方式
 var client2 = new SerialPortClient(portName, baudRate);//串口方式
 var client3 = new UdpClient(ip, port);//Udp方式
 
-var plc = new OmronCipClient(client1);//使用的方式
-plc.Client.Open();//打开通道
-plc.Read<bool>("abc");//读
+var client = new OmronCipClient(client1);//使用的方式
+client.Client.Open();//打开
 ```
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
@@ -86,6 +88,79 @@ client1.Send("abc");//发送
 client1.Receive();//等待并接受
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
+```
+
+# 通讯 (Communication)
+## TcpClient
+`TcpClient : ClientBase`
+```CSharp
+var client1 = new TcpClient("127.0.0.1", 8080);
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连，默认手动
+client1.Encoding = Encoding.UTF8;//如何解析字符串
+client1.TimeOut = 3000;//超时时间
+client1.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
+client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();//时间“Received”的默认方式
+client1.Opening = (a) =>
+{
+    Console.WriteLine("连接中");
+    return true;
+};
+client1.Opened = (a) =>
+{
+    Console.WriteLine("连接成功");
+};
+client1.Closing = (a) =>
+{
+    Console.WriteLine("关闭中");
+    return true;
+};
+client1.Closed = (a, b) =>
+{
+    Console.WriteLine("关闭成功" + b);
+};
+client1.Received = (a, b) =>
+{
+    Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
+};
+client1.Warning = (a, b) =>
+{
+    Console.WriteLine("错误" + b.ToString());
+};
+//打开链接，设置所有属性必须在打开前
+client1.Open();
+
+client1.Send("abc");//发送
+client1.Receive();//等待并接受
+client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
+client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
+client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
+client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
+```
+
+## SerialPortClient
+`SerialPortClient : ClientBase`
+```CSharp
+var client1 = new SerialPortClient("COM1", 9600);
+
+//以下是初始化默认属性，可以不设置
+client1.ConnectionMode = ConnectionMode.Manual;//手动打开，串口使用断线重连意义不大
+client1.Encoding = Encoding.ASCII;//如何解析字符串
+client1.TimeOut = 3000;//超时时间
+client1.ReceiveMode = ReceiveMode.ParseTime();//方法“Receive()”的默认方式，串口根据时间来接受数据更好
+client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的默认方式
+
+//所有事件和TcpClient一样，这里不在重复
+
+//打开链接，设置所有属性必须在打开前
+client1.Open();
+
+//所有发送和接受和TcpClient一样，这里不在重复
+```
+
+# Modbus
+## Modbus
+```CSharp
+//改造中...
 ```
 
 # PLC
@@ -158,50 +233,6 @@ client.Start();
 client.Pause();
 ```
 
-# 通讯 (Communication)
-## TcpClient
-```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
-client1.Encoding = Encoding.UTF8;//如何解析字符串
-client1.TimeOut = 5000;//超时时间
-client1.Opening = (a) =>
-{
-    Console.WriteLine("连接中");
-    return true;
-};
-client1.Opened = (a) =>
-{
-    Console.WriteLine("连接成功");
-};
-client1.Closing = (a) =>
-{
-    Console.WriteLine("关闭中");
-    return true;
-};
-client1.Closed = (a, b) =>
-{
-    Console.WriteLine("关闭成功" + b);
-};
-client1.Received = (a, b) =>
-{
-    Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
-};
-client1.Warning = (a, b) =>
-{
-    Console.WriteLine("错误" + b.ToString());
-};
-//打开链接，设置所有属性必须在打开前
-client1.Open();
-
-client1.Send("abc");//发送
-client1.Receive();//等待并接受
-client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
-client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
-client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
-client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
-```
-
 # 算法 (Algorithm)
 ## CRC
 ```CSharp
@@ -271,4 +302,45 @@ dev1.Client.Open();
 ## 焊接机 (Weld)
 ```CSharp
 //快克品牌不推荐
+```
+
+# 扩展 (Rests)
+## 1.如何使用自定义协议 (Use a custom protocol)
+```CSharp
+//XXX协议实现
+public class XXX
+{
+    public ClientBase Client { get; private set; }//通讯管道
+
+    public XXX(ClientBase client)
+    {
+        Client = client;
+        Client.ReceiveMode = ReceiveMode.ParseTime();
+        Client.Encoding = Encoding.ASCII;
+        Client.ConnectionMode = ConnectionMode.AutoOpen;
+    }
+
+    public XXX(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }//默认使用TcpClient
+
+    //这是一个示例，他发送“info1\r\n” 并等待返回字符串的结果
+    public IoTResult ReadXXX()
+    {
+        string comm = $"info1\r\n";
+        try
+        {
+            return Client.SendReceive(comm);
+        }
+        catch (Exception ex)
+        {
+            return IoTResult.Create().AddError(ex);
+        }
+    }
+
+}
+```
+```CSharp
+//使用
+var client = new XXX("127.0.0.1");
+client.Client.Open();
+var info = client.ReadXXX();
 ```

@@ -17,24 +17,34 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class SerialPortClient : ClientBase
     {
-        System.IO.Ports.SerialPort serialPort;
+        public override bool IsOpen => serialPort?.IsOpen ?? false && IsOpen2;
+
+        string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One;
+
         object obj1 = new object();
+        bool IsOpen2 = false;
+        bool IsUserClose = false;//是否用户关闭
         bool isSendReceive = false;//是否正在发送和接受中
-        /// <summary>
-        /// 是否链接
-        /// </summary>
-        public bool IsConnect = false;
-        public override bool IsOpen => serialPort?.IsOpen ?? false;
+
+        private System.IO.Ports.SerialPort serialPort;
+        private System.IO.Stream stream;
+        QueueByteFixed dataEri;
+        Task task;
+        int ReconnectionCount = 0;
+        CancellationTokenSource flushCts;
 
         public SerialPortClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One)
         {
-            serialPort = new System.IO.Ports.SerialPort();
-            serialPort.PortName = portName;
-            serialPort.BaudRate = baudRate;
-            serialPort.DataBits = dataBits;
-            serialPort.StopBits = stopBits;
-            serialPort.Encoding = Encoding;
-            serialPort.Parity = parity;
+            this.portName = portName;
+            this.baudRate = baudRate;
+            this.dataBits = dataBits;
+            this.stopBits = stopBits;
+            this.parity = parity;
+
+            ConnectionMode = ConnectionMode.Manual;
+            Encoding = Encoding.ASCII;
+            ReceiveMode = ReceiveMode.ParseTime();
+            ReceiveModeReceived = ReceiveMode.ParseTime();
         }
 
         public override IoTResult Open()
@@ -54,6 +64,7 @@ namespace Ping9719.IoT.Communication
             catch (Exception ex)
             {
                 result.AddError(ex);
+                IsOpen2 = false;
             }
             return result.ToEnd();
         }
@@ -63,14 +74,14 @@ namespace Ping9719.IoT.Communication
             var result = new IoTResult();
             try
             {
-                if (IsOpen)
-                {
-                    var aa = Closing?.Invoke(this);
-                    if (aa == false)
-                        throw new Exception("用户已拒绝断开");
+                //if (IsOpen)
+                //{
+                var aa = Closing?.Invoke(this);
+                if (aa == false)
+                    throw new Exception("用户已拒绝断开");
 
-                    Close2(true);
-                }
+                Close2(true);
+                //}
             }
             catch (Exception ex)
             {
@@ -79,9 +90,18 @@ namespace Ping9719.IoT.Communication
             return result.ToEnd();
         }
 
-        public override IoTResult ClearAcceptCache()
+        public override IoTResult DiscardInBuffer()
         {
-            throw new NotImplementedException();
+            try
+            {
+                dataEri?.Clear();
+                serialPort?.DiscardInBuffer();
+                return new IoTResult().ToEnd();
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex).ToEnd();
+            }
         }
 
         public override IoTResult Send(byte[] data, int offset = 0, int count = -1)
@@ -131,9 +151,12 @@ namespace Ping9719.IoT.Communication
 
                 lock (obj1)
                 {
-                    result.Value = Receive2(receiveMode);
-                }
+                    if (IsAutoDiscard)
+                        DiscardInBuffer();
 
+                    result.Value = Receive2(receiveMode);
+                    result.Responses.Add(result.Value);
+                }
 
             }
             catch (Exception ex)
@@ -142,7 +165,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                if (IsOpen && ConnectionMode == ConnectionMode && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
                     Close();
 
                 isSendReceive = false;
@@ -164,14 +187,13 @@ namespace Ping9719.IoT.Communication
 
                 lock (obj1)
                 {
-                    if (IsAutoDiscard && serialPort.BytesToRead > 0)
-                    {
-                        var bytes = new byte[serialPort.BytesToRead];
-                        serialPort.Read(bytes, 0, bytes.Length);
-                    }
+                    if (IsAutoDiscard)
+                        DiscardInBuffer();
 
+                    result.Requests.Add(data);
                     Send2(data);
                     result.Value = Receive2(receiveMode);
+                    result.Responses.Add(result.Value);
                 }
             }
             catch (Exception ex)
@@ -189,55 +211,100 @@ namespace Ping9719.IoT.Communication
         }
 
         #region 内部
-        void Open2(bool IsReconnection)
+        void GoRun()
         {
-            //serialPort?.Close();
-            serialPort?.Open();
-
-            if (!IsReconnection)
-                Monitor2();
-        }
-
-        void Monitor2()
-        {
-            Task.Run(() =>
+            task = Task.Factory.StartNew(async (a) =>
             {
-                byte[] data = new byte[0];
+                var cc = (SerialPortClient)a;
+                byte[] data = new byte[ReceiveBufferSize];
                 while (true)
                 {
-                    //System.Threading.Thread.Sleep(1);
                     try
                     {
-                        if (IsConnect && IsOpen)
+                        if (IsUserClose)
                         {
-                            //等待消息
-                            var receiveResult = serialPort.Read(data, 0, 0);
-                            if (IsConnect && serialPort.BytesToRead == 0 && !isSendReceive)//可能已经断开
+                            break;
+                        }
+                        else if (cc.IsOpen2 && cc.IsOpen)
+                        {
+                            int readLength;
+                            try
                             {
-                                Close2(false);
+                                readLength = await cc.stream.ReadAsync(data, 0, data.Length);
                             }
-                            else if (IsConnect && Received != null && serialPort.BytesToRead > 0 && !isSendReceive)//有新信息
+                            catch (IOException ex)
                             {
-                                lock (obj1)
+                                //var ErrorCode = (ex.InnerException as SocketException)?.ErrorCode;
+                                readLength = -1;
+                            }
+                            catch (Exception ex)
+                            {
+                                //其他原因
+                                readLength = -3;
+                            }
+
+                            //断开
+                            if (readLength <= 0)
+                            {
+                                if (readLength == 0)
                                 {
-                                    var bytes = Receive2(ReceiveModeReceived);
-                                    Received?.Invoke(this, bytes);
+                                    //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
+                                }
+
+                                if (cc.IsOpen2 && cc.IsOpen)
+                                    cc.Close2(false);
+                            }
+                            //收到消息
+                            else
+                            {
+                                cc.dataEri.Enqueue(data, 0, readLength);
+                                if (cc.Received != null && !cc.isSendReceive)
+                                {
+
+                                    lock (cc.obj1)
+                                    {
+                                        if (cc.ReceiveModeReceived.Type == ReceiveModeEnum.Time)
+                                        {
+                                            // 取消之前的延迟刷新
+                                            flushCts?.Cancel();
+                                            flushCts = new CancellationTokenSource();
+
+                                            var countMax = (int)cc.ReceiveModeReceived.Data;
+                                            Task.Delay(countMax, flushCts.Token).ContinueWith(t =>
+                                            {
+                                                if (t.IsCanceled)
+                                                    return;
+
+                                                var bytes = dataEri.DequeueAll();
+                                                if (bytes != null && bytes.Length > 0)
+                                                    cc.Received?.Invoke(this, bytes);
+                                            }, TaskContinuationOptions.ExecuteSynchronously);
+                                        }
+                                        else
+                                        {
+                                            var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                            if (bytes != null && bytes.Length > 0)
+                                                cc.Received?.Invoke(this, bytes);
+                                        }
+                                    }
                                 }
                             }
 
-                            ////可能已经断开
-                            //if (IsPoll && IsConnect && Socket.Poll(1000, SelectMode.SelectRead) && Socket.Available == 0)
-                            //{
-                            //    Close2(false);
-                            //}
                         }
-                        else if (ConnectionMode == ConnectionMode.AutoReconnection)
+                        else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
                         {
-                            Open2(true);
+                            ReconnectionCount++;
+                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime);
+                            System.Threading.Thread.Sleep(tz);
+
+                            if (IsUserClose)
+                                break;
+
+                            cc.Open2(true);
                         }
                         else
                         {
-                            return;
+                            break;
                         }
                     }
                     catch (Exception ex)
@@ -249,18 +316,43 @@ namespace Ping9719.IoT.Communication
 
                     }
                 }
-            });
+            }, this);
+
+            //task.Start();
         }
 
-        /// <summary>
-        /// 断开
-        /// </summary>
-        /// <param name="isUser">是否用户自己断开的</param>
+        void Open2(bool IsReconnection)
+        {
+            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+            serialPort = new System.IO.Ports.SerialPort(portName, baudRate, parity, dataBits, stopBits);
+            serialPort.Encoding = Encoding;
+            serialPort.ReadTimeout = TimeOut;
+            serialPort.WriteTimeout = TimeOut;
+
+            serialPort.Open();
+
+            IsOpen2 = true;
+            stream = serialPort.BaseStream;
+            ReconnectionCount = 0;
+
+            if (!IsReconnection)
+            {
+                IsUserClose = false;
+                GoRun();
+            }
+            Opened?.Invoke(this);
+        }
+
         void Close2(bool isUser)
         {
             try
             {
+                IsOpen2 = false;
+                IsUserClose = isUser;
+                dataEri = null;
+
                 serialPort?.Close();
+                serialPort?.Dispose();
             }
             catch (Exception ex)
             {
@@ -268,101 +360,137 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                IsConnect = false;
-                Closed?.BeginInvoke(this, isUser, null, null);
+                Closed?.Invoke(this, isUser);
+
+                if (isUser)
+                    task?.Wait();
             }
         }
 
         void Send2(byte[] data, int offset = 0, int count = -1)
         {
-            serialPort.Write(data, offset, count < 0 ? data.Length : count);
+            stream.Write(data, offset, count < 0 ? data.Length : count);
         }
 
-        byte[] Receive2(ReceiveMode receiveMode = null)
+        byte[] Receive2(ReceiveMode receiveMode = null, bool isevent = false)
         {
             receiveMode ??= ReceiveMode;
-
-            byte[] value = new byte[0];
+            byte[] value = null;
             DateTime beginTime = DateTime.Now;
             if (receiveMode.Type == ReceiveModeEnum.Byte)
             {
-                var count = 0;
                 var countMax = (int)receiveMode.Data;
-                value = new byte[countMax];
-
-                while (countMax - count > 0)
+                if (isevent)
                 {
-                    if (IsOutTime(beginTime, receiveMode.TimeOut))
-                        throw new TimeoutException("已超时");
+                    if (dataEri.Count >= countMax)
+                    {
+                        value = dataEri.Dequeue(countMax);
+                    }
+                }
+                else
+                {
+                    while (dataEri.Count < countMax)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
 
-                    count += serialPort.Read(value, count, countMax - count);
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.Dequeue(countMax);
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.ByteAll)
             {
-                while (serialPort.BytesToRead == 0)
+                if (isevent)
                 {
-                    if (IsOutTime(beginTime, receiveMode.TimeOut))
-                        throw new TimeoutException("已超时");
-                    Thread.Sleep(10);
+                    value = dataEri.DequeueAll();
                 }
-                value = new byte[serialPort.BytesToRead];
-                var count = serialPort.Read(value, 0, value.Length);
+                else
+                {
+                    while (dataEri.Count == 0)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.DequeueAll();
+                }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Char)
             {
-                var count = 0;
                 var countMax = (int)receiveMode.Data * 2;
-                value = new byte[countMax];
-
-                while (countMax - count > 0)
+                if (isevent)
                 {
-                    if (IsOutTime(beginTime, receiveMode.TimeOut))
-                        throw new TimeoutException("已超时");
+                    if (dataEri.Count >= countMax)
+                    {
+                        value = dataEri.Dequeue(countMax);
+                    }
+                }
+                else
+                {
+                    while (dataEri.Count < countMax)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
 
-                    count += serialPort.Read(value, count, countMax - count);
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.Dequeue(countMax);
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Time)
             {
                 var countMax = (int)receiveMode.Data;
-                var tempBufferLength = serialPort.BytesToRead;
-                while (serialPort.BytesToRead == 0 || tempBufferLength != serialPort.BytesToRead)
+                if (isevent)
                 {
-                    if (IsOutTime(beginTime, receiveMode.TimeOut))
-                        throw new TimeoutException("已超时");
-
-                    tempBufferLength = serialPort.BytesToRead;
-                    Thread.Sleep(countMax);
+                    value = dataEri.DequeueAll();
                 }
-                value = new byte[serialPort.BytesToRead];
-                var count = serialPort.Read(value, 0, value.Length);
+                else
+                {
+                    var tempBufferLength = dataEri.Count;
+                    while (dataEri.Count == 0 || tempBufferLength != dataEri.Count)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        tempBufferLength = dataEri.Count;
+                        Thread.Sleep(countMax);
+                    }
+                    value = dataEri.DequeueAll();
+                }
             }
             else if (receiveMode.Type == ReceiveModeEnum.ToString)
             {
-                //value = new byte[0];
                 var zfc = Encoding.GetBytes(receiveMode.Data.ToString());
-                List<byte> buffer = new List<byte>();
-                while (true)
+                if (isevent)
                 {
-                    if (serialPort.BytesToRead == 0)
+                    if (dataEri.ToArray().EndsWith(zfc))
                     {
-                        Thread.Sleep(10);
-                        continue;
-                    }
-
-                    if (IsOutTime(beginTime, receiveMode.TimeOut))
-                        throw new TimeoutException("已超时");
-
-                    var a1 = new byte[serialPort.BytesToRead];
-                    var count = serialPort.Read(a1, 0, a1.Length);
-                    buffer.AddRange(a1);
-                    if (buffer.ToArray().EndsWith(zfc))
-                    {
-                        break;
+                        value = dataEri.DequeueAll();
                     }
                 }
-                value = buffer.ToArray();
+                else
+                {
+                    while (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc))
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.DequeueAll();
+                }
             }
 
             return value;

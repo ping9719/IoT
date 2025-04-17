@@ -19,8 +19,8 @@ namespace Ping9719.IoT.Communication
     {
         public override bool IsOpen => tcpClient?.Connected ?? false && IsOpen2;
 
-        string ip;
-        int port;
+        string ip; int port;
+
         object obj1 = new object();
         bool IsOpen2 = false;
         bool IsUserClose = false;//是否用户关闭
@@ -31,6 +31,7 @@ namespace Ping9719.IoT.Communication
         QueueByteFixed dataEri;
         Task task;
         int ReconnectionCount = 0;
+        CancellationTokenSource flushCts;
 
         public TcpClient(string ip, int port)
         {
@@ -81,7 +82,7 @@ namespace Ping9719.IoT.Communication
             return result.ToEnd();
         }
 
-        public override IoTResult ClearAcceptCache()
+        public override IoTResult DiscardInBuffer()
         {
             try
             {
@@ -142,7 +143,7 @@ namespace Ping9719.IoT.Communication
                 lock (obj1)
                 {
                     if (IsAutoDiscard)
-                        ClearAcceptCache();
+                        DiscardInBuffer();
 
                     result.Value = Receive2(receiveMode);
                     result.Responses.Add(result.Value);
@@ -178,7 +179,7 @@ namespace Ping9719.IoT.Communication
                 lock (obj1)
                 {
                     if (IsAutoDiscard)
-                        ClearAcceptCache();
+                        DiscardInBuffer();
 
                     result.Requests.Add(data);
                     Send2(data);
@@ -203,7 +204,7 @@ namespace Ping9719.IoT.Communication
         #region 内部
         void GoRun()
         {
-            task = new Task((a) =>
+            task = Task.Factory.StartNew(async (a) =>
             {
                 var cc = (TcpClient)a;
                 byte[] data = new byte[ReceiveBufferSize];
@@ -220,9 +221,10 @@ namespace Ping9719.IoT.Communication
                             int readLength;
                             try
                             {
-                                var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
-                                receiveResult1.AsyncWaitHandle.WaitOne();
-                                readLength = cc.stream.EndRead(receiveResult1);
+                                //var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
+                                //receiveResult1.AsyncWaitHandle.WaitOne();
+                                //readLength = cc.stream.EndRead(receiveResult1);
+                                readLength = await cc.stream.ReadAsync(data, 0, data.Length);
                             }
                             catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
                             {
@@ -269,9 +271,29 @@ namespace Ping9719.IoT.Communication
                                 {
                                     lock (cc.obj1)
                                     {
-                                        var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
-                                        if (bytes != null && bytes.Length > 0)
-                                            cc.Received?.Invoke(this, bytes);
+                                        if (cc.ReceiveModeReceived.Type == ReceiveModeEnum.Time)
+                                        {
+                                            // 取消之前的延迟刷新
+                                            flushCts?.Cancel();
+                                            flushCts = new CancellationTokenSource();
+
+                                            var countMax = (int)cc.ReceiveModeReceived.Data;
+                                            Task.Delay(countMax, flushCts.Token).ContinueWith(t =>
+                                            {
+                                                if (t.IsCanceled)
+                                                    return;
+
+                                                var bytes = dataEri.DequeueAll();
+                                                if (bytes != null && bytes.Length > 0)
+                                                    cc.Received?.Invoke(this, bytes);
+                                            }, TaskContinuationOptions.ExecuteSynchronously);
+                                        }
+                                        else
+                                        {
+                                            var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                            if (bytes != null && bytes.Length > 0)
+                                                cc.Received?.Invoke(this, bytes);
+                                        }
                                     }
                                 }
                             }
@@ -304,7 +326,7 @@ namespace Ping9719.IoT.Communication
                 }
             }, this);
 
-            task.Start();
+            //task.Start();
         }
 
         void Open2(bool IsReconnection)

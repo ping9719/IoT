@@ -46,13 +46,13 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 超时（发送、接受、链接）（毫秒）-1永久
         /// </summary>
-        public virtual int TimeOut { get; set; } = 5000;
+        public virtual int TimeOut { get; set; } = 3000;
         /// <summary>
         /// 接受数据的方式
         /// </summary>
         public virtual ReceiveMode ReceiveMode { get; set; } = ReceiveMode.ParseByteAll();
         /// <summary>
-        /// 接受数据的方式，在事件 Received 下
+        /// 接受数据的方式，在事件 Received 下。注意 ReceiveModeEnum.Time 模式下时间设置太长或对方一直在发送消息，可能会死锁 ！
         /// </summary>
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
@@ -89,7 +89,7 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 清空接受缓存
         /// </summary>
-        public abstract IoTResult ClearAcceptCache();
+        public abstract IoTResult DiscardInBuffer();
 
         /// <summary>
         /// 发送

@@ -11,29 +11,28 @@
 [查看 "IoT.WPF" 文档 ( "IoT.WPF" document)](Ping9719.IoT.WPF/README.md)   
 #
 
-### 亮点（Merit）
-1.常用设备实现接口“IIoT”可进行读写 (read and write)   
+# 前言、亮点（Merit）
+1.常用设备实现接口“IIoT”可进行读写 
 ```CSharp
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc",5);//读5个
 client.Write<bool>("abc",true);//写值
 client.Write<int>("abc",10,20,30);//写多个
 ```
-2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换  (Pipe switching)   
+2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
 var client1 = new TcpClient(ip, port);//Tcp方式
 var client2 = new SerialPortClient(portName, baudRate);//串口方式
 var client3 = new UdpClient(ip, port);//Udp方式
 
-var plc = new OmronCipClient(client1);//使用的方式
-plc.Client.Open();//打开通道
-plc.Read<bool>("abc");//读
+var client = new OmronCipClient(client1);//使用的方式
+client.Client.Open();//打开
 ```
-3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式  (The client implements ClientBase)   
+3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
-//client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client1.Opened = (a) =>{Log.AddLog("链接成功")};
 client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
 client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
@@ -61,16 +60,16 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
 - 机器人 (Robot)
     - 爱普生 (EpsonRobot) （进行中） 
 - 通讯 (Communication)
-    - TcpClient （进行中） 
+    - TcpClient
     - TcpServer （待开发） 
     - UdpClient （待开发） 
     - UdpServer （待开发） 
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
-    - SerialPortClient （待开发） 
+    - SerialPortClient
 - 算法 (Algorithm)
-    - CRC （待开发） 
+    - CRC
     - 傅立叶算法(Fourier) （待开发） 
     - PID （待开发） 
     - RSA （待开发） 
@@ -79,6 +78,7 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
         - 大族激光刻印 (DaZhuMark)
+        - 华普激光刻印 (HuaPuMark)
     - 无线射频 (Rfid)
         - 倍加福Rfid (BeiJiaFuRfid)
         - 泰和森Rfid (TaiHeSenRfid)
