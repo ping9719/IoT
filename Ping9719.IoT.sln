@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest", "ConsoleTest\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ping9719.IoT.WPF", "Ping9719.IoT.WPF\Ping9719.IoT.WPF.csproj", "{F5ADBF33-3938-4C9D-AFEF-FA3AC9C7E24F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ping9719.IoT.Avalonia", "Ping9719.IoT.Avalonia\Ping9719.IoT.Avalonia.csproj", "{AF0BE4A6-4D68-49BE-BCE1-3CE2A4614D1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F5ADBF33-3938-4C9D-AFEF-FA3AC9C7E24F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5ADBF33-3938-4C9D-AFEF-FA3AC9C7E24F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5ADBF33-3938-4C9D-AFEF-FA3AC9C7E24F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF0BE4A6-4D68-49BE-BCE1-3CE2A4614D1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF0BE4A6-4D68-49BE-BCE1-3CE2A4614D1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF0BE4A6-4D68-49BE-BCE1-3CE2A4614D1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF0BE4A6-4D68-49BE-BCE1-3CE2A4614D1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
