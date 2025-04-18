@@ -1,10 +1,9 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ping9719.IoT.Modbus.Models
+namespace Ping9719.IoT.Modbus
 {
     /// <summary>
     /// Modbus输入
@@ -59,9 +58,9 @@ namespace Ping9719.IoT.Modbus.Models
                     }
                     else
                     {
-                        
+
                         result.AddError($"address地址[{address}]格式不正确。无法解析其中的地址（0-65535）。");
-                        
+
                         return result;
                     }
                 }
@@ -71,9 +70,9 @@ namespace Ping9719.IoT.Modbus.Models
                     {
                         if (!byte.TryParse(itemSplit[1], out s))
                         {
-                            
+
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的站号（0-255）。");
-                            
+
                             return result;
                         }
                     }
@@ -81,16 +80,16 @@ namespace Ping9719.IoT.Modbus.Models
                     {
                         if (!byte.TryParse(itemSplit[1], out x))
                         {
-                            
+
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的功能码（1-255）。");
-                            
+
                             return result;
                         }
                         if (x == 0)
                         {
-                            
+
                             result.AddError($"address地址[{address}]格式不正确。无法解析其中的功能码（1-255）。");
-                            
+
                             return result;
                         }
                     }
@@ -99,9 +98,9 @@ namespace Ping9719.IoT.Modbus.Models
 
             if (!isaok)
             {
-                
+
                 result.AddError($"address地址[{address}]格式不正确。无法找到其中的地址（0-65535）。");
-                
+
                 return result;
             }
 

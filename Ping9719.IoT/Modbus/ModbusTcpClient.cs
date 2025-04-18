@@ -3,54 +3,88 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Enums;
-using Ping9719.IoT.Interfaces;
 using Ping9719.IoT;
-using Ping9719.IoT.Modbus.Models;
 
 namespace Ping9719.IoT.Modbus
 {
     /// <summary>
     /// ModbusTcp协议客户端
     /// </summary>
-    public class ModbusTcpClient : SocketBase, IIoTBase
+    public class ModbusTcpClient : IIoT
     {
         private EndianFormat format;
         private bool plcAddresses;
         private byte stationNumber = 1;
 
 
-        /// <summary>
-        /// 字符串编码格式。默认ASCII
-        /// </summary>
-        public Encoding Encoding { get; set; } = Encoding.ASCII;
+        ///// <summary>
+        ///// 字符串编码格式。默认ASCII
+        ///// </summary>
+        //public Encoding Encoding { get; set; } = Encoding.ASCII;
 
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
+        ///// <summary>
+        ///// 是否是连接的
+        ///// </summary>
+        //public override bool IsConnected => socket?.Connected ?? false;
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="ipAndPoint"></param>
+        ///// <param name="timeout">超时时间（毫秒）</param>
+        ///// <param name="format">大小端设置</param>
+        ///// <param name="plcAddresses">PLC地址</param>
+        ///// <param name="plcAddresses">PLC地址</param>
+        //public ModbusTcpClient(IPEndPoint ipAndPoint, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        //{
+        //    this.timeout = timeout;
+        //    ipEndPoint = ipAndPoint;
+        //    this.format = format;
+        //    this.plcAddresses = plcAddresses;
+        //    this.stationNumber = stationNumber;
+        //}
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="ip"></param>
+        ///// <param name="port"></param>
+        ///// <param name="timeout">超时时间（毫秒）</param>
+        ///// <param name="format">大小端设置</param>
+        ///// <param name="plcAddresses">PLC地址</param>
+        //public ModbusTcpClient(string ip, int port, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        //{
+        //    this.timeout = timeout;
+        //    SetIpEndPoint(ip, port);
+        //    this.format = format;
+        //    this.plcAddresses = plcAddresses;
+        //    this.stationNumber = stationNumber;
+        //}
+
+        public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="ipAndPoint"></param>
+        /// <param name="client"></param>
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="format">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        /// <param name="plcAddresses">PLC地址</param>
-        public ModbusTcpClient(IPEndPoint ipAndPoint, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        public ModbusTcpClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
         {
-            this.timeout = timeout;
-            ipEndPoint = ipAndPoint;
+            Client = client;
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.AutoOpen;
+
             this.format = format;
             this.plcAddresses = plcAddresses;
             this.stationNumber = stationNumber;
         }
-
         /// <summary>
         /// 
         /// </summary>
@@ -59,49 +93,42 @@ namespace Ping9719.IoT.Modbus
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="format">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        public ModbusTcpClient(string ip, int port, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
-        {
-            this.timeout = timeout;
-            SetIpEndPoint(ip, port);
-            this.format = format;
-            this.plcAddresses = plcAddresses;
-            this.stationNumber = stationNumber;
-        }
+        public ModbusTcpClient(string ip, int port = 1500, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : this(new TcpClient(ip, port), timeout, format, stationNumber, plcAddresses) { }//默认使用TcpClient
 
-        /// <summary>
-        /// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public override IoTResult<byte[]> SendPackageSingle(byte[] command)
-        {
-            //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            lock (this)
-            {
-                IoTResult<byte[]> result = new IoTResult<byte[]>();
-                try
-                {
-                    socket.Send(command);
-                    var socketReadResul = SocketRead(8);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
-                    int length = headPackage[4] * 256 + headPackage[5] - 2;
-                    socketReadResul = SocketRead(length);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+        ///// <summary>
+        ///// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
+        ///// </summary>
+        ///// <param name="command"></param>
+        ///// <returns></returns>
+        //public override IoTResult<byte[]> SendPackageSingle(byte[] command)
+        //{
+        //    //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
+        //    lock (this)
+        //    {
+        //        IoTResult<byte[]> result = new IoTResult<byte[]>();
+        //        try
+        //        {
+        //            socket.Send(command);
+        //            var socketReadResul = SocketRead(8);
+        //            if (!socketReadResul.IsSucceed)
+        //                return socketReadResul;
+        //            var headPackage = socketReadResul.Value;
+        //            int length = headPackage[4] * 256 + headPackage[5] - 2;
+        //            socketReadResul = SocketRead(length);
+        //            if (!socketReadResul.IsSucceed)
+        //                return socketReadResul;
+        //            var dataPackage = socketReadResul.Value;
 
-                    result.Value = headPackage.Concat(dataPackage).ToArray();
-                    return result.ToEnd();
-                }
-                catch (Exception ex)
-                {
-                    result.AddError(ex);
-                    return result.ToEnd();
-                }
-            }
-        }
+        //            result.Value = headPackage.Concat(dataPackage).ToArray();
+        //            return result.ToEnd();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            result.AddError(ex);
+        //            return result.ToEnd();
+        //        }
+        //    }
+        //}
 
         #region Read 读取
         /// <summary>
@@ -117,15 +144,15 @@ namespace Ping9719.IoT.Modbus
         {
             var result = new IoTResult<byte[]>();
 
-            if (!socket?.Connected ?? true)
-            {
-                var conentResult = Connect();
-                if (!conentResult.IsSucceed)
-                {
-                    conentResult.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{conentResult.ErrorText}");
-                    return result;
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var conentResult = Connect();
+            //    if (!conentResult.IsSucceed)
+            //    {
+            //        conentResult.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{conentResult.ErrorText}");
+            //        return result;
+            //    }
+            //}
             try
             {
                 var chenkHead = GetCheckHead(functionCode);
@@ -133,7 +160,7 @@ namespace Ping9719.IoT.Modbus
                 byte[] command = GetReadCommand(address, stationNumber, functionCode, readLength, chenkHead);
                 result.Responses.Add(command);
                 //获取响应报文
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                 {
                     sendResult.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{sendResult.ErrorText}");
@@ -151,32 +178,31 @@ namespace Ping9719.IoT.Modbus
 
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
                 {
-                    
                     result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。响应结果校验失败");
-                    SafeClose();
+                    //SafeClose();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
                 {
-                    
+
                     result.AddError(ModbusHelper.ErrMsg(dataPackage[8]));
                 }
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。连接超时");
-                    SafeClose();
-                }
-                else
-                {
-                    result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ex.Message}");
-                }
-            }
+            //catch (SocketException ex)
+            //{
+
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。连接超时");
+            //        SafeClose();
+            //    }
+            //    else
+            //    {
+            //        result.AddError($"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ex.Message}");
+            //    }
+            //}
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -994,7 +1020,7 @@ namespace Ping9719.IoT.Modbus
             {
                 if (!result.IsSucceed)
                 {
-                    WarningLog?.Invoke( result.Error.FirstOrDefault());
+                    //WarningLog?.Invoke( result.Error.FirstOrDefault());
                     result = BatchRead(addresses);
                 }
                 else
@@ -1122,18 +1148,18 @@ namespace Ping9719.IoT.Modbus
         public IoTResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5)
         {
             var result = new IoTResult();
-            if (!socket?.Connected ?? true)
-            {
-                var conentResult = Connect();
-                if (!conentResult.IsSucceed)
-                    return result.AddError(conentResult.Error);
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var conentResult = Connect();
+            //    if (!conentResult.IsSucceed)
+            //        return result.AddError(conentResult.Error);
+            //}
             try
             {
                 var chenkHead = GetCheckHead(functionCode);
                 var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, chenkHead);
                 result.Responses.Add(command);
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return result.AddError(sendResult.Error).ToEnd();
                 var dataPackage = sendResult.Value;
@@ -1141,29 +1167,29 @@ namespace Ping9719.IoT.Modbus
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
                 {
                     result.AddError("响应结果校验失败");
-                    SafeClose();
+                    //SafeClose();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
                 {
                     result.AddError(ModbusHelper.ErrMsg(dataPackage[8]));
                 }
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                    SafeClose();
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-            }
+            //catch (SocketException ex)
+            //{
+
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //        SafeClose();
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //}
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -1180,12 +1206,12 @@ namespace Ping9719.IoT.Modbus
         public IoTResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool byteFormatting = true)
         {
             var result = new IoTResult();
-            if (!socket?.Connected ?? true)
-            {
-                var conentResult = Connect();
-                if (!conentResult.IsSucceed)
-                    return result.AddError(conentResult.Error);
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var conentResult = Connect();
+            //    if (!conentResult.IsSucceed)
+            //        return result.AddError(conentResult.Error);
+            //}
             try
             {
                 if (byteFormatting)
@@ -1193,38 +1219,38 @@ namespace Ping9719.IoT.Modbus
                 var chenkHead = GetCheckHead(functionCode);
                 var command = GetWriteCommand(address, values, stationNumber, functionCode, chenkHead);
                 result.Responses.Add(command);
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return result.AddError(sendResult.Error).ToEnd();
                 var dataPackage = sendResult.Value;
-                result.Responses.Add(dataPackage) ;
+                result.Responses.Add(dataPackage);
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
                 {
-                    result.AddError( "响应结果校验失败");
-                    SafeClose();
+                    result.AddError("响应结果校验失败");
+                    //SafeClose();
                 }
                 else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
                 {
-                    
-                    result.AddError( ModbusHelper.ErrMsg(dataPackage[8]));
+
+                    result.AddError(ModbusHelper.ErrMsg(dataPackage[8]));
                 }
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                    SafeClose();
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-            }
+            //catch (SocketException ex)
+            //{
+
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //        SafeClose();
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //}
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -1641,11 +1667,11 @@ namespace Ping9719.IoT.Modbus
             IoTResult readResut = new IoTResult();
 
             var isautoopen = false;
-            if (!IsConnected)
-            {
-                Open();
-                isautoopen = true;
-            }
+            //if (!IsConnected)
+            //{
+            //    Open();
+            //    isautoopen = true;
+            //}
             if (tType == typeof(bool))
             {
                 for (int i = 0; i < value.Length; i++)
@@ -1738,14 +1764,14 @@ namespace Ping9719.IoT.Modbus
             }
             else
             {
-                if (isautoopen)
-                    Close();
+                //if (isautoopen)
+                //    Close();
 
                 throw new NotImplementedException("暂不支持的类型");
             }
 
-            if (isautoopen)
-                Close();
+            //if (isautoopen)
+            //    Close();
             return readResut;
         }
         #endregion

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using Ping9719.IoT.Algorithm;
-using Ping9719.IoT.Enums;
 using Ping9719.IoT;
 using Ping9719.IoT.Modbus;
 
@@ -16,10 +15,10 @@ namespace Ping9719.IoT.Device.Screw
     /// 快克螺丝机（新协议）（桌面式）
     /// 螺丝机运动平台通讯协议(对外)-20200106.pdf
     /// </summary>
-    public class KuaiKeDeskScrew : ModbusRtuClient
+    public class KuaiKeDeskScrew : ModbusRtuClient, IIoT
     {
-        public KuaiKeDeskScrew(string portName, int baudRate = 115200, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, dataBits, stopBits, parity, timeout, format, stationNumber, plcAddresses)
+        public KuaiKeDeskScrew(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false)
+            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
         {
 
         }
@@ -112,7 +111,7 @@ namespace Ping9719.IoT.Device.Screw
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x80 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
                 return sendResult;
 
@@ -137,7 +136,7 @@ namespace Ping9719.IoT.Device.Screw
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x84 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
                 return sendResult;
 

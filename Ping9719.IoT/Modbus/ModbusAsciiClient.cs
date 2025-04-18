@@ -3,18 +3,19 @@ using System;
 using System.IO.Ports;
 using System.Linq;
 using Ping9719.IoT.Algorithm;
-using Ping9719.IoT.Enums;
-using Ping9719.IoT.Interfaces;
 using Ping9719.IoT;
-using Ping9719.IoT.Modbus.Base;
+using Ping9719.IoT.Communication;
+using System.Text;
 
 namespace Ping9719.IoT.Modbus
 {
     /// <summary>
     /// ModbusAscii
     /// </summary>
-    public class ModbusAsciiClient : ModbusSerialBase, IIoTBase
+    public class ModbusAsciiClient : ModbusSerialBase, IIoT
     {
+        public ModbusAsciiClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : base(client, timeout, format, stationNumber, plcAddresses) { }
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -26,10 +27,8 @@ namespace Ping9719.IoT.Modbus
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="format">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        public ModbusAsciiClient(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, dataBits, stopBits, parity, timeout, format, stationNumber, plcAddresses)
-        {
-        }
+        public ModbusAsciiClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : base(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), timeout, format, stationNumber, plcAddresses) { }
+
 
         #region  Read 读取
         /// <summary>
@@ -42,7 +41,7 @@ namespace Ping9719.IoT.Modbus
         /// <returns></returns>
         public override IoTResult<byte[]> Read(string address, byte stationNumber = 1, byte functionCode = 3, ushort readLength = 1, bool byteFormatting = true)
         {
-            if (isAutoOpen) Connect();
+            //if (isAutoOpen) Connect();
 
             var result = new IoTResult<byte[]>();
             try
@@ -57,17 +56,17 @@ namespace Ping9719.IoT.Modbus
                 finalCommand[finalCommand.Length - 2] = 0x0D;
                 finalCommand[finalCommand.Length - 1] = 0x0A;
 
-                result.Requests.Add (finalCommand);
+                result.Requests.Add(finalCommand);
 
                 //发送命令并获取响应报文
-                var sendResult = SendPackageReliable(finalCommand);
+                var sendResult = Client.SendReceive(finalCommand);
                 if (!sendResult.IsSucceed)
                     return result.AddError(sendResult.Error).ToEnd();
                 var responsePackage = sendResult.Value;
 
                 if (!responsePackage.Any())
                 {
-                    
+
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -77,7 +76,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    
+
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -92,12 +91,12 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -113,7 +112,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="functionCode"></param>
         public override IoTResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5)
         {
-            if (isAutoOpen) Connect();
+            //if (isAutoOpen) Connect();
             var result = new IoTResult();
             try
             {
@@ -128,13 +127,13 @@ namespace Ping9719.IoT.Modbus
 
                 result.Requests.Add(finalCommand);
                 //发送命令并获取响应报文
-                var sendResult = SendPackageReliable(finalCommand);
+                var sendResult = Client.SendReceive(finalCommand);
                 if (!sendResult.IsSucceed)
                     return result.AddError(sendResult.Error).ToEnd();
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    
+
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -144,7 +143,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    
+
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -153,12 +152,12 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -173,7 +172,7 @@ namespace Ping9719.IoT.Modbus
         /// <returns></returns>
         public override IoTResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool byteFormatting = true)
         {
-            if (isAutoOpen) Connect();
+            //if (isAutoOpen) Connect();
 
             var result = new IoTResult();
             try
@@ -189,13 +188,13 @@ namespace Ping9719.IoT.Modbus
                 finalCommand[finalCommand.Length - 1] = 0x0A;
 
                 result.Requests.Add(finalCommand);
-                var sendResult = SendPackageReliable(finalCommand);
+                var sendResult = Client.SendReceive(finalCommand);
                 if (!sendResult.IsSucceed)
                     return result.AddError(sendResult.Error).ToEnd();
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
-                    
+
                     result.AddError("响应结果为空");
                     return result.ToEnd();
                 }
@@ -205,7 +204,7 @@ namespace Ping9719.IoT.Modbus
                 var resultByte = resultLRC.AsciiArrayToByteArray();
                 if (!LRC.CheckLRC(resultByte))
                 {
-                    
+
                     result.AddError("响应结果LRC验证失败");
                     //return result.ToEnd();
                 }
@@ -214,12 +213,12 @@ namespace Ping9719.IoT.Modbus
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }

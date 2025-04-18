@@ -1,5 +1,4 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Enums;
 using Ping9719.IoT.Modbus;
 using System;
 using System.Collections.Generic;
@@ -15,10 +14,10 @@ namespace Ping9719.IoT.Device.Screw
     /// 快克螺丝机
     /// Modbus指令整理.xlsx
     /// </summary>
-    public class KuaiKeScrew : ModbusRtuClient
+    public class KuaiKeScrew : ModbusRtuClient, IIoT
     {
-        public KuaiKeScrew(string portName, int baudRate = 115200, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, dataBits, stopBits, parity, timeout, format, stationNumber, plcAddresses)
+        public KuaiKeScrew(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
+            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
         {
 
         }
@@ -44,12 +43,12 @@ namespace Ping9719.IoT.Device.Screw
             result.Value = new KuaiKeScrewInfo();
             try
             {
-                bool isopen = false;
-                if (isAutoOpen)
-                {
-                    Open();
-                    isopen = true;
-                }
+                //bool isopen = false;
+                //if (isAutoOpen)
+                //{
+                //    Open();
+                //    isopen = true;
+                //}
 
                 var data1 = Read<short>("12289");
                 if (!data1.IsSucceed)
@@ -94,21 +93,21 @@ namespace Ping9719.IoT.Device.Screw
                 result.Value.左机加工完成标志 = valList[33];
                 result.Value.右机加工完成标志 = valList[34];
 
-                if (isopen)
-                {
-                    Close();
-                }
+                //if (isopen)
+                //{
+                //    Close();
+                //}
             }
             catch (Exception ex)
             {
                 
                 result.AddError(ex);
             }
-            finally
-            {
-                if (isAutoOpen)
-                    Dispose();
-            }
+            //finally
+            //{
+            //    if (isAutoOpen)
+            //        Dispose();
+            //}
             return result.ToEnd();
         }
     }

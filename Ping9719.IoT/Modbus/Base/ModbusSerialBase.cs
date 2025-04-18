@@ -4,36 +4,45 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
-using Ping9719.IoT.Enums;
-using Ping9719.IoT.Interfaces;
-using Ping9719.IoT;
-using Ping9719.IoT.Modbus.Models;
 using Ping9719.IoT.Communication;
 
-namespace Ping9719.IoT.Modbus.Base
+namespace Ping9719.IoT.Modbus
 {
-    public abstract class ModbusSerialBase : SerialPortBase, IIoTBase
+    public abstract class ModbusSerialBase : IIoT
     {
         protected EndianFormat format;
         private bool plcAddresses;
         private byte stationNumber = 1;
 
+        ///// <summary>
+        ///// 字符串编码格式。默认ASCII
+        ///// </summary>
+        //public Encoding Encoding { get; set; } = Encoding.ASCII;
 
-        /// <summary>
-        /// 字符串编码格式。默认ASCII
-        /// </summary>
-        public Encoding Encoding { get; set; } = Encoding.ASCII;
+        ///// <summary>
+        ///// 是否是连接的
+        ///// </summary>
+        //public bool IsConnected => serialPort?.IsOpen ?? false;
 
+        ///// <summary>
+        ///// 警告日志委托        
+        ///// </summary>
+        //public Action<Exception> WarningLog { get; set; }
 
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public bool IsConnected => serialPort?.IsOpen ?? false;
+        public ClientBase Client { get; private set; }//通讯管道
 
-        /// <summary>
-        /// 警告日志委托        
-        /// </summary>
-        public Action<Exception> WarningLog { get; set; }
+        public ModbusSerialBase(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        {
+            Client = client;
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.Manual;
+
+            this.format = format;
+            this.plcAddresses = plcAddresses;
+            this.stationNumber = stationNumber;
+        }
 
         /// <summary>
         /// 构造函数
@@ -46,23 +55,7 @@ namespace Ping9719.IoT.Modbus.Base
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="format">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        public ModbusSerialBase(string portName, int baudRate, int dataBits, StopBits stopBits, Parity parity, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
-        {
-            if (serialPort == null) serialPort = new SerialPort();
-            serialPort.PortName = portName;
-            serialPort.BaudRate = baudRate;
-            serialPort.DataBits = dataBits;
-            serialPort.StopBits = stopBits;
-            serialPort.Encoding = Encoding.ASCII;
-            serialPort.Parity = parity;
-
-            serialPort.ReadTimeout = timeout;
-            serialPort.WriteTimeout = timeout;
-
-            this.format = format;
-            this.plcAddresses = plcAddresses;
-            this.stationNumber = stationNumber;
-        }
+        public ModbusSerialBase(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), timeout, format, stationNumber, plcAddresses) { }
 
         //#region 发送报文，并获取响应报文
         ///// <summary>
@@ -839,7 +832,7 @@ namespace Ping9719.IoT.Modbus.Base
             {
                 if (!result.IsSucceed)
                 {
-                    WarningLog?.Invoke(result.Error.FirstOrDefault());
+                    //WarningLog?.Invoke(result.Error.FirstOrDefault());
                     result = BatchRead(addresses);
                 }
                 else
@@ -1251,11 +1244,11 @@ namespace Ping9719.IoT.Modbus.Base
             IoTResult readResut = new IoTResult();
 
             var isautoopen = false;
-            if (!IsConnected)
-            {
-                Open();
-                isautoopen = true;
-            }
+            //if (!IsConnected)
+            //{
+            //    Open();
+            //    isautoopen = true;
+            //}
             if (tType == typeof(bool))
             {
                 for (int i = 0; i < value.Length; i++)
@@ -1348,14 +1341,14 @@ namespace Ping9719.IoT.Modbus.Base
             }
             else
             {
-                if (isautoopen)
-                    Close();
+                //if (isautoopen)
+                //    Close();
 
                 throw new NotImplementedException("暂不支持的类型");
             }
 
-            if (isautoopen)
-                Close();
+            //if (isautoopen)
+            //    Close();
             return readResut;
         }
 

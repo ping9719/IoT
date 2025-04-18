@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System;
 
-namespace Ping9719.IoT.PLC.Models
+namespace Ping9719.IoT.PLC
 {
     public class AllenBradleyAddress
     {

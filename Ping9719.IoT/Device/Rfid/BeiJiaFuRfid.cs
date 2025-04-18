@@ -26,7 +26,6 @@ namespace Ping9719.IoT.Device.Rfid
         public BeiJiaFuRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }
         public BeiJiaFuRfid(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
-
         /// <summary>
         /// 读取，并尝试将读取的结果转为数字
         /// </summary>

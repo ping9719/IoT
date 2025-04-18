@@ -1,5 +1,4 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Enums;
 using Ping9719.IoT.Modbus;
 using System;
 using System.Collections.Generic;
@@ -38,10 +37,10 @@ namespace Ping9719.IoT.Device.Screw
     ///历史力矩值	28672	记录当前工作一轮实时扭力值，每 PA0-67 毫秒保存一次，最大保存 6144点。
     ///历史角度值	35072	记录当前工作一轮实时角度值，每 PA0-67 毫秒保存一次，最大保存 6144点。
     /// </summary>
-    public class MiLeScrew : ModbusRtuClient
+    public class MiLeScrew : ModbusRtuClient, IIoT
     {
-        public MiLeScrew(string portName, int baudRate = 9600, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, dataBits, stopBits, parity, timeout, format, stationNumber, plcAddresses)
+        public MiLeScrew(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
+            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
         {
 
         }

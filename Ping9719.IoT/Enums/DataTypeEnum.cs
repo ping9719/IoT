@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Ping9719.IoT.Enums
+namespace Ping9719.IoT
 {
     /// <summary>
     /// 数据类型

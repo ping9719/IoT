@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Ping9719.IoT.PLC.Enums
+namespace Ping9719.IoT.PLC
 {
     /// <summary>
     /// 西门子型号版本

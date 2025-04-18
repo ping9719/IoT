@@ -3,15 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Enums;
-using Ping9719.IoT.Interfaces;
-using Ping9719.IoT.PLC.Enums;
-using Ping9719.IoT.PLC.Models;
 
 namespace Ping9719.IoT.PLC
 {
@@ -19,16 +14,12 @@ namespace Ping9719.IoT.PLC
     /// 西门子客户端（S7协议）
     /// http://www.360doc.cn/mip/763580999.html
     /// </summary>
-    public class SiemensS7Client : SocketBase, IIoTBase
+    public class SiemensS7Client : IIoT
     {
         /// <summary>
         /// CPU版本
         /// </summary>
         private readonly SiemensVersion version;
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
         /// <summary>
         /// 版本
         /// </summary>
@@ -45,11 +36,6 @@ namespace Ping9719.IoT.PLC
         public byte Rack { get; private set; }
 
         /// <summary>
-        /// 字符串编码格式。默认ASCII
-        /// </summary>
-        public Encoding Encoding { get; set; } = Encoding.ASCII;
-
-        /// <summary>
         /// 字节格式
         /// </summary>
         public EndianFormat Format { get; set; } = EndianFormat.DCBA;
@@ -59,64 +45,21 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         public ushort ReadWriteByteNum { get; set; } = 200;
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="version">CPU版本</param>
-        /// <param name="ipAndPoint">IP地址和端口号</param>
-        /// <param name="timeout">超时时间</param>
-        /// <param name="slot">PLC的插槽号</param>
-        /// <param name="rack">PLC的机架号</param>
-        public SiemensS7Client(SiemensVersion version, IPEndPoint ipAndPoint, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
         {
+            this.version = version;
+            Client = client;
             Slot = slot;
             Rack = rack;
-            this.version = version;
-            ipEndPoint = ipAndPoint;
-            this.timeout = timeout;
-        }
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            Client.IsAutoDiscard = true;
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="version">CPU版本</param>
-        /// <param name="ip">IP地址</param>
-        /// <param name="port">端口号，一般默认为102</param>
-        /// <param name="slot">PLC的槽号</param>
-        /// <param name="rack">PLC的机架号</param>
-        /// <param name="timeout">超时时间</param>
-        public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
-        {
-            Slot = slot;
-            Rack = rack;
-            this.version = version;
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
-        }
-
-        /// <summary>
-        /// 打开连接（如果已经是连接状态会先关闭再打开）
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Connect()
-        {
-            var result = new IoTResult();
-            SafeClose();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            Client.Opened = (a) =>
             {
-                //超时时间设置
-                socket.ReceiveTimeout = timeout;
-                socket.SendTimeout = timeout;
-
-                //连接
-                //socket.Connect(ipEndPoint);
-                IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-                //阻塞当前线程           
-                if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-                    throw new TimeoutException("连接超时");
-                socket.EndConnect(connectResult);
-
                 var Command1 = SiemensConstant.Command1;
                 var Command2 = SiemensConstant.Command2;
 
@@ -148,83 +91,163 @@ namespace Ping9719.IoT.PLC
                         break;
                 }
 
-                //result.Requst = string.Join(" ", Command1.Select(t => t.ToString("X2")));
-                //第一次初始化指令交互
-                socket.Send(Command1);
+                var socketReadResul = Client.SendReceive(Command1);
+                if (!socketReadResul.IsSucceed || socketReadResul.Value.Length <= SiemensConstant.InitHeadLength)
+                    throw new Exception("打开S7第一次握手失败。");
 
-                var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var head1 = socketReadResul.Value;
+                socketReadResul = Client.SendReceive(Command2);
+                if (!socketReadResul.IsSucceed || socketReadResul.Value.Length <= SiemensConstant.InitHeadLength)
+                    throw new Exception("打开S7第一次握手失败。");
 
-
-                socketReadResul = SocketRead(GetContentLength(head1));
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var content1 = socketReadResul.Value;
-
-                //result.Response = string.Join(" ", head1.Concat(content1).Select(t => t.ToString("X2")));
-
-                //result.Requst2 = string.Join(" ", Command2.Select(t => t.ToString("X2")));
-                //第二次初始化指令交互
-                socket.Send(Command2);
-
-                socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var head2 = socketReadResul.Value;
-
-                socketReadResul = SocketRead(GetContentLength(head2));
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var content2 = socketReadResul.Value;
-
-                //result.Response2 = string.Join(" ", head2.Concat(content2).Select(t => t.ToString("X2")));
-            }
-            catch (Exception ex)
+            };
+            Client.Closing = (a) =>
             {
-                SafeClose();
-                result.AddError(ex);
-            }
-            return result.ToEnd();
+                //try
+                //{
+                //    byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                //    Client.Send(command);
+                //}
+                //catch (Exception)
+                //{
+
+                //    throw;
+                //}
+                return true;
+            };
         }
+        public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00, int timeout = 1500) : this(version, new TcpClient(ip, port), slot, rack, timeout) { }
 
-        /// <summary>
-        /// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public override IoTResult<byte[]> SendPackageSingle(byte[] command)
-        {
-            //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            lock (this)
-            {
-                IoTResult<byte[]> result = new IoTResult<byte[]>();
-                try
-                {
-                    socket.Send(command);
-                    var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
+        ///// <summary>
+        ///// 打开连接（如果已经是连接状态会先关闭再打开）
+        ///// </summary>
+        ///// <returns></returns>
+        //protected override IoTResult Connect()
+        //{
+        //    var result = new IoTResult();
+        //    SafeClose();
+        //    socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        //    try
+        //    {
+        //        //超时时间设置
+        //        socket.ReceiveTimeout = timeout;
+        //        socket.SendTimeout = timeout;
 
-                    socketReadResul = SocketRead(GetContentLength(headPackage));
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+        //        //连接
+        //        //socket.Connect(ipEndPoint);
+        //        IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
+        //        //阻塞当前线程           
+        //        if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
+        //            throw new TimeoutException("连接超时");
+        //        socket.EndConnect(connectResult);
 
-                    result.Value = headPackage.Concat(dataPackage).ToArray();
-                    return result.ToEnd();
-                }
-                catch (Exception ex)
-                {
-                    
-                    result.AddError(ex);
-                    
-                    return result.ToEnd();
-                }
-            }
-        }
+        //        var Command1 = SiemensConstant.Command1;
+        //        var Command2 = SiemensConstant.Command2;
+
+        //        switch (version)
+        //        {
+        //            case SiemensVersion.S7_200:
+        //                Command1 = SiemensConstant.Command1_200;
+        //                Command2 = SiemensConstant.Command2_200;
+        //                break;
+        //            case SiemensVersion.S7_200Smart:
+        //                Command1 = SiemensConstant.Command1_200Smart;
+        //                Command2 = SiemensConstant.Command2_200Smart;
+        //                break;
+        //            case SiemensVersion.S7_300:
+        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x02;
+        //                break;
+        //            case SiemensVersion.S7_400:
+        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x03;
+        //                Command1[17] = 0x00;
+        //                break;
+        //            case SiemensVersion.S7_1200:
+        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x00;
+        //                break;
+        //            case SiemensVersion.S7_1500:
+        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x00;
+        //                break;
+        //            default:
+        //                Command1[18] = 0x00;
+        //                break;
+        //        }
+
+        //        //result.Requst = string.Join(" ", Command1.Select(t => t.ToString("X2")));
+        //        //第一次初始化指令交互
+        //        socket.Send(Command1);
+
+        //        var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
+        //        if (!socketReadResul.IsSucceed)
+        //            return socketReadResul;
+        //        var head1 = socketReadResul.Value;
+
+
+        //        socketReadResul = SocketRead(GetContentLength(head1));
+        //        if (!socketReadResul.IsSucceed)
+        //            return socketReadResul;
+        //        var content1 = socketReadResul.Value;
+
+        //        //result.Response = string.Join(" ", head1.Concat(content1).Select(t => t.ToString("X2")));
+
+        //        //result.Requst2 = string.Join(" ", Command2.Select(t => t.ToString("X2")));
+        //        //第二次初始化指令交互
+        //        socket.Send(Command2);
+
+        //        socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
+        //        if (!socketReadResul.IsSucceed)
+        //            return socketReadResul;
+        //        var head2 = socketReadResul.Value;
+
+        //        socketReadResul = SocketRead(GetContentLength(head2));
+        //        if (!socketReadResul.IsSucceed)
+        //            return socketReadResul;
+        //        var content2 = socketReadResul.Value;
+
+        //        //result.Response2 = string.Join(" ", head2.Concat(content2).Select(t => t.ToString("X2")));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        SafeClose();
+        //        result.AddError(ex);
+        //    }
+        //    return result.ToEnd();
+        //}
+
+        ///// <summary>
+        ///// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
+        ///// </summary>
+        ///// <param name="command"></param>
+        ///// <returns></returns>
+        //public override IoTResult<byte[]> SendPackageSingle(byte[] command)
+        //{
+        //    //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
+        //    lock (this)
+        //    {
+        //        IoTResult<byte[]> result = new IoTResult<byte[]>();
+        //        try
+        //        {
+        //            socket.Send(command);
+        //            var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
+        //            if (!socketReadResul.IsSucceed)
+        //                return socketReadResul;
+        //            var headPackage = socketReadResul.Value;
+
+        //            socketReadResul = SocketRead(GetContentLength(headPackage));
+        //            if (!socketReadResul.IsSucceed)
+        //                return socketReadResul;
+        //            var dataPackage = socketReadResul.Value;
+
+        //            result.Value = headPackage.Concat(dataPackage).ToArray();
+        //            return result.ToEnd();
+        //        }
+        //        catch (Exception ex)
+        //        {
+
+        //            result.AddError(ex);
+
+        //            return result.ToEnd();
+        //        }
+        //    }
+        //}
 
         #region Read 
         /// <summary>
@@ -236,14 +259,14 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult<byte[]> Read(string address, ushort length, bool isBit = false)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<byte[]>(connectResult).AddError($"读取{address}失败，{connectResult.ErrorText}");
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var connectResult = Connect();
+            //    if (!connectResult.IsSucceed)
+            //    {
+            //        return new IoTResult<byte[]>(connectResult).AddError($"读取{address}失败，{connectResult.ErrorText}");
+            //    }
+            //}
             var result = new IoTResult<byte[]>();
             result.Value = new byte[] { };
             try
@@ -258,9 +281,9 @@ namespace Ping9719.IoT.PLC
                     arg.ReadWriteBit = isBit;
 
                     byte[] command = GetReadCommand(arg);
-                    
+
                     //发送命令 并获取响应报文
-                    var sendResult = SendPackageReliable(command);
+                    var sendResult = Client.SendReceive(command);
                     if (!sendResult.IsSucceed)
                     {
                         return result.AddError(sendResult.Error).ToEnd();
@@ -269,7 +292,7 @@ namespace Ping9719.IoT.PLC
                     var dataPackage = sendResult.Value;
                     byte[] responseData = new byte[arg.ReadWriteLength];
                     Array.Copy(dataPackage, dataPackage.Length - arg.ReadWriteLength, responseData, 0, arg.ReadWriteLength);
-                    
+
                     result.Value = result.Value.Concat(responseData).ToArray();
 
                     //0x04 读 0x01 读取一个长度 //如果是批量读取，批量读取方法里面有验证
@@ -277,47 +300,47 @@ namespace Ping9719.IoT.PLC
                     {
                         if (dataPackage[21] == 0x0A && dataPackage[22] == 0x00)
                         {
-                            
-                            result.AddError ( $"读取{address}失败，请确认是否存在地址{address}");
+
+                            result.AddError($"读取{address}失败，请确认是否存在地址{address}");
                             return result;
                         }
                         else if (dataPackage[21] == 0x05 && dataPackage[22] == 0x00)
                         {
-                            
+
                             result.AddError($"读取{address}失败，请确认是否存在地址{address}");
                             return result;
                         }
                         else if (dataPackage[21] != 0xFF)
                         {
-                            
+
                             result.AddError($"读取{address}失败，异常代码[{21}]:{dataPackage[21]}");
                             return result;
                         }
                     }
                 }
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError($"读取{address}失败，连接超时");
-                }
-                else
-                {
-                    result.AddError($"读取{address}失败，{ex.Message}");
-                }
-                SafeClose();
-            }
+            //catch (SocketException ex)
+            //{
+
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError($"读取{address}失败，连接超时");
+            //    }
+            //    else
+            //    {
+            //        result.AddError($"读取{address}失败，{ex.Message}");
+            //    }
+            //    SafeClose();
+            //}
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
+                //SafeClose();
             }
-            finally
-            {
-                if (isAutoOpen) Dispose();
-            }
+            //finally
+            //{
+            //    if (isAutoOpen) Dispose();
+            //}
             return result.ToEnd();
         }
 
@@ -363,14 +386,14 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         private IoTResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<Dictionary<string, object>>(connectResult);
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var connectResult = Connect();
+            //    if (!connectResult.IsSucceed)
+            //    {
+            //        return new IoTResult<Dictionary<string, object>>(connectResult);
+            //    }
+            //}
             var result = new IoTResult<Dictionary<string, object>>();
             result.Value = new Dictionary<string, object>();
             try
@@ -378,9 +401,9 @@ namespace Ping9719.IoT.PLC
                 //发送读取信息
                 var args = ConvertArg(addresses);
                 byte[] command = GetReadCommand(args);
-                
+
                 //发送命令 并获取响应报文
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return new IoTResult<Dictionary<string, object>>(sendResult);
 
@@ -397,7 +420,7 @@ namespace Ping9719.IoT.PLC
 
                 Array.Copy(dataPackage, dataPackage.Length - length, responseData, 0, length);
 
-                
+
                 var cursor = 0;
                 foreach (var item in args)
                 {
@@ -470,28 +493,28 @@ namespace Ping9719.IoT.PLC
                     result.Value.Add(item.Address, value);
                 }
             }
-            catch (SocketException ex)
-            {
-                result.IsSucceed = false;
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
+            //catch (SocketException ex)
+            //{
+            //    result.IsSucceed = false;
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //    SafeClose();
+            //}
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
+                //SafeClose();
             }
-            finally
-            {
-                if (isAutoOpen) Dispose();
-            }
+            //finally
+            //{
+            //    if (isAutoOpen) Dispose();
+            //}
             return result.ToEnd();
         }
 
@@ -646,14 +669,14 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         private IoTResult BatchWrite(Dictionary<string, object> addresses)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var connectResult = Connect();
+            //    if (!connectResult.IsSucceed)
+            //    {
+            //        return connectResult;
+            //    }
+            //}
             IoTResult result = new IoTResult();
             try
             {
@@ -701,13 +724,13 @@ namespace Ping9719.IoT.PLC
                 }
                 var arg = ConvertWriteArg(newAddresses);
                 byte[] command = GetWriteCommand(arg);
-                
-                var sendResult = SendPackageReliable(command);
+
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return sendResult;
 
                 var dataPackage = sendResult.Value;
-                
+
 
                 if (dataPackage.Length == arg.Length + 21)
                 {
@@ -716,49 +739,49 @@ namespace Ping9719.IoT.PLC
                         var offset = 21 + i;
                         if (dataPackage[offset] == 0x0A)
                         {
-                            
-                            result.AddError( $"写入{arg[i].Address}失败，请确认是否存在地址{arg[i].Address}，异常代码[{offset}]:{dataPackage[offset]}");
+
+                            result.AddError($"写入{arg[i].Address}失败，请确认是否存在地址{arg[i].Address}，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                         else if (dataPackage[offset] == 0x05)
                         {
-                            
+
                             result.AddError($"写入{arg[i].Address}失败，请确认是否存在地址{arg[i].Address}，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                         else if (dataPackage[offset] != 0xFF)
                         {
-                            
+
                             result.AddError($"写入{string.Join(",", arg.Select(t => t.Address))}失败，异常代码[{offset}]:{dataPackage[offset]}");
                         }
                     }
                 }
                 else
                 {
-                    
+
                     result.AddError($"写入数据数量和响应结果数量不一致，写入数据：{arg.Length} 响应数量：{dataPackage.Length - 21}");
                 }
             }
-            catch (SocketException ex)
-            {
-                result.IsSucceed = false;
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
+            //catch (SocketException ex)
+            //{
+            //    result.IsSucceed = false;
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //    SafeClose();
+            //}
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
+                //SafeClose();
             }
-            finally
-            {
-                if (isAutoOpen) Dispose();
-            }
+            //finally
+            //{
+            //    if (isAutoOpen) Dispose();
+            //}
             return result.ToEnd();
         }
 
@@ -779,7 +802,7 @@ namespace Ping9719.IoT.PLC
                 if (!tempResult.IsSucceed)
                 {
                     result.AddError(tempResult.Error, tempResult.IsSucceed);
-                    
+
                 }
                 //result.Requst = tempResult.Requst;
                 //result.Response = tempResult.Response;
@@ -796,14 +819,14 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult Write(string address, byte[] data, bool isBit = false)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var connectResult = Connect();
+            //    if (!connectResult.IsSucceed)
+            //    {
+            //        return connectResult;
+            //    }
+            //}
             IoTResult result = new IoTResult();
             try
             {
@@ -818,57 +841,57 @@ namespace Ping9719.IoT.PLC
                     arg.ReadWriteBit = isBit;
 
                     byte[] command = GetWriteCommand(arg);
-                    
-                    var sendResult = SendPackageReliable(command);
+
+                    var sendResult = Client.SendReceive(command);
                     if (!sendResult.IsSucceed)
                         return sendResult;
 
                     var dataPackage = sendResult.Value;
-                    
+
 
                     var offset = dataPackage.Length - 1;
                     if (dataPackage[offset] == 0x0A)
                     {
-                        
-                        result.AddError( $"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
+
+                        result.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }
                     else if (dataPackage[offset] == 0x05)
                     {
-                        
+
                         result.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }
                     else if (dataPackage[offset] != 0xFF)
                     {
-                        
+
                         result.AddError($"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}");
                         return result;
                     }
                 }
             }
-            catch (SocketException ex)
-            {
-                result.IsSucceed = false;
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
+            //catch (SocketException ex)
+            //{
+            //    result.IsSucceed = false;
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //    SafeClose();
+            //}
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
+                //SafeClose();
             }
-            finally
-            {
-                if (isAutoOpen) Dispose();
-            }
+            //finally
+            //{
+            //    if (isAutoOpen) Dispose();
+            //}
             return result.ToEnd();
         }
 
@@ -1390,16 +1413,16 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult<string> ReadString(string address, int length = -1, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding;
+            encoding = encoding ?? Client.Encoding;
 
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<string>(connectResult);
-                }
-            }
+            //if (!socket?.Connected ?? true)
+            //{
+            //    var connectResult = Connect();
+            //    if (!connectResult.IsSucceed)
+            //    {
+            //        return new IoTResult<string>(connectResult);
+            //    }
+            //}
             var result = new IoTResult<string>();
             try
             {
@@ -1410,7 +1433,7 @@ namespace Ping9719.IoT.PLC
                     arg2.ReadWriteLength = 1;
                     byte[] command2 = GetReadCommand(arg2);
                     //result.Requst = string.Join(" ", command2.Select(t => t.ToString("X2")));
-                    var sendResult2 = SendPackageReliable(command2);
+                    var sendResult2 = Client.SendReceive(command2);
                     if (!sendResult2.IsSucceed)
                     {
                         return new IoTResult<string>(sendResult2);
@@ -1425,38 +1448,38 @@ namespace Ping9719.IoT.PLC
                 var arg = ConvertArg(address);
                 arg.ReadWriteLength = Convert.ToUInt16(length);
                 byte[] command = GetReadCommand(arg);
-                
-                var sendResult = SendPackageReliable(command);
+
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return new IoTResult<string>(sendResult);
 
                 var dataPackage = sendResult.Value;
                 byte[] requst = new byte[length];
                 Array.Copy(dataPackage, 25, requst, 0, length);
-                
+
                 result.Value = encoding.GetString(requst, 1, requst[0]);
             }
-            catch (SocketException ex)
-            {
-                result.IsSucceed = false;
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
+            //catch (SocketException ex)
+            //{
+            //    result.IsSucceed = false;
+            //    if (ex.SocketErrorCode == SocketError.TimedOut)
+            //    {
+            //        result.AddError("连接超时");
+            //    }
+            //    else
+            //    {
+            //        result.AddError(ex);
+            //    }
+            //    SafeClose();
+            //}
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
+                //SafeClose();
             }
             finally
             {
-                if (isAutoOpen) Dispose();
+                //if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -1539,7 +1562,7 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding;
+            encoding = encoding ?? Client.Encoding;
 
             var valueBytes = encoding.GetBytes(value);
             var bytes = new byte[valueBytes.Length + 1];

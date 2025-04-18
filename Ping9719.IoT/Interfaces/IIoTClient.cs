@@ -1,8 +1,7 @@
-﻿using Ping9719.IoT.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Ping9719.IoT.Interfaces
+namespace Ping9719.IoT
 {
     /// <summary>
     /// 不推荐使用

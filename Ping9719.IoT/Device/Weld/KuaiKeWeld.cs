@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using Ping9719.IoT.Algorithm;
-using Ping9719.IoT.Enums;
 using Ping9719.IoT;
 using Ping9719.IoT.Modbus;
 
@@ -16,10 +15,10 @@ namespace Ping9719.IoT.Device.Weld
     /// 快克焊接机
     /// PLC与主板通信持续整理.doc
     /// </summary>
-    public class KuaiKeWeld : ModbusRtuClient
+    public class KuaiKeWeld : ModbusRtuClient, IIoT
     {
-        public KuaiKeWeld(string portName, int baudRate = 115200, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, dataBits, stopBits, parity, timeout, format, stationNumber, plcAddresses)
+        public KuaiKeWeld(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false)
+            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
         {
 
         }
@@ -93,8 +92,8 @@ namespace Ping9719.IoT.Device.Weld
             }
             catch (Exception ex)
             {
-                
-                result.AddError( ex);
+
+                result.AddError(ex);
             }
             return result;
         }
@@ -112,7 +111,7 @@ namespace Ping9719.IoT.Device.Weld
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x80 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
                 return sendResult;
 
@@ -137,7 +136,7 @@ namespace Ping9719.IoT.Device.Weld
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x84 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
                 return sendResult;
 
@@ -187,7 +186,7 @@ namespace Ping9719.IoT.Device.Weld
             List<byte> bytes = new List<byte>() { 0x01, 0x06, 0x01, 0x99 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
-            var sendResult = SendPackageReliable(commandCRC16);
+            var sendResult = Client.SendReceive(commandCRC16);
             return sendResult;
         }
 

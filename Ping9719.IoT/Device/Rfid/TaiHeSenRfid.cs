@@ -1,7 +1,6 @@
 ﻿using Ping9719.IoT;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;

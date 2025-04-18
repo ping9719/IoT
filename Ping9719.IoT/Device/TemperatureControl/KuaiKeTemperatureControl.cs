@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Enums;
 using Ping9719.IoT;
 
 namespace Ping9719.IoT.Device.TemperatureControl

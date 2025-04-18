@@ -16,7 +16,7 @@ namespace Ping9719.IoT.Device.Screw
     /// 设置IP方式：开机按住屏幕-网络设置
     /// Quick--Modbus TCP智能电批.xls
     /// </summary>
-    public class KuaiKeTcpScrew : ModbusTcpClient
+    public class KuaiKeTcpScrew : ModbusTcpClient, IIoT
     {
         public KuaiKeTcpScrew(string ip, int port = 502, int timeout = 1500) : base(ip, port, timeout)
         {
@@ -140,7 +140,7 @@ namespace Ping9719.IoT.Device.Screw
             }
             catch (Exception ex)
             {
-                
+
                 result.AddError(ex);
             }
             finally
@@ -181,12 +181,12 @@ namespace Ping9719.IoT.Device.Screw
 
                 //开始
                 IsMonitor = true;
-                bool isOpen = false;
-                if (isAutoOpen || IsConnected == false)
-                {
-                    Open();
-                    isOpen = true;
-                }
+                //bool isOpen = false;
+                //if (isAutoOpen || IsConnected == false)
+                //{
+                //    Open();
+                //    isOpen = true;
+                //}
 
                 int sta = -1;
                 while (true)
@@ -204,8 +204,8 @@ namespace Ping9719.IoT.Device.Screw
                     Thread.Sleep(1);
                 }
 
-                if (isOpen)
-                    Close();
+                //if (isOpen)
+                //    Close();
                 IsMonitor = false;
                 isTopMonitor = false;
             });
@@ -232,12 +232,12 @@ namespace Ping9719.IoT.Device.Screw
 
                 //开始
                 IsMonitor = true;
-                bool isOpen = false;
-                if (isAutoOpen || IsConnected == false)
-                {
-                    Open();
-                    isOpen = true;
-                }
+                //bool isOpen = false;
+                //if (isAutoOpen || IsConnected == false)
+                //{
+                //    Open();
+                //    isOpen = true;
+                //}
 
                 int sta = 1;
                 while (true)
@@ -257,8 +257,8 @@ namespace Ping9719.IoT.Device.Screw
                     Thread.Sleep(1);
                 }
 
-                if (isOpen)
-                    Close();
+                //if (isOpen)
+                //    Close();
                 IsMonitor = false;
                 isTopMonitor = false;
             });

@@ -1,6 +1,6 @@
-﻿using Ping9719.IoT.Enums;
+﻿
 
-namespace Ping9719.IoT.PLC.Models
+namespace Ping9719.IoT.PLC
 {
     /// <summary>
     /// 三菱解析后的地址信息

@@ -32,7 +32,7 @@ namespace Ping9719.IoT.Device.Rfid
 
             this.stationNumber = stationNumber;
         }
-        public WanQuanRfid(string ip, int port) : this(new TcpClient(ip, port)) { }
+        public WanQuanRfid(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
         public WanQuanRfid(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
         /// <summary>
@@ -98,6 +98,78 @@ namespace Ping9719.IoT.Device.Rfid
                 Value = epcStr
             };
         }
+
+        //public IoTResult<string> ReadRfid(int antNumber)
+        //{
+        //    string startAddress = "5100";
+        //    switch (antNumber)
+        //    {
+        //        case 1:
+        //            startAddress = "5100";
+        //            break;
+        //        case 2:
+        //            startAddress = "5200";
+        //            break;
+        //        case 3:
+        //            startAddress = "5300";
+        //            break;
+        //        case 4:
+        //            startAddress = "5400";
+        //            break;
+        //    }
+
+        //    string retStr = "";
+        //    try
+        //    {
+        //        if ("5100" == startAddress)
+        //        {
+        //            var ret = base.Read<Int16>(startAddress, 10);
+        //            if (!ret.IsSucceed)
+        //            {
+        //                return new Result<string>(ret);
+        //            }
+        //            var tmp1 = ret.Value.ToArray()[3];
+        //            var tmp2 = ret.Value.ToArray()[4];
+        //            var tmp3 = ret.Value.ToArray()[5];
+        //            var tmp4 = ret.Value.ToArray()[6];
+        //            byte[] nums = new byte[8];
+        //            nums[0] = (byte)(tmp1 >> 8);
+        //            nums[1] = (byte)(tmp1 & 0xFF);
+        //            nums[2] = (byte)(tmp2 >> 8);
+        //            nums[3] = (byte)(tmp2 & 0xFF);
+        //            nums[4] = (byte)(tmp3 >> 8);
+        //            nums[5] = (byte)(tmp3 & 0xFF);
+        //            nums[6] = (byte)(tmp4 >> 8);
+        //            nums[7] = (byte)(tmp4 & 0xFF);
+        //            retStr = DataConvert.ByteArrayToString(nums);
+        //        }
+
+        //        if ("5200" == startAddress)
+        //        {
+        //            var ret = base.Read<Int16>(startAddress, 2);
+        //            if (!ret.IsSucceed)
+        //            {
+        //                return new Result<string>(ret);
+        //            }
+
+        //            var tmp1 = ret.Value.ToArray()[0];
+        //            var tmp2 = ret.Value.ToArray()[1];
+        //            byte[] nums = new byte[4];
+        //            nums[0] = (byte)(tmp1 >> 8);
+        //            nums[1] = (byte)(tmp1 & 0xFF);
+        //            nums[2] = (byte)(tmp2 >> 8);
+        //            nums[3] = (byte)(tmp2 & 0xFF);
+        //            retStr = Encoding.ASCII.GetString(nums);
+        //        }
+
+        //        return new Result<string>() { IsSucceed = true, Value = retStr };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new Result<string>() { IsSucceed = false, Err = ex.Message };
+        //    }
+
+        //}
 
         /// <summary>
         /// 写入标签

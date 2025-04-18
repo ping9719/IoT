@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Interfaces
+namespace Ping9719.IoT
 {
     public interface IIoT
     {

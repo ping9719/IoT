@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ping9719.IoT.Common
+namespace Ping9719.IoT.Modbus
 {
     /// <summary>
     /// 帮助类

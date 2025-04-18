@@ -19,14 +19,6 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public abstract bool IsOpen { get; }
         /// <summary>
-        /// 链接模式
-        /// </summary>
-        public ConnectionMode ConnectionMode { get; set; }
-        /// <summary>
-        /// 断线重连，最大重连时间。默认10秒。
-        /// </summary>
-        public int MaxReconnectionTime { get; set; } = 10 * 1000;
-        /// <summary>
         /// 接受区，缓冲区大小（默认1024 * 100）
         /// </summary>
         public int ReceiveBufferSize { get; set; } = 1024 * 100;
@@ -53,29 +45,25 @@ namespace Ping9719.IoT.Communication
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
         /// <summary>
-        /// 即将打开
+        /// 客户端即将链接
         /// </summary>
-        public Func<ServiceBase, bool> Opening;
+        public Func<ClientBase, bool> Opening;
         /// <summary>
-        /// 成功打开
+        /// 客户端成功链接
         /// </summary>
-        public Action<ServiceBase> Opened;
+        public Action<ClientBase> Opened;
         /// <summary>
-        /// 即将断开连接。仅主动断开。
+        /// 客户端正在断开链接。仅主动断开。
         /// </summary>
-        public Func<ServiceBase, bool> Closing;
+        public Func<ClientBase, bool> Closing;
         /// <summary>
-        /// 断开连接，item2:是否自动断开
+        /// 客户端断开链接，item2:是否自动断开
         /// </summary>
-        public Action<ServiceBase, bool> Closed;
+        public Action<ClientBase, bool> Closed;
         /// <summary>
         /// 接收到信息
         /// </summary>
-        public Action<ServiceBase, byte[]> Received;
-        /// <summary>
-        /// 警告错误
-        /// </summary>
-        public Action<ServiceBase, Exception> Warning;
+        public Action<ClientBase, byte[]> Received;
 
         /// <summary>
         /// 打开

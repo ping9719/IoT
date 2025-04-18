@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Ping9719.IoT.Modbus.Models
+namespace Ping9719.IoT.Modbus
 {
     /// <summary>
     /// Modbus输出
