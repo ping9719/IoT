@@ -86,30 +86,6 @@ namespace Ping9719.IoT.WPF
             textBoxInfo.AppendText($"打印完成，时间{bbb.TimeConsuming ?? 0}秒\r\n");
         }
 
-        private void kshg(object sender, RoutedEventArgs e)
-        {
-            if (DeviceData == null)
-            {
-                textBoxInfo.AppendText("没有初始化设备\r\n");
-                return;
-            }
-
-            //var aaa = GetSelect();
-            //if (aaa.Length == 0)
-            //{
-            //    textBoxInfo.AppendText("请选择至少一个卡\r\n");
-            //    return;
-            //}
-            //var bbb = DeviceData.RedStart(aaa);
-            //if (!bbb.IsSucceed)
-            //{
-            //    textBoxInfo.AppendText($"{bbb.ErrorText}\r\n");
-            //    return;
-            //}
-
-            //textBoxInfo.AppendText($"红光完成，时间{bbb.Value}秒\r\n");
-        }
-
         private void cxzt(object sender, RoutedEventArgs e)
         {
             if (DeviceData == null)

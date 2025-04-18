@@ -25,7 +25,7 @@
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center">模板名称</TextBlock>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center">模板路径</TextBlock>
                     <TextBox x:Name="textBoxMbName" Grid.Column="1" Margin="5,0,0,0"></TextBox>
                     <Button Grid.Column="3" Margin="5,0,0,0" Padding="20,0" Click="jzmb">加载模板</Button>
                 </Grid>
