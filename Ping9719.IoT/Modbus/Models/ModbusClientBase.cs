@@ -8,7 +8,7 @@ using Ping9719.IoT.Communication;
 
 namespace Ping9719.IoT.Modbus
 {
-    public abstract class ModbusSerialBase : IIoT
+    public abstract class ModbusClientBase : IIoT
     {
         protected EndianFormat format;
         private bool plcAddresses;
@@ -31,7 +31,7 @@ namespace Ping9719.IoT.Modbus
 
         public ClientBase Client { get; private set; }//通讯管道
 
-        public ModbusSerialBase(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        public ModbusClientBase(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
         {
             Client = client;
             Client.TimeOut = timeout;
@@ -55,7 +55,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="format">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        public ModbusSerialBase(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), timeout, format, stationNumber, plcAddresses) { }
+        public ModbusClientBase(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), timeout, format, stationNumber, plcAddresses) { }
 
         //#region 发送报文，并获取响应报文
         ///// <summary>

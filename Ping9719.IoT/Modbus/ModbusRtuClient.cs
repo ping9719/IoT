@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Modbus
     /// <summary>
     /// ModbusRtu协议客户端
     /// </summary>
-    public class ModbusRtuClient : ModbusSerialBase, IIoT
+    public class ModbusRtuClient : ModbusClientBase, IIoT
     {
         public ModbusRtuClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : base(client, timeout, format, stationNumber, plcAddresses) { }
 

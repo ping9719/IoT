@@ -12,7 +12,7 @@ namespace Ping9719.IoT.Modbus
     /// <summary>
     /// ModbusAscii
     /// </summary>
-    public class ModbusAsciiClient : ModbusSerialBase, IIoT
+    public class ModbusAsciiClient : ModbusClientBase, IIoT
     {
         public ModbusAsciiClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : base(client, timeout, format, stationNumber, plcAddresses) { }
 
