@@ -20,7 +20,7 @@ client.Read<bool>("abc",5);//读5个
 client.Write<bool>("abc",true);//写值
 client.Write<int>("abc",10,20,30);//写多个
 ```
-2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
+2.实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
 var client1 = new TcpClient(ip, port);//Tcp方式
 var client2 = new SerialPortClient(portName, baudRate);//串口方式
@@ -63,12 +63,12 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
 - 通讯 (Communication)
     - TcpClient
     - TcpServer （待开发） 
+    - SerialPortClient
     - UdpClient （待开发） 
     - UdpServer （待开发） 
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
-    - SerialPortClient
 - 算法 (Algorithm)
     - CRC
     - 傅立叶算法(Fourier) （待开发） 
