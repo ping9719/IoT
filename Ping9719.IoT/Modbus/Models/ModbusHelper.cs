@@ -29,13 +29,13 @@ namespace Ping9719.IoT.Modbus
             switch (errCode)
             {
                 case 0x01:
-                    err = $"异常码{errCode}：⾮法功能";
+                    err = $"异常码{errCode}：非法功能";
                     break;
                 case 0x02:
-                    err = $"异常码{errCode}：⾮法数据地址";
+                    err = $"异常码{errCode}：非法数据地址";
                     break;
                 case 0x03:
-                    err = $"异常码{errCode}：⾮法数据值";
+                    err = $"异常码{errCode}：非法数据值";
                     break;
                 case 0x04:
                     err = $"异常码{errCode}：从站设备故障";
