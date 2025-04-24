@@ -39,15 +39,15 @@ namespace Ping9719.IoT.WPF
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var result = DeviceData.Read((int)comboBox2.SelectedItem);
-            if (result != null && result.IsSucceed)
-            {
-                textBox2.Text = textBox2.Text + "\r\n" + result.Value;
-            }
-            else if (result != null && result.Error.Count > 0)
-            {
-                textBox2.Text = textBox2.Text + "\r\n" + result.ErrorText;
-            }
+            //var result = DeviceData.ReadString((int)comboBox2.SelectedItem);
+            //if (result != null && result.IsSucceed)
+            //{
+            //    textBox2.Text = textBox2.Text + "\r\n" + result.Value;
+            //}
+            //else if (result != null && result.Error.Count > 0)
+            //{
+            //    textBox2.Text = textBox2.Text + "\r\n" + result.ErrorText;
+            //}
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)

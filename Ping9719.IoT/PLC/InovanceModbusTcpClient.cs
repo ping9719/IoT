@@ -18,12 +18,18 @@ namespace Ping9719.IoT.PLC
         /// 
         /// </summary>
         /// <param name="client"></param>
-        /// <param name="timeout">超时时间（毫秒）</param>
-        /// <param name="format">大小端设置</param>
-        /// <param name="plcAddresses">PLC地址</param>
-        public InovanceModbusTcpClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false) : base(client, timeout, format, stationNumber, plcAddresses) { }
+        /// <param name="format"></param>
+        /// <param name="stationNumber"></param>
+        public InovanceModbusTcpClient(ClientBase client, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1) : base(client, format, stationNumber) { }
 
-        public InovanceModbusTcpClient(string ip, int port = 502, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false) : base(ip, port, timeout, format, stationNumber, plcAddresses) { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
+        /// <param name="format"></param>
+        /// <param name="stationNumber"></param>
+        public InovanceModbusTcpClient(string ip, int port = 502, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1) : base(ip, port, format, stationNumber) { }
 
         #region IIoTBase
         /// <summary>

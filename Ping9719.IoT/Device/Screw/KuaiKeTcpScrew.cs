@@ -18,7 +18,7 @@ namespace Ping9719.IoT.Device.Screw
     /// </summary>
     public class KuaiKeTcpScrew : ModbusTcpClient, IIoT
     {
-        public KuaiKeTcpScrew(string ip, int port = 502, int timeout = 1500) : base(ip, port, timeout)
+        public KuaiKeTcpScrew(string ip, int port = 502) : base(ip, port)
         {
 
         }
