@@ -161,7 +161,8 @@ client1.Open();
 # Modbus
 ## Modbus
 `ModbusRtuClient : IIoT`   
-`ModbusTcpClient : IIoT`
+`ModbusTcpClient : IIoT`   
+`ModbusAsciiClient : IIoT`
 ```CSharp
 var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
 var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP

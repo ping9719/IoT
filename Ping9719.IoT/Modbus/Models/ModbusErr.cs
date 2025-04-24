@@ -15,7 +15,7 @@ namespace Ping9719.IoT.Modbus
         /// <returns></returns>
         public static bool VerifyFunctionCode(byte resultCode, byte responseCode)
         {
-            //正常响应时与请求一致，错误时最高位置 1
+            //异常功能码：0x83（原功能码 0x03 + 0x80）
             //return responseCode - resultCode == 128;
             return resultCode != responseCode || responseCode >= 128;
         }
@@ -31,7 +31,7 @@ namespace Ping9719.IoT.Modbus
             switch (errCode)
             {
                 case 0x01:
-                    err = $"异常码{errCode}：非法功能";
+                    err = $"异常码{errCode}：非法功能码";
                     break;
                 case 0x02:
                     err = $"异常码{errCode}：非法数据地址";
@@ -40,22 +40,22 @@ namespace Ping9719.IoT.Modbus
                     err = $"异常码{errCode}：非法数据值";
                     break;
                 case 0x04:
-                    err = $"异常码{errCode}：从站设备故障";
+                    err = $"异常码{errCode}：服务器设备故障";
                     break;
                 case 0x05:
                     err = $"异常码{errCode}：确认";
                     break;
                 case 0x06:
-                    err = $"异常码{errCode}：从属设备忙";
+                    err = $"异常码{errCode}：服务器忙";
                     break;
                 case 0x08:
-                    err = $"异常码{errCode}：存储奇偶性差错";
+                    err = $"异常码{errCode}：内存奇偶校验错误";
                     break;
                 case 0x0A:
-                    err = $"异常码{errCode}：不可⽤⽹关路径";
+                    err = $"异常码{errCode}：网关路径不可用";
                     break;
                 case 0x0B:
-                    err = $"异常码{errCode}：⽹关⽬标设备响应失败";
+                    err = $"异常码{errCode}：网关目标设备未响应";
                     break;
             }
             return err;
