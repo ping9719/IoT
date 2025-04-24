@@ -118,7 +118,7 @@ namespace Ping9719.IoT.Device.Rfid
                     return result.AddError("读取失败，未读取到RFID信息");
                 }
 
-                var byte1 = DataConvert.StringToByteArray(datajson.data.FirstOrDefault().epc, false);
+                var byte1 = DataConvert.StringToByteArray(datajson.data.FirstOrDefault().epc);
                 if (typeof(T) == typeof(byte[]))
                     result.Value = (T)(object)byte1;
                 else if (typeof(T) == typeof(Int16))

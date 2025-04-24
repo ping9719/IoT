@@ -104,7 +104,7 @@ namespace Ping9719.IoT.WPF
 
         public static byte[] WriteAna(string bytes)
         {
-            return bytes.Replace(" ", "").TrimStart('0').PadLeft(8, '0').StringToByteArray(false);
+            return bytes.Replace(" ", "").TrimStart('0').PadLeft(8, '0').StringToByteArray();
         }
     }
 }

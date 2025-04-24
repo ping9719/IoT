@@ -15,9 +15,9 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <param name="byteArray"></param>
         /// <returns></returns>
-        public static string ByteArrayToString(this byte[] byteArray)
+        public static string ByteArrayToString(this byte[] byteArray, string sepa = " ")
         {
-            return string.Join(" ", byteArray.Select(t => t.ToString("X2")));
+            return string.Join(sepa, byteArray.Select(t => t.ToString("X2")));
         }
         /// <summary>
         /// 开头是否相等
@@ -52,29 +52,23 @@ namespace Ping9719.IoT.Common
         /// <summary>
         /// 16进制字符串转字节数组
         /// </summary>
-        /// <param name="str"></param>
+        /// <param name="str16"></param>
         /// <param name="strict">严格模式（严格按两个字母间隔一个空格）</param>
         /// <returns></returns>
-        public static byte[] StringToByteArray(this string str, bool strict = true)
+        public static byte[] StringToByteArray(this string str16)
         {
-            if (string.IsNullOrWhiteSpace(str) || str.Trim().Replace(" ", "").Length % 2 != 0)
+            var str1 = str16?.Trim()?.Replace(" ", "");
+            if (string.IsNullOrWhiteSpace(str16) || str1.Length % 2 != 0)
                 throw new ArgumentException("请传入有效的参数");
 
-            if (strict)
+            var zfc = str16.ToArray();
+            var aLen = str1.Length / 2;
+            byte[] bytes = new byte[aLen];
+            for (int i = 0; i < aLen; i++)
             {
-                return str.Split(' ').Where(t => t?.Length == 2).Select(t => Convert.ToByte(t, 16)).ToArray();
+                bytes[i] = Convert.ToByte(new string(zfc, i * 2, 2), 16);
             }
-            else
-            {
-                str = str.Trim().Replace(" ", "");
-                var list = new List<byte>();
-                for (int i = 0; i < str.Length; i++)
-                {
-                    var string16 = str[i].ToString() + str[++i].ToString();
-                    list.Add(Convert.ToByte(string16, 16));
-                }
-                return list.ToArray();
-            }
+            return bytes;
         }
 
         /// <summary>
@@ -95,7 +89,7 @@ namespace Ping9719.IoT.Common
                 {
                     stringList.Add(((char)(Convert.ToByte(item, 16))).ToString());
                 }
-                return StringToByteArray(string.Join("", stringList), false);
+                return StringToByteArray(string.Join("", stringList));
             }
             else
             {
@@ -106,7 +100,7 @@ namespace Ping9719.IoT.Common
                     var stringAscii = str[i].ToString() + str[++i].ToString();
                     stringList.Add(((char)Convert.ToByte(stringAscii, 16)).ToString());
                 }
-                return StringToByteArray(string.Join("", stringList), false);
+                return StringToByteArray(string.Join("", stringList));
             }
         }
 
@@ -126,7 +120,7 @@ namespace Ping9719.IoT.Common
             {
                 stringList.Add(((char)item).ToString());
             }
-            return StringToByteArray(string.Join("", stringList), false);
+            return StringToByteArray(string.Join("", stringList));
         }
 
         /// <summary>

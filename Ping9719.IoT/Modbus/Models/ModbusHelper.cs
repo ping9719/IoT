@@ -10,12 +10,14 @@ namespace Ping9719.IoT.Modbus
         /// <summary>
         /// 是否为异常功能码
         /// </summary>
-        /// <param name="resultCode"></param>
-        /// <param name="responseCode"></param>
+        /// <param name="resultCode">请求的</param>
+        /// <param name="responseCode">响应的</param>
         /// <returns></returns>
         public static bool VerifyFunctionCode(byte resultCode, byte responseCode)
         {
-            return responseCode - resultCode == 128;
+            //正常响应时与请求一致，错误时最高位置 1
+            //return responseCode - resultCode == 128;
+            return resultCode != responseCode || responseCode >= 128;
         }
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="errCode"></param>
         public static string ErrMsg(byte errCode)
         {
-            var err = "未知异常";
+            var err = $"异常码{errCode}：未知异常";
             switch (errCode)
             {
                 case 0x01:

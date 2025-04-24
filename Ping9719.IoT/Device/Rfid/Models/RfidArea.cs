@@ -30,6 +30,14 @@ namespace Ping9719.IoT.Device.Rfid
         /// <summary>
         /// 存储标签的扩展区（Extended Memory）。用于存储额外的数据或信息。
         /// </summary>
-        Ext
+        Ext,
+        /// <summary>
+        /// ISO15693数据块
+        /// </summary>
+        ISO15693,
+        /// <summary>
+        /// ISO14443A数据块
+        /// </summary>
+        ISO14443A,
     }
 }

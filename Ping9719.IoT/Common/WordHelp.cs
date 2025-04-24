@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Common
 {
-    public class WordHelp
+    public static class WordHelp
     {
         /// <summary>
         /// 指定类型占用的数量
@@ -69,6 +69,84 @@ namespace Ping9719.IoT.Common
                 jg[cs - 1] = sumNum % blockNum;
             }
             return jg;
+        }
+
+        /// <summary>
+        /// 数据分页、分块
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data">数据</param>
+        /// <param name="blockNum">页大小</param>
+        /// <param name="isDiscard">是否移除不满足页面条数的</param>
+        /// <returns></returns>
+        public static List<List<T>> SplitBlock<T>(this IEnumerable<T> data, int blockNum, bool isDiscard)
+        {
+            if (data == null)
+                return null;
+            if (data.Count() < blockNum)
+                return isDiscard ? new List<List<T>>() : new List<List<T>>() { data.ToList() };
+            if (data.Count() == blockNum)
+                return new List<List<T>>() { data.ToList() };
+
+            //总页码
+            var cs = data.Count() % blockNum == 0 ? data.Count() / blockNum : data.Count() / blockNum + 1;
+            var info = new List<List<T>>();
+            for (var i = 0; i < cs; i++)
+            {
+                //页数据
+                info.Add(data.Skip(i * blockNum).Take(blockNum).ToList());
+            }
+
+            if (isDiscard)
+            {
+                if ((info.LastOrDefault()?.Count() ?? blockNum) != blockNum)
+                {
+                    info.RemoveAt(info.Count() - 1);
+                }
+            }
+            return info;
+        }
+
+        /// <summary>
+        /// 数据分页、分块
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data">数据</param>
+        /// <param name="blockNum">页大小</param>
+        /// <param name="replenish">补充 1从前面补充 2从后面补充 其他不补充</param>
+        /// <param name="val">补充的值</param>
+        /// <returns></returns>
+        public static List<List<T>> SplitBlock<T>(this IEnumerable<T> data, int blockNum, int replenish, T val)
+        {
+            if (data == null)
+                return null;
+
+            //总页码
+            var cs = data.Count() % blockNum == 0 ? data.Count() / blockNum : data.Count() / blockNum + 1;
+            var info = new List<List<T>>();
+            for (var i = 0; i < cs; i++)
+            {
+                //页数据
+                info.Add(data.Skip(i * blockNum).Take(blockNum).ToList());
+            }
+
+            if (replenish == 1)
+            {
+                if ((info.LastOrDefault()?.Count() ?? blockNum) != blockNum)
+                {
+                    var abc = Enumerable.Repeat(val, blockNum - info.Last().Count());
+                    info.Last().InsertRange(0, abc);
+                }
+            }
+            else if (replenish == 2)
+            {
+                if ((info.LastOrDefault()?.Count() ?? blockNum) != blockNum)
+                {
+                    var abc = Enumerable.Repeat(val, blockNum - info.Last().Count());
+                    info.Last().AddRange(abc);
+                }
+            }
+            return info;
         }
 
         /// <summary>

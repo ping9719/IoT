@@ -23,7 +23,7 @@
         CDAB = 2,
         /// <summary>
         /// Little-Endian
-        /// 小端序 DCBA
+        /// 小端序 DCBA，C#默认
         /// </summary>
         DCBA = 3,
     }

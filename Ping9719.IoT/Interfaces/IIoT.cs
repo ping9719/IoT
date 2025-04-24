@@ -31,7 +31,7 @@ namespace Ping9719.IoT
         /// </summary>
         /// <param name="address">地址</param>
         /// <param name="length">长度</param>
-        /// <param name="encoding">编码</param>
+        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
         /// <returns></returns>
         IoTResult<string> ReadString(string address, int length, Encoding encoding);
 
@@ -57,8 +57,8 @@ namespace Ping9719.IoT
         /// </summary>
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
-        /// <param name="length">长度</param>
-        /// <param name="encoding">编码</param>
+        /// <param name="length">长度。一般用于补充的长度</param>
+        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
         /// <returns></returns>
         IoTResult WriteString(string address, string value, int length, Encoding encoding);
 
