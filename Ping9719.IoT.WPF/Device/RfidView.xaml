@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="Ping9719.IoT.WPF.RfidView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ping9719.IoT.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="200" d:DesignWidth="400">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>区域：</TextBlock>
+            <ComboBox Name="qy" Grid.Column="1" Margin="5,0">
+                <ComboBoxItem>Retain</ComboBoxItem>
+                <ComboBoxItem>EPC</ComboBoxItem>
+                <ComboBoxItem>User</ComboBoxItem>
+                <ComboBoxItem>TID</ComboBoxItem>
+                <ComboBoxItem>Ext</ComboBoxItem>
+                <ComboBoxItem>ISO15693</ComboBoxItem>
+                <ComboBoxItem>ISO14443A</ComboBoxItem>
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="1" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>天线：</TextBlock>
+            <TextBox Name="tx" Grid.Column="1" Margin="5,0"></TextBox>
+        </Grid>
+        <Grid Grid.Row="2" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>密码：</TextBlock>
+            <TextBox Name="mm" Grid.Column="1" Margin="5,0"></TextBox>
+        </Grid>
+        <Grid Grid.Row="3" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>编码：</TextBlock>
+            <ComboBox Name="bm" Grid.Column="1" Margin="5,0">
+                <ComboBoxItem>Hex16</ComboBoxItem>
+                <ComboBoxItem>ASCII</ComboBoxItem>
+                <ComboBoxItem>UTF8</ComboBoxItem>
+                <ComboBoxItem>Unicode</ComboBoxItem>
+                <ComboBoxItem>UTF32</ComboBoxItem>
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="4" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>长度：</TextBlock>
+            <TextBox Name="dc" Grid.Column="1" Margin="5,0"></TextBox>
+            <Button Click="Button_Click1" Grid.Column="2" Width="100">读</Button>
+        </Grid>
+        <Grid Grid.Row="5" Margin="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBlock>写值：</TextBlock>
+            <TextBox Name="xr" Grid.Column="1" Margin="5,0"></TextBox>
+            <Button Click="Button_Click2" Grid.Column="2" Width="100">写</Button>
+        </Grid>
+        <TextBox x:Name="info" Grid.Row="6" Margin="5" TextWrapping="Wrap" AcceptsReturn="True" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Visible"></TextBox>
+    </Grid>
+</UserControl>
