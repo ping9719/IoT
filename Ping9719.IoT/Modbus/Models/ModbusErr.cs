@@ -5,7 +5,7 @@ namespace Ping9719.IoT.Modbus
     /// <summary>
     /// 帮助类
     /// </summary>
-    public class ModbusHelper
+    public class ModbusErr
     {
         /// <summary>
         /// 是否为异常功能码

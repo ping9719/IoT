@@ -17,9 +17,9 @@ Install-Package Ping9719.IoT
     - MqttClient （待开发） 
     - MqttServer （待开发） 
 - [Modbus](#Modbus)
-    - ModbusRtu (ModbusRtuClient,ModbusRtuOverTcpClient)
-    - ModbusTcp (ModbusTcpClient)
-    - ModbusAscii (ModbusAsciiClient)
+    - ModbusRtuClient
+    - ModbusTcpClient
+    - ModbusAsciiClient
 - [PLC](#PLC)
     - 罗克韦尔 (AllenBradleyCipClient) （未通过测试）   
     - 汇川 (InovanceModbusTcpClient)
@@ -159,16 +159,24 @@ client1.Open();
 
 # Modbus
 ## Modbus
+`ModbusRtuClient : IIoT`   
+`ModbusTcpClient : IIoT`
 ```CSharp
-ModbusTcpClient client = new ModbusTcpClient("127.0.0.1", 502, format: EndianFormat.ABCD);
+var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
+var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP
+var client = new ModbusTcpClient("127.0.0.1", 502, format: EndianFormat.ABCD);
+var client = new ModbusTcpClient(new SerialPortClient("COM1", 9600), format: EndianFormat.ABCD);//ModbusTcp协议走串口
 client.Client.Open();
+
 client.Read<Int16>("100");//读寄存器
 client.Read<Int16>("100.1");//读寄存器中的位，读位只支持单个读，最好是uint16,int16
 client.Read<Int16>("s=2;x=3;100");//读寄存器，对应站号，功能码，地址
 client.Read<bool>("100");//读线圈
 client.Read<bool>("100", 10);//读多个线圈
+
 client.Write<Int16>("100", 100);//写寄存器
 client.Write<Int16>("100", 100, 110);//写多个寄存器
+
 client.ReadString("100", 5, Encoding.ASCII);//读字符串
 client.ReadString("100", 5, null);//读字符串，以16进制的方式
 client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0时且不足会自动在结尾补充0X00在结尾

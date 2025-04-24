@@ -16,8 +16,8 @@ namespace Ping9719.IoT.Device.Screw
     /// </summary>
     public class KuaiKeScrew : ModbusRtuClient, IIoT
     {
-        public KuaiKeScrew(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
+        public KuaiKeScrew(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1)
+            : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)
         {
 
         }
@@ -29,7 +29,7 @@ namespace Ping9719.IoT.Device.Screw
         /// <returns></returns>
         public IoTResult WriteState(int val, bool isLeft = true)
         {
-            return Write(isLeft ? "12290" : "12291", BitConverter.GetBytes(Convert.ToInt16(val)), 1, 6, true);
+            return Write<Int16>(isLeft ? "s=1;x=6;12290" : "s=1;x=6;12291", Convert.ToInt16(val));
         }
 
         /// <summary>

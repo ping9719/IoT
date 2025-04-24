@@ -17,8 +17,8 @@ namespace Ping9719.IoT.Device.Weld
     /// </summary>
     public class KuaiKeWeld : ModbusRtuClient, IIoT
     {
-        public KuaiKeWeld(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
+        public KuaiKeWeld(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1)
+            : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)
         {
 
         }

@@ -131,8 +131,8 @@ namespace Ping9719.IoT.Modbus
                 //验证
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<string>();
-                if (ModbusHelper.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
-                    return sendResult.AddError(ModbusHelper.ErrMsg(sendResult.Value[7])).ToVal<string>();
+                if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
+                    return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[8])).ToVal<string>();
 
                 //数据
                 var data = sendResult.Value.Skip(9).Take(sendResult.Value[8]).ToArray();
@@ -175,8 +175,8 @@ namespace Ping9719.IoT.Modbus
                 //验证
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<IEnumerable<T>>();
-                if (ModbusHelper.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
-                    return sendResult.AddError(ModbusHelper.ErrMsg(sendResult.Value[7])).ToVal<IEnumerable<T>>();
+                if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
+                    return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[8])).ToVal<IEnumerable<T>>();
 
                 //数据
                 var data = sendResult.Value.Skip(9).Take(sendResult.Value[8]).ToArray();
@@ -300,8 +300,8 @@ namespace Ping9719.IoT.Modbus
                 //验证
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败");
-                if (ModbusHelper.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
-                    return sendResult.AddError(ModbusHelper.ErrMsg(sendResult.Value[7]));
+                if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
+                    return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[8]));
 
                 return sendResult;
             }

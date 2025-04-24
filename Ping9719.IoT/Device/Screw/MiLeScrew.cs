@@ -39,8 +39,8 @@ namespace Ping9719.IoT.Device.Screw
     /// </summary>
     public class MiLeScrew : ModbusRtuClient, IIoT
     {
-        public MiLeScrew(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1, bool plcAddresses = false)
-            : base(portName, baudRate, parity, dataBits, stopBits, timeout, format, stationNumber, plcAddresses)
+        public MiLeScrew(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1)
+            : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)
         {
 
         }

@@ -115,8 +115,9 @@ namespace Ping9719.IoT.Common
         /// <param name="blockNum">页大小</param>
         /// <param name="replenish">补充 1从前面补充 2从后面补充 其他不补充</param>
         /// <param name="val">补充的值</param>
+        /// <param name="isReverse">是否反转每一个里面的元素</param>
         /// <returns></returns>
-        public static List<List<T>> SplitBlock<T>(this IEnumerable<T> data, int blockNum, int replenish, T val)
+        public static List<List<T>> SplitBlock<T>(this IEnumerable<T> data, int blockNum, int replenish, T val, bool isReverse = false)
         {
             if (data == null)
                 return null;
@@ -146,6 +147,13 @@ namespace Ping9719.IoT.Common
                     info.Last().AddRange(abc);
                 }
             }
+
+            if (isReverse)
+            {
+                foreach (var item in info)
+                    item.Reverse();
+            }
+
             return info;
         }
 

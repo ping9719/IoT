@@ -49,9 +49,9 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
 
 # [Ping9719.IoT](Ping9719.IoT/docs/README.md)   
 - Modbus
-    - ModbusRtu (ModbusRtuClient,ModbusRtuOverTcpClient)
-    - ModbusTcp (ModbusTcpClient)
-    - ModbusAscii (ModbusAsciiClient)
+    - ModbusRtuClient
+    - ModbusTcpClient
+    - ModbusAsciiClient
 - PLC
     - 罗克韦尔 (AllenBradleyCipClient) （未通过测试） 
     - 汇川 (InovanceModbusTcpClient)
