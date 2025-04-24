@@ -16,7 +16,6 @@ namespace Ping9719.IoT.Modbus
     public class ModbusTcpClient : IIoT
     {
         internal EndianFormat format;
-        internal bool plcAddresses;
         internal byte stationNumber = 1;
 
         private UInt16 transactionId_ = 0;
