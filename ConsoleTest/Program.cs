@@ -1,5 +1,9 @@
-﻿using Ping9719.IoT.Communication;
+﻿using Ping9719.IoT;
+using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using Ping9719.IoT.Device.Fct;
+using Ping9719.IoT.Device.Rfid;
+using Ping9719.IoT.Modbus;
 using Ping9719.IoT.PLC;
 using System.Text;
 
@@ -9,46 +13,77 @@ namespace ConsoleTest
     {
         static void Main(string[] args)
         {
-            OmronCipClient omronCip = new OmronCipClient("172.22.124.21", 44818);
-            var aaa = omronCip.Client.Open();
+            //DCBA:0100
+            var aaaa = BitConverter.GetBytes((long)1161981756646125696);
+            //var asdasd = ModbusInfo.AddressAnalysis("100", 1);
+            //var asda1 = asdasd.Value.GetModbusTcpCommand<UInt16>(0, new UInt16[] { 2,666 }, 2, null);
 
-            //UdpClient client1 = new UdpClient("127.0.0.1", 8080);
+            ModbusTcpClient client = new ModbusTcpClient("127.0.0.1", 502, format: EndianFormat.ABCD);
+            client.Client.Open();
+            client.Read<Int16>("100");//读寄存器
+            client.Read<Int16>("100.1");//读寄存器中的位，读位只支持单个读，最好是uint16,int16
+            client.Read<Int16>("s=2;x=3;100");//读寄存器，对应站号，功能码，地址
+            client.Read<bool>("100");//读线圈
+            client.Read<bool>("100", 10);//读多个线圈
+            client.Write<Int16>("100", 100);//写寄存器
+            client.Write<Int16>("100", 100, 110);//写多个寄存器
+            client.ReadString("500", 5, Encoding.ASCII);//读字符串
+            client.ReadString("500", 5, null);//读字符串，以16进制的方式
 
-            //client1.ConnectionMode = ConnectionMode.AutoOpen;//断线重连
-            //client1.Encoding = Encoding.UTF8;//如何解析字符串
-            //client1.TimeOut = 5000;//超时时间
-            //client1.Opening = (a) =>
-            //{
-            //    Console.WriteLine("连接中");
-            //    Console.Out.Flush();
-            //    return true;
-            //};
-            //client1.Opened = (a) =>
-            //{
-            //    Console.WriteLine("连接成功");
-            //};
-            //client1.Closing = (a) =>
-            //{
-            //    Console.WriteLine("关闭中");
-            //    return true;
-            //};
-            //client1.Closed = (a, b) =>
-            //{
-            //    Console.WriteLine("关闭成功" + b);
-            //};
-            //client1.Received = (a, b) =>
-            //{
-            //    Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
-            //};
-            //client1.Warning = (a, b) =>
-            //{
-            //    Console.WriteLine("错误" + b.ToString());
-            //};
-            ////打开链接，设置所有属性必须在打开前
-            //client1.Open();
+            var aa1 = client.Write<Int16>("100", 1, 2, 5070, 4128);
+            var aa2 = client.Write<Int32>("200", 1, 2, 5070, 270544960);
+            var aa3 = client.Write<Int64>("300", 1, 2, 5070, 1161981756646125696);
+            var aa4 = client.Write<float>("400", 1f, 2.45f, 5070.45454f, 335282.454f);
+            var aa51 = client.WriteString("500", "abcd", 10, Encoding.ASCII);
+            var aa5 = client.ReadString("500", 5, Encoding.ASCII);
 
+            var asda = WordHelp.SplitBlock<int>(Enumerable.Range(1, 0), 3, 2, 0);
+            var aaa11 = BitConverter.GetBytes((Int16)1);
+            var aaa = DataConvert.StringToByteArray("010203");
 
-            //client1.SendReceive("abc");
+            WanQuanRfid wanQuan2Rfid = new WanQuanRfid(WanQuanRfidVer.IR610P_HF, ip: "192.168.0.90", 502);
+            //var aaa = wanQuan2Rfid.Client.Open();
+            var aaaa1 = wanQuan2Rfid.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693), "0102");
+            var aaaa2 = wanQuan2Rfid.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693),4);
+            var aaa1122= 1;
+            //OmronCipClient omronCip = new OmronCipClient("172.22.124.21", 44818);
+            //var aaa = omronCip.Client.Open();
+
+            //var client1 = new TcpClient("127.0.0.1", 8080);
+            // var client1 = new SerialPortClient("COM9", 9600);
+
+            // client1.ConnectionMode = ConnectionMode.AutoOpen;//断线重连
+            // client1.Encoding = Encoding.ASCII;//如何解析字符串
+            // client1.TimeOut = 5000;//超时时间
+            // client1.Opening = (a) =>
+            // {
+            //     Console.WriteLine("连接中");
+            //     Console.Out.Flush();
+            //     return true;
+            // };
+            // client1.Opened = (a) =>
+            // {
+            //     Console.WriteLine("连接成功");
+            // };
+            // client1.Closing = (a) =>
+            // {
+            //     Console.WriteLine("关闭中");
+            //     return true;
+            // };
+            // client1.Closed = (a, b) =>
+            // {
+            //     Console.WriteLine("关闭成功" + b);
+            // };
+            // int i = 0;
+            // client1.Received = (a, b) =>
+            // {
+            //     i++;
+            //     Console.WriteLine($"收到消息{i}:" + a.Encoding.GetString(b));
+            // };
+            // //打开链接，设置所有属性必须在打开前
+            // client1.Open();
+
+            //var aaa= client1.SendReceive("abc");
             //client1.SendReceive("abc");
             //client1.SendReceive("abc");
             ////client1.Close();

@@ -31,83 +31,34 @@ namespace Ping9719.IoT.Modbus
             }
         }
 
-
-        ///// <summary>
-        ///// 字符串编码格式。默认ASCII
-        ///// </summary>
-        //public Encoding Encoding { get; set; } = Encoding.ASCII;
-
-        ///// <summary>
-        ///// 是否是连接的
-        ///// </summary>
-        //public override bool IsConnected => socket?.Connected ?? false;
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="ipAndPoint"></param>
-        ///// <param name="timeout">超时时间（毫秒）</param>
-        ///// <param name="format">大小端设置</param>
-        ///// <param name="plcAddresses">PLC地址</param>
-        ///// <param name="plcAddresses">PLC地址</param>
-        //public ModbusTcpClient(IPEndPoint ipAndPoint, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
-        //{
-        //    this.timeout = timeout;
-        //    ipEndPoint = ipAndPoint;
-        //    this.format = format;
-        //    this.plcAddresses = plcAddresses;
-        //    this.stationNumber = stationNumber;
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="ip"></param>
-        ///// <param name="port"></param>
-        ///// <param name="timeout">超时时间（毫秒）</param>
-        ///// <param name="format">大小端设置</param>
-        ///// <param name="plcAddresses">PLC地址</param>
-        //public ModbusTcpClient(string ip, int port, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
-        //{
-        //    this.timeout = timeout;
-        //    SetIpEndPoint(ip, port);
-        //    this.format = format;
-        //    this.plcAddresses = plcAddresses;
-        //    this.stationNumber = stationNumber;
-        //}
-
         public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
-        /// 
+        /// 初始化
         /// </summary>
-        /// <param name="client"></param>
-        /// <param name="timeout">超时时间（毫秒）</param>
-        /// <param name="format">大小端设置</param>
-        /// <param name="plcAddresses">PLC地址</param>
-        public ModbusTcpClient(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false)
+        /// <param name="client">客户端</param>
+        /// <param name="format">数据格式</param>
+        /// <param name="stationNumber">站号</param>
+        public ModbusTcpClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
         {
             Client = client;
-            Client.TimeOut = timeout;
+            Client.TimeOut = 1500;
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.format = format;
-            this.plcAddresses = plcAddresses;
             this.stationNumber = stationNumber;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="timeout">超时时间（毫秒）</param>
-        /// <param name="format">大小端设置</param>
-        /// <param name="plcAddresses">PLC地址</param>
-        public ModbusTcpClient(string ip, int port = 1500, int timeout = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1, bool plcAddresses = false) : this(new TcpClient(ip, port), timeout, format, stationNumber, plcAddresses) { }//默认使用TcpClient
 
-        #region 获取命令
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="ip">ip地址</param>
+        /// <param name="port">端口</param>
+        /// <param name="format">数据格式</param>
+        /// <param name="stationNumber">站号</param>
+        public ModbusTcpClient(string ip, int port = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1) : this(new TcpClient(ip, port), format, stationNumber) { }
 
         /// <summary>
         /// 获取随机校验头
@@ -118,8 +69,6 @@ namespace Ping9719.IoT.Modbus
             var random = new Random(DateTime.Now.Millisecond + seed);
             return new byte[] { (byte)random.Next(255), (byte)random.Next(255) };
         }
-
-        #endregion
 
         #region IIoTBase
         /// <summary>
@@ -156,6 +105,13 @@ namespace Ping9719.IoT.Modbus
             }
         }
 
+        /// <summary>
+        /// 读取字符串
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="length">长度</param>
+        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
+        /// <returns></returns>
         public virtual IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
             var result = ModbusInfo.AddressAnalysis(address, stationNumber);
@@ -290,6 +246,14 @@ namespace Ping9719.IoT.Modbus
             return Write<T>(address, new[] { value });
         }
 
+        /// <summary>
+        /// 写入字符串
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="value">值</param>
+        /// <param name="length">长度。一般用于补充的长度</param>
+        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
+        /// <returns></returns>
         public virtual IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
             try
@@ -300,7 +264,7 @@ namespace Ping9719.IoT.Modbus
                 else
                     val2 = encoding.GetBytes(value);
 
-                if (length > 0 && val2.Length  < length * 2)
+                if (length > 0 && val2.Length < length * 2)
                     val2 = val2.Concat(Enumerable.Repeat<byte>(0, length * 2 - val2.Length)).ToArray();
                 if (val2.Length % 2 != 0)
                     val2 = val2.Concat(new byte[] { 0 }).ToArray();
