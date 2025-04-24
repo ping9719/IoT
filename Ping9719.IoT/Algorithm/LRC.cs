@@ -9,7 +9,7 @@ namespace Ping9719.IoT.Algorithm
     public class LRC
     {
         /// <summary>
-        /// 
+        /// LRC算法
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -31,7 +31,7 @@ namespace Ping9719.IoT.Algorithm
         }
 
         /// <summary>
-        /// 
+        /// 验证LRC算法
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>

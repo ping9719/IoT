@@ -30,6 +30,7 @@ Install-Package Ping9719.IoT
     - 爱普生 (EpsonRobot) （进行中） 
 - [算法 (Algorithm)](#算法 (Algorithm))
     - CRC
+    - LRC
     - 傅立叶算法(Fourier) （待开发） 
     - PID （待开发） 
     - RSA （待开发） 
@@ -257,26 +258,32 @@ client.Pause();
 ```CSharp
 byte[] bytes = new byte[0];
 //CRC
-CRC.Crc8(bytes)
-CRC.Crc8Itu(bytes)
-CRC.Crc8Rohc(bytes)
-CRC.Crc16(bytes)
-CRC.Crc16Usb(bytes)
-CRC.Crc16Modbus(bytes)
-CRC.Crc32(bytes)
-CRC.Crc32Q(bytes)
-CRC.Crc32Sata(bytes)
+CRC.Crc8(bytes);
+CRC.Crc8Itu(bytes);
+CRC.Crc8Rohc(bytes);
+CRC.Crc16(bytes);
+CRC.Crc16Usb(bytes);
+CRC.Crc16Modbus(bytes);
+CRC.Crc32(bytes);
+CRC.Crc32Q(bytes);
+CRC.Crc32Sata(bytes);
 //CRC 验证
-CRC.CheckCrc8(bytes)
-CRC.CheckCrc8Itu(bytes)
-CRC.CheckCrc8Rohc(bytes)
-CRC.CheckCrc16(bytes)
-CRC.CheckCrc16Usb(bytes)
-CRC.CheckCrc16Modbus(bytes)
-CRC.CheckCrc32(bytes)
-CRC.CheckCrc32Q(bytes)
-CRC.CheckCrc32Sata(bytes)
+CRC.CheckCrc8(bytes);
+CRC.CheckCrc8Itu(bytes);
+CRC.CheckCrc8Rohc(bytes);
+CRC.CheckCrc16(bytes);
+CRC.CheckCrc16Usb(bytes);
+CRC.CheckCrc16Modbus(bytes);
+CRC.CheckCrc32(bytes);
+CRC.CheckCrc32Q(bytes);
+CRC.CheckCrc32Sata(bytes);
 ```
+## LRC
+```CSharp
+LRC.GetLRC(bytes);
+LRC.CheckLRC(bytes);
+```
+
 # 设备和仪器 (Device)
 ## Fct
 ```CSharp
