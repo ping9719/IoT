@@ -12,6 +12,11 @@
 [查看 "IoT.Avalonia" 文档 ( "IoT.Avalonia" document)](Ping9719.IoT.WPF/README.md)   
 #
 
+### 库：[library]
+源代码：[Github (主库)](https://github.com/ping9719/IoT)  
+源代码：[Gitee (备用库)](https://gitee.com/ping9719/IoT)   
+#
+
 # 前言、亮点（Merit）
 1.常用设备实现接口“IIoT”可进行读写 
 ```CSharp

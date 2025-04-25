@@ -17,4 +17,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Ping9719.IoT\Ping9719.IoT.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="docs\img\" />
+	</ItemGroup>
 </Project>
