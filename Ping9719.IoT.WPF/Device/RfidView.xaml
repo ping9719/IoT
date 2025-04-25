@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock>区域：</TextBlock>
-            <ComboBox Name="qy" Grid.Column="1" Margin="5,0">
+            <ComboBox Name="qy" Grid.Column="1" Margin="5,0" SelectedValuePath="Content" SelectedIndex="1">
                 <ComboBoxItem>Retain</ComboBoxItem>
                 <ComboBoxItem>EPC</ComboBoxItem>
                 <ComboBoxItem>User</ComboBoxItem>
@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock>天线：</TextBlock>
-            <TextBox Name="tx" Grid.Column="1" Margin="5,0"></TextBox>
+            <TextBox Name="tx" Text="1" Grid.Column="1" Margin="5,0"></TextBox>
         </Grid>
         <Grid Grid.Row="2" Margin="3">
             <Grid.ColumnDefinitions>
@@ -46,7 +46,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock>密码：</TextBlock>
-            <TextBox Name="mm" Grid.Column="1" Margin="5,0"></TextBox>
+            <TextBox Name="mm" Text="00000000" Grid.Column="1" Margin="5,0"></TextBox>
         </Grid>
         <Grid Grid.Row="3" Margin="3">
             <Grid.ColumnDefinitions>
@@ -54,7 +54,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock>编码：</TextBlock>
-            <ComboBox Name="bm" Grid.Column="1" Margin="5,0">
+            <ComboBox Name="bm" Grid.Column="1" Margin="5,0" SelectedValuePath="Content" SelectedIndex="1">
                 <ComboBoxItem>Hex16</ComboBoxItem>
                 <ComboBoxItem>ASCII</ComboBoxItem>
                 <ComboBoxItem>UTF8</ComboBoxItem>
@@ -69,7 +69,7 @@
                 <ColumnDefinition Width="auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock>长度：</TextBlock>
-            <TextBox Name="dc" Grid.Column="1" Margin="5,0"></TextBox>
+            <TextBox Name="dc" Text="4" Grid.Column="1" Margin="5,0"></TextBox>
             <Button Click="Button_Click1" Grid.Column="2" Width="100">读</Button>
         </Grid>
         <Grid Grid.Row="5" Margin="3">

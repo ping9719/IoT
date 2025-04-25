@@ -110,7 +110,7 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<string>();
+                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<string>();
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
@@ -156,7 +156,7 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<IEnumerable<T>>();
+                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<IEnumerable<T>>();
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
@@ -283,7 +283,7 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。");
+                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。");
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))

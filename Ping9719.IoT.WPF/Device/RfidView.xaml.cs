@@ -50,23 +50,23 @@ namespace Ping9719.IoT.WPF
                 {
                     if (b.NewValue is RfidArea val1)
                     {
-                        view.qy.SelectedIndex = (int)val1;
+                        view.qy.SelectedValue = val1.ToString();
                     }
                 }
             }));
 
 
         /// <summary>
-        /// 天线
+        /// 天线号
         /// </summary>
-        public int Anten
+        public int AntenNum
         {
-            get { return (int)GetValue(AntenProperty); }
-            set { SetValue(AntenProperty, value); }
+            get { return (int)GetValue(AntenNumProperty); }
+            set { SetValue(AntenNumProperty, value); }
         }
 
-        public static readonly DependencyProperty AntenProperty =
-            DependencyProperty.Register("Anten", typeof(int), typeof(RfidView), new PropertyMetadata(1, (a, b) =>
+        public static readonly DependencyProperty AntenNumProperty =
+            DependencyProperty.Register("AntenNum", typeof(int), typeof(RfidView), new PropertyMetadata(1, (a, b) =>
             {
                 if (a is RfidView view)
                 {
@@ -115,7 +115,7 @@ namespace Ping9719.IoT.WPF
                 {
                     if (b.NewValue is EncodingEnum val1)
                     {
-                        view.qy.SelectedIndex = (int)val1;
+                        view.bm.SelectedValue = val1.ToString();
                     }
                 }
             }));
@@ -141,6 +141,51 @@ namespace Ping9719.IoT.WPF
                 }
             }));
 
+        /// <summary>
+        /// 写入的值
+        /// </summary>
+        public string WriteVal
+        {
+            get { return (string)GetValue(WriteValProperty); }
+            set { SetValue(WriteValProperty, value); }
+        }
+
+        public static readonly DependencyProperty WriteValProperty =
+            DependencyProperty.Register("WriteVal", typeof(string), typeof(RfidView), new PropertyMetadata("", (a, b) =>
+            {
+                if (a is RfidView view)
+                {
+                    if (b.NewValue is string val1)
+                    {
+                        view.xr.Text = val1.ToString();
+                    }
+                }
+            }));
+
+
+        /// <summary>
+        /// 是否只读参数
+        /// </summary>
+        public bool IsReadPara
+        {
+            get { return (bool)GetValue(IsReadParaProperty); }
+            set { SetValue(IsReadParaProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsReadParaProperty =
+            DependencyProperty.Register("IsReadPara", typeof(bool), typeof(RfidView), new PropertyMetadata(false, (a, b) =>
+            {
+                if (a is RfidView view)
+                {
+                    if (b.NewValue is bool val1)
+                    {
+                        view.qy.IsEnabled = !val1;
+                        view.tx.IsEnabled = !val1;
+                        view.mm.IsEnabled = !val1;
+                        view.bm.IsEnabled = !val1;
+                    }
+                }
+            }));
 
         private void Button_Click1(object sender, RoutedEventArgs e)
         {
@@ -152,8 +197,15 @@ namespace Ping9719.IoT.WPF
 
             try
             {
-                var aaa = RfidAddress.GetRfidAddressStr(Area, Pass.StringToByteArray(), Anten);
-                var re = DeviceData.ReadString(aaa, ReadCount, Encoding.GetEncoding());
+                var qy1 = (RfidArea)Enum.Parse(typeof(RfidArea), qy.SelectedValue.ToString());
+                var tx1 = Convert.ToInt32(tx.Text);
+                var mm1 = mm.Text;
+                var bm1 = (EncodingEnum)Enum.Parse(typeof(EncodingEnum), bm.SelectedValue.ToString());
+                var dc1 = Convert.ToInt32(dc.Text);
+                var xr1 = xr.Text;
+
+                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.StringToByteArray(), tx1);
+                var re = DeviceData.ReadString(aaa, dc1, bm1.GetEncoding());
                 if (re.IsSucceed)
                     info.AppendText($"{re.Value}\r\n");
                 else
@@ -175,8 +227,15 @@ namespace Ping9719.IoT.WPF
 
             try
             {
-                var aaa = RfidAddress.GetRfidAddressStr(Area, Pass.StringToByteArray(), Anten);
-                var re = DeviceData.WriteString(aaa, xr.Text, ReadCount, Encoding.GetEncoding());
+                var qy1 = (RfidArea)Enum.Parse(typeof(RfidArea), qy.SelectedValue.ToString());
+                var tx1 = Convert.ToInt32(tx.Text);
+                var mm1 = mm.Text;
+                var bm1 = (EncodingEnum)Enum.Parse(typeof(EncodingEnum), bm.SelectedValue.ToString());
+                var dc1 = Convert.ToInt32(dc.Text);
+                var xr1 = xr.Text;
+
+                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.StringToByteArray(), tx1);
+                var re = DeviceData.WriteString(aaa, xr1, dc1, bm1.GetEncoding());
                 if (re.IsSucceed)
                     info.AppendText($"成功\r\n");
                 else

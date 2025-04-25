@@ -284,7 +284,7 @@ namespace Ping9719.IoT.Device.Rfid
                         if (!aa.IsSucceed)
                             return aa.ToVal<string>();
 
-                        return new IoTResult<string>().AddError("不支持的区域" + add.Area.ToString());
+                        return aa;
                     }
                     else
                     {
