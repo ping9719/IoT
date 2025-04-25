@@ -8,8 +8,8 @@
 [查看 "IoT" 文档 ( "IoT" document)](Ping9719.IoT/docs/README.md)   
 [查看 "IoT" 版本文档 ( "IoT" Version document)](Ping9719.IoT/docs/VERSION.md)  
 
-[查看 "IoT.WPF" 文档 ( "IoT.WPF" document)](Ping9719.IoT.WPF/README.md)   
-[查看 "IoT.Avalonia" 文档 ( "IoT.Avalonia" document)](Ping9719.IoT.WPF/README.md)   
+[查看 "IoT.WPF" 文档 ( "IoT.WPF" document)](Ping9719.IoT.WPF/docs/README.md)   
+[查看 "IoT.Avalonia" 文档 ( "IoT.Avalonia" document)](Ping9719.IoT.Avalonia/docs/README.md)   
 #
 
 ### 库：[library]

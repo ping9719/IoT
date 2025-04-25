@@ -1,7 +1,7 @@
 ﻿# Ping9719.IoT.Avalonia
 
-### WPF界面
-#界面实现
+### Avalonia界面
+#这是对每种协议的界面实现，比如“Modbus”，那么在他的后面加入“View”就是“ModbusView（未做）”就是他的界面，方便快速的使用和调试。
 
 
 # 安装包 [NuGet]
@@ -13,5 +13,5 @@ Install-Package Ping9719.IoT.Avalonia
 
 ### 列子:[ensample code:]
 ```CSharp
-
+//开发中...
 ```
