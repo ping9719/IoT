@@ -11,8 +11,8 @@ namespace Ping9719.IoT.Enums
     /// </summary>
     public enum EncodingEnum
     {
-        Hex16,
-        ASCII,
+        Hex16 = -1,
+        ASCII = 1,
         UTF8,
         Unicode,
         UTF32,
@@ -23,7 +23,7 @@ namespace Ping9719.IoT.Enums
         {
             if (encodingEnum == EncodingEnum.ASCII)
                 return Encoding.ASCII;
-           else if (encodingEnum == EncodingEnum.UTF8)
+            else if (encodingEnum == EncodingEnum.UTF8)
                 return Encoding.UTF8;
             else if (encodingEnum == EncodingEnum.Unicode)
                 return Encoding.Unicode;

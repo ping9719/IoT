@@ -33,7 +33,7 @@ namespace Ping9719.IoT.Device.Rfid
 
             this.ver = ver;
         }
-        public WanQuanRfid(WanQuanRfidVer ver, string ip, int port = 1500) : this(ver, new TcpClient(ip, port)) { }
+        public WanQuanRfid(WanQuanRfidVer ver, string ip, int port = 502) : this(ver, new TcpClient(ip, port)) { }
         public WanQuanRfid(WanQuanRfidVer ver, string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(ver, new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }
 
         /// <summary>
