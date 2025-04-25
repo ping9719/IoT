@@ -114,6 +114,7 @@ namespace Ping9719.IoT.Modbus
                     return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<string>();
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
+                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<string>();
@@ -162,6 +163,7 @@ namespace Ping9719.IoT.Modbus
                     return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<IEnumerable<T>>();
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
+                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<IEnumerable<T>>();
@@ -291,6 +293,7 @@ namespace Ping9719.IoT.Modbus
                     return result.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。");
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
+                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败");
