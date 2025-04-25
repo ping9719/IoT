@@ -303,11 +303,15 @@ dev2.Client.Open();
 ## 无线射频 (Rfid)
 ```CSharp
 TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-BeiJiaFuRfid dev1 = new BeiJiaFuRfid(client1);
-DongJiRfid dev1 = new DongJiRfid(client1);
-TaiHeSenRfid dev1 = new TaiHeSenRfid(client1);
-WanQuanRfid dev1 = new WanQuanRfid(client1);
-dev1.Client.Open();
+BeiJiaFuRfid rfid = new BeiJiaFuRfid(client1);
+DongJiRfid rfid = new DongJiRfid(client1);
+TaiHeSenRfid rfid = new TaiHeSenRfid(client1);
+WanQuanRfid rfid = new WanQuanRfid(client1);
+rfid.Client.Open();
+
+//WanQuanRfid
+rfid.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
+rfid.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
 ```
 ## 扫码枪 (Scanner)
 ```CSharp
