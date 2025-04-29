@@ -19,11 +19,7 @@ namespace Ping9719.IoT.PLC
         /// <summary>
         /// CPU版本
         /// </summary>
-        private readonly SiemensVersion version;
-        /// <summary>
-        /// 版本
-        /// </summary>
-        public string Version => version.ToString();
+        public SiemensVersion Version { get; private set; }
 
         /// <summary>
         /// 插槽号 
@@ -48,7 +44,7 @@ namespace Ping9719.IoT.PLC
         public ClientBase Client { get; private set; }
         public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
         {
-            this.version = version;
+            this.Version = version;
             Client = client;
             Slot = slot;
             Rack = rack;
@@ -97,7 +93,7 @@ namespace Ping9719.IoT.PLC
 
                 socketReadResul = Client.SendReceive(Command2);
                 if (!socketReadResul.IsSucceed || socketReadResul.Value.Length <= SiemensConstant.InitHeadLength)
-                    throw new Exception("打开S7第一次握手失败。");
+                    throw new Exception("打开S7第二次握手失败。");
 
             };
             Client.Closing = (a) =>
@@ -116,138 +112,6 @@ namespace Ping9719.IoT.PLC
             };
         }
         public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00, int timeout = 1500) : this(version, new TcpClient(ip, port), slot, rack, timeout) { }
-
-        ///// <summary>
-        ///// 打开连接（如果已经是连接状态会先关闭再打开）
-        ///// </summary>
-        ///// <returns></returns>
-        //protected override IoTResult Connect()
-        //{
-        //    var result = new IoTResult();
-        //    SafeClose();
-        //    socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        //    try
-        //    {
-        //        //超时时间设置
-        //        socket.ReceiveTimeout = timeout;
-        //        socket.SendTimeout = timeout;
-
-        //        //连接
-        //        //socket.Connect(ipEndPoint);
-        //        IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-        //        //阻塞当前线程           
-        //        if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-        //            throw new TimeoutException("连接超时");
-        //        socket.EndConnect(connectResult);
-
-        //        var Command1 = SiemensConstant.Command1;
-        //        var Command2 = SiemensConstant.Command2;
-
-        //        switch (version)
-        //        {
-        //            case SiemensVersion.S7_200:
-        //                Command1 = SiemensConstant.Command1_200;
-        //                Command2 = SiemensConstant.Command2_200;
-        //                break;
-        //            case SiemensVersion.S7_200Smart:
-        //                Command1 = SiemensConstant.Command1_200Smart;
-        //                Command2 = SiemensConstant.Command2_200Smart;
-        //                break;
-        //            case SiemensVersion.S7_300:
-        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x02;
-        //                break;
-        //            case SiemensVersion.S7_400:
-        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x03;
-        //                Command1[17] = 0x00;
-        //                break;
-        //            case SiemensVersion.S7_1200:
-        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x00;
-        //                break;
-        //            case SiemensVersion.S7_1500:
-        //                Command1[21] = (byte)(Rack * 0x20 + Slot); //0x00;
-        //                break;
-        //            default:
-        //                Command1[18] = 0x00;
-        //                break;
-        //        }
-
-        //        //result.Requst = string.Join(" ", Command1.Select(t => t.ToString("X2")));
-        //        //第一次初始化指令交互
-        //        socket.Send(Command1);
-
-        //        var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-        //        if (!socketReadResul.IsSucceed)
-        //            return socketReadResul;
-        //        var head1 = socketReadResul.Value;
-
-
-        //        socketReadResul = SocketRead(GetContentLength(head1));
-        //        if (!socketReadResul.IsSucceed)
-        //            return socketReadResul;
-        //        var content1 = socketReadResul.Value;
-
-        //        //result.Response = string.Join(" ", head1.Concat(content1).Select(t => t.ToString("X2")));
-
-        //        //result.Requst2 = string.Join(" ", Command2.Select(t => t.ToString("X2")));
-        //        //第二次初始化指令交互
-        //        socket.Send(Command2);
-
-        //        socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-        //        if (!socketReadResul.IsSucceed)
-        //            return socketReadResul;
-        //        var head2 = socketReadResul.Value;
-
-        //        socketReadResul = SocketRead(GetContentLength(head2));
-        //        if (!socketReadResul.IsSucceed)
-        //            return socketReadResul;
-        //        var content2 = socketReadResul.Value;
-
-        //        //result.Response2 = string.Join(" ", head2.Concat(content2).Select(t => t.ToString("X2")));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        SafeClose();
-        //        result.AddError(ex);
-        //    }
-        //    return result.ToEnd();
-        //}
-
-        ///// <summary>
-        ///// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
-        ///// </summary>
-        ///// <param name="command"></param>
-        ///// <returns></returns>
-        //public override IoTResult<byte[]> SendPackageSingle(byte[] command)
-        //{
-        //    //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-        //    lock (this)
-        //    {
-        //        IoTResult<byte[]> result = new IoTResult<byte[]>();
-        //        try
-        //        {
-        //            socket.Send(command);
-        //            var socketReadResul = SocketRead(SiemensConstant.InitHeadLength);
-        //            if (!socketReadResul.IsSucceed)
-        //                return socketReadResul;
-        //            var headPackage = socketReadResul.Value;
-
-        //            socketReadResul = SocketRead(GetContentLength(headPackage));
-        //            if (!socketReadResul.IsSucceed)
-        //                return socketReadResul;
-        //            var dataPackage = socketReadResul.Value;
-
-        //            result.Value = headPackage.Concat(dataPackage).ToArray();
-        //            return result.ToEnd();
-        //        }
-        //        catch (Exception ex)
-        //        {
-
-        //            result.AddError(ex);
-
-        //            return result.ToEnd();
-        //        }
-        //    }
-        //}
 
         #region Read 
         /// <summary>
