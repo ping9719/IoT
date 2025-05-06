@@ -2,6 +2,7 @@
 using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -13,17 +14,20 @@ namespace Ping9719.IoT.Device.Mark
     /// </summary>
     public class DaZhuMark
     {
+        DaZhuMarkVer ver;
         public ClientBase Client { get; private set; }
-        public DaZhuMark(ClientBase client, int timeout = 60000)
+        public DaZhuMark(ClientBase client, int timeout = 60000, DaZhuMarkVer ver = DaZhuMarkVer.WindowsJd)
         {
             Client = client;
             Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.UTF8;
             Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
+
+            this.ver = ver;
         }
 
-        public DaZhuMark(string ip, int port = 9001) : this(new TcpClient(ip, port)) { }
+        public DaZhuMark(string ip, int port = 9001, DaZhuMarkVer ver = DaZhuMarkVer.WindowsJd) : this(new TcpClient(ip, port), 60000, ver) { }
 
         /// <summary>
         /// 加载指定模板
@@ -35,6 +39,8 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<int> Initialize(string name, string id, bool isClose = false)
         {
             string comm = $"<Initialize,{id},{(isClose ? 1 : 0)},{name}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"OpenDoc,{name};;";
 
             var result = new IoTResult<int>();
             try
@@ -68,6 +74,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult Offset(string id, int type, float x, float y, float a)
         {
             string comm = $"<Offset,{id},{type},{x},{y},{a}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"SetShapeData,,,{x},{y},{a};;";
+
             var result = new IoTResult<string[]>();
             try
             {
@@ -95,6 +104,8 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult Uninstall()
         {
             string comm = $"<Uninstall>";
+            if (ver == DaZhuMarkVer.Linux)
+                return IoTResult.Create().AddError("不支持");
 
             var result = new IoTResult();
             try
@@ -121,6 +132,8 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<string[]> GetCard()
         {
             string comm = $"<GetCard>";
+            if (ver == DaZhuMarkVer.Linux)
+                return IoTResult.Create<string[]>().AddError("不支持");
 
             var result = new IoTResult<string[]>();
             try
@@ -152,6 +165,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult Data(string key, string value, string id)
         {
             string comm = $"<Data,{id},{key},{value}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"SetShapeData,{key},{value};;";
+
             var result = new IoTResult<string[]>();
             try
             {
@@ -179,6 +195,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<double> MarkStart(params string[] id)
         {
             string comm = $"<MarkStart,{string.Join(",", id)}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"StartMark;;";
+
             var result = new IoTResult<double>();
             try
             {
@@ -206,6 +225,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<double> RedStart(params string[] id)
         {
             string comm = $"<RedStart,{string.Join(",", id)}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"StartRedMark;;";
+
             var result = new IoTResult<double>();
             try
             {
@@ -233,6 +255,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult Stop(params string[] id)
         {
             string comm = $"<Stop,{string.Join(",", id)}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"StopMark;;";
+
             var result = new IoTResult();
             try
             {
@@ -258,6 +283,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult StopAll()
         {
             string comm = $"<Stop>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"StopMark;;";
+
             var result = new IoTResult();
             try
             {
@@ -285,6 +313,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<string> State(string id)
         {
             string comm = $"<State,{id}>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"MarkStatus;;";
+
             var result = new IoTResult<string>();
             try
             {
@@ -313,6 +344,9 @@ namespace Ping9719.IoT.Device.Mark
         public IoTResult<string> State()
         {
             string comm = $"<State>";
+            if (ver == DaZhuMarkVer.Linux)
+                comm = $"MarkStatus;;";
+
             var result = new IoTResult<string>();
             try
             {
@@ -339,25 +373,55 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         /// <param name="str">返回的结果</param>
         /// <returns></returns>
-        private static IoTResult<string[]> Analysis(string str)
+        private IoTResult<string[]> Analysis(string str)
         {
             IoTResult<string[]> result = new IoTResult<string[]>();
-            if (str.StartsWith("<") && str.EndsWith(">"))
+            if (ver == DaZhuMarkVer.WindowsJd)
             {
-                var con = str.Substring(1, str.Length - 2).Split(',');
-                if (con.Length > 0 && con[0] == "OK")
-                    result.Value = con.Skip(1).ToArray();
-                else if (con.Length > 0 && con[0] == "NG")
-                    result.AddError(string.Join(",", con.Skip(1)));
+                if (str.StartsWith("<") && str.EndsWith(">"))
+                {
+                    var con = str.Substring(1, str.Length - 2).Split(',');
+                    if (con.Length > 0 && con[0] == "OK")
+                        result.Value = con.Skip(1).ToArray();
+                    else if (con.Length > 0 && con[0] == "NG")
+                        result.AddError(string.Join(",", con.Skip(1)));
+                    else
+                        result.AddError($"不是有效的格式【{con}】");
+                }
                 else
-                    result.AddError($"不是有效的格式【{con}】");
+                {
+                    result.IsSucceed = false;
+                }
+            }
+            else if (ver == DaZhuMarkVer.Linux)
+            {
+                if (str.EndsWith(";;"))
+                {
+                    var con = str.Substring(0, str.Length - 2).Split(',');
+                    if (con.Length > 0 && con[0].ToLower() == "ok")
+                        result.Value = con.Skip(1).ToArray();
+                    else if (con.Length > 0 && con[0].ToLower() == "failed")
+                        result.AddError(string.Join(",", con.Skip(1)));
+                    else
+                        result.AddError($"不是有效的格式【{con}】");
+                }
+                else
+                {
+                    result.IsSucceed = false;
+                }
             }
             else
             {
-                result.IsSucceed = false;
+                result.AddError($"不支持的类型");
             }
             return result;
         }
 
+    }
+
+    public enum DaZhuMarkVer
+    {
+        WindowsJd,
+        Linux,
     }
 }
