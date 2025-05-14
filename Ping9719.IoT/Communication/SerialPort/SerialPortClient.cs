@@ -19,7 +19,7 @@ namespace Ping9719.IoT.Communication
     {
         public override bool IsOpen => serialPort?.IsOpen ?? false && IsOpen2;
 
-        string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One;
+        string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One; Handshake handshake = Handshake.None;
 
         object obj1 = new object();
         bool IsOpen2 = false;
@@ -33,13 +33,14 @@ namespace Ping9719.IoT.Communication
         int ReconnectionCount = 0;
         CancellationTokenSource flushCts;
 
-        public SerialPortClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One)
+        public SerialPortClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake= Handshake.None)
         {
             this.portName = portName;
             this.baudRate = baudRate;
             this.dataBits = dataBits;
             this.stopBits = stopBits;
             this.parity = parity;
+            this.handshake = handshake;
 
             ConnectionMode = ConnectionMode.Manual;
             Encoding = Encoding.ASCII;
@@ -328,6 +329,7 @@ namespace Ping9719.IoT.Communication
             serialPort.Encoding = Encoding;
             serialPort.ReadTimeout = TimeOut;
             serialPort.WriteTimeout = TimeOut;
+            serialPort.Handshake = handshake;
 
             serialPort.Open();
 
