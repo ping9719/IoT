@@ -21,7 +21,7 @@ Install-Package Ping9719.IoT
     - ModbusTcpClient
     - ModbusAsciiClient
 - [PLC](#PLC)
-    - 罗克韦尔 (AllenBradleyCipClient) （未通过测试）   
+    - 罗克韦尔 (AllenBradleyCipClient) （进行中）   
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
@@ -68,12 +68,13 @@ client.Write<int>("abc",10,20,30);//写多个
 ```
 2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
-var client1 = new TcpClient(ip, port);//Tcp方式
-var client2 = new SerialPortClient(portName, baudRate);//串口方式
-var client3 = new UdpClient(ip, port);//Udp方式
+var type1 = new TcpClient(ip, port);//Tcp方式
+var type2 = new SerialPortClient(portName, baudRate);//串口方式
+var type3 = new UdpClient(ip, port);//Udp方式
 
-var client = new OmronCipClient(client1);//使用的方式
-client.Client.Open();//打开
+var client1 = new ModbusTcpClient(type1);//使用Tcp方式
+var client2 = new ModbusTcpClient(type2);//使用串口方式
+client1.Client.Open();//打开
 ```
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
@@ -89,6 +90,14 @@ client1.Send("abc");//发送
 client1.Receive();//等待并接受
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
+```
+4.返回为“IoTResult”，内置了异常处理等信息
+```CSharp
+var info = client.Read<bool>("abc");
+if (info.IsSucceed)//应该判断后在取值
+{ var val = info.Value; }
+else
+{ var err = info.ErrorText; }
 ```
 
 # 通讯 (Communication)

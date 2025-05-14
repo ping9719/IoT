@@ -1,4 +1,4 @@
-# Ping9719.IoT
+﻿# Ping9719.IoT
 
 ### 工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议。
 ##### Iot device communication protocol implementation, including mainstream PLC, ModBus, CIP, MC, FINS...... Such common protocols.
@@ -25,14 +25,15 @@ client.Read<bool>("abc",5);//读5个
 client.Write<bool>("abc",true);//写值
 client.Write<int>("abc",10,20,30);//写多个
 ```
-2.实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
+2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
-var client1 = new TcpClient(ip, port);//Tcp方式
-var client2 = new SerialPortClient(portName, baudRate);//串口方式
-var client3 = new UdpClient(ip, port);//Udp方式
+var type1 = new TcpClient(ip, port);//Tcp方式
+var type2 = new SerialPortClient(portName, baudRate);//串口方式
+var type3 = new UdpClient(ip, port);//Udp方式
 
-var client = new OmronCipClient(client1);//使用的方式
-client.Client.Open();//打开
+var client1 = new ModbusTcpClient(type1);//使用Tcp方式
+var client2 = new ModbusTcpClient(type2);//使用串口方式
+client1.Client.Open();//打开
 ```
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
@@ -49,22 +50,16 @@ client1.Receive();//等待并接受
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
 ```
+4.返回为“IoTResult”，内置了异常处理等信息
+```CSharp
+var info = client.Read<bool>("abc");
+if (info.IsSucceed)//应该判断后在取值
+{ var val = info.Value; }
+else
+{ var err = info.ErrorText; }
+```
 
-### 内容树：[Content tree]
-
-# [Ping9719.IoT](Ping9719.IoT/docs/README.md)   
-- Modbus
-    - ModbusRtuClient
-    - ModbusTcpClient
-    - ModbusAsciiClient
-- PLC
-    - 罗克韦尔 (AllenBradleyCipClient) （未通过测试） 
-    - 汇川 (InovanceModbusTcpClient)
-    - 三菱 (MitsubishiMcClient)
-    - 欧姆龙 (OmronFinsClient,OmronCipClient)
-    - 西门子 (SiemensS7Client)
-- 机器人 (Robot)
-    - 爱普生 (EpsonRobot) （进行中） 
+# Ping9719.IoT
 - 通讯 (Communication)
     - TcpClient
     - TcpServer （待开发） 
@@ -74,8 +69,21 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
+- Modbus
+    - ModbusRtuClient
+    - ModbusTcpClient
+    - ModbusAsciiClient
+- PLC
+    - 罗克韦尔 (AllenBradleyCipClient) （进行中）   
+    - 汇川 (InovanceModbusTcpClient)
+    - 三菱 (MitsubishiMcClient)
+    - 欧姆龙 (OmronFinsClient,OmronCipClient)
+    - 西门子 (SiemensS7Client)
+- 机器人 (Robot)
+    - 爱普生 (EpsonRobot) （进行中） 
 - 算法 (Algorithm)
     - CRC
+    - LRC
     - 傅立叶算法(Fourier) （待开发） 
     - PID （待开发） 
     - RSA （待开发） 
@@ -99,3 +107,5 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
         - 快克焊接机 (KuaiKeWeld)（不推荐） 
+- 扩展 (Rests)
+    - 1.如何使用自定义协议 (Use a custom protocol)
