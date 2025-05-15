@@ -36,6 +36,8 @@ Install-Package Ping9719.IoT
     - PID （待开发） 
     - RSA （待开发） 
 - [设备和仪器 (Device)](#设备和仪器 (Device))
+    - 气密检测 (Airtight)
+        - 科斯莫气密检测 (CosmoAirtight)
     - Fct
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
@@ -361,7 +363,10 @@ public class XXX
         Client.ConnectionMode = ConnectionMode.AutoOpen;
     }
 
-    public XXX(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }//默认使用TcpClient
+    //默认使用TcpClient
+    public XXX(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
+    //默认使用SerialPortClient
+    public XXX(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake = Handshake.None) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits, handshake)) { }
 
     //这是一个示例，他发送“info1\r\n” 并等待返回字符串的结果
     public IoTResult ReadXXX()
@@ -378,8 +383,7 @@ public class XXX
     }
 
 }
-```
-```CSharp
+
 //使用
 var client = new XXX("127.0.0.1");
 client.Client.Open();
