@@ -32,6 +32,7 @@ Install-Package Ping9719.IoT
     - CRC
     - LRC
     - 傅立叶算法(Fourier) （待开发） 
+    - 稳定婚姻配对算法(GaleShapleyAlgorithm) （完善中） 
     - PID （待开发） 
     - RSA （待开发） 
 - [设备和仪器 (Device)](#设备和仪器 (Device))
