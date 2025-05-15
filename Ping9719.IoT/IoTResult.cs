@@ -51,9 +51,9 @@ namespace Ping9719.IoT
         /// </summary>
         public DateTime? EndTime { get; protected set; } = null;
         /// <summary>
-        /// 耗时（毫秒）
+        /// 耗时
         /// </summary>
-        public double? TimeConsuming { get => EndTime.HasValue ? (EndTime.Value - StartTime).TotalMilliseconds : null; }
+        public TimeSpan? TimeConsuming { get => EndTime.HasValue ? (EndTime.Value - StartTime) : null; }
         /// <summary>
         /// 详细异常
         /// </summary>
