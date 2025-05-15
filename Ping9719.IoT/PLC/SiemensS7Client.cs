@@ -42,6 +42,14 @@ namespace Ping9719.IoT.PLC
         public ushort ReadWriteByteNum { get; set; } = 200;
 
         public ClientBase Client { get; private set; }
+        /// <summary>
+        /// 西门子客户端
+        /// </summary>
+        /// <param name="version">版本</param>
+        /// <param name="client">客户端</param>
+        /// <param name="slot">插槽号</param>
+        /// <param name="rack">机架号</param>
+        /// <param name="timeout">超时时间（毫秒）</param>
         public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
         {
             this.Version = version;
@@ -111,6 +119,16 @@ namespace Ping9719.IoT.PLC
                 return true;
             };
         }
+
+        /// <summary>
+        /// 西门子客户端,以网络的方式
+        /// </summary>
+        /// <param name="version">版本</param>
+        /// <param name="ip">ip</param>
+        /// <param name="port">端口</param>
+        /// <param name="slot">插槽号</param>
+        /// <param name="rack">机架号</param>
+        /// <param name="timeout">超时时间（毫秒）</param>
         public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00, int timeout = 1500) : this(version, new TcpClient(ip, port), slot, rack, timeout) { }
 
         #region Read 
@@ -135,14 +153,14 @@ namespace Ping9719.IoT.PLC
             result.Value = new byte[] { };
             try
             {
-                var arg = ConvertArg(address);
+                var arg = SiemensAddress.ConvertArg(address);
                 var cs = WordHelp.SplitBlock(length, ReadWriteByteNum, arg.BeginAddress, 8);
                 foreach (var item in cs)
                 {
                     //发送读取信息
                     arg.BeginAddress = item.Key;
-                    arg.ReadWriteLength = Convert.ToUInt16(item.Value);
-                    arg.ReadWriteBit = isBit;
+                    arg.Length = Convert.ToUInt16(item.Value);
+                    arg.IsBit = isBit;
 
                     byte[] command = GetReadCommand(arg);
 
@@ -154,8 +172,8 @@ namespace Ping9719.IoT.PLC
                     }
 
                     var dataPackage = sendResult.Value;
-                    byte[] responseData = new byte[arg.ReadWriteLength];
-                    Array.Copy(dataPackage, dataPackage.Length - arg.ReadWriteLength, responseData, 0, arg.ReadWriteLength);
+                    byte[] responseData = new byte[arg.Length];
+                    Array.Copy(dataPackage, dataPackage.Length - arg.Length, responseData, 0, arg.Length);
 
                     result.Value = result.Value.Concat(responseData).ToArray();
 
@@ -263,7 +281,7 @@ namespace Ping9719.IoT.PLC
             try
             {
                 //发送读取信息
-                var args = ConvertArg(addresses);
+                var args = SiemensAddress.ConvertArg(addresses);
                 byte[] command = GetReadCommand(args);
 
                 //发送命令 并获取响应报文
@@ -317,8 +335,8 @@ namespace Ping9719.IoT.PLC
                         continue;
                     }
 
-                    var readResut = responseData.Skip(cursor).Take(item.ReadWriteLength).Reverse().ToArray();
-                    cursor += item.ReadWriteLength == 1 ? 2 : item.ReadWriteLength;
+                    var readResut = responseData.Skip(cursor).Take(item.Length).Reverse().ToArray();
+                    cursor += item.Length == 1 ? 2 : item.Length;
                     switch (item.DataType)
                     {
                         case DataTypeEnum.Bool:
@@ -382,145 +400,145 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        /// <summary>
-        /// 读取Boolean
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<bool> ReadBoolean(string address)
-        {
-            var readResut = Read(address, 1, isBit: true);
-            var result = new IoTResult<bool>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToBoolean(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Boolean
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<bool> ReadBoolean(string address)
+        //{
+        //    var readResut = Read(address, 1, isBit: true);
+        //    var result = new IoTResult<bool>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToBoolean(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        public IoTResult<byte> ReadByte(string address)
-        {
-            var readResut = Read(address, 1);
-            var result = new IoTResult<byte>(readResut);
-            if (result.IsSucceed)
-                result.Value = readResut.Value.ToByteFormat(Format)[0];
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="address"></param>
+        ///// <returns></returns>
+        //public IoTResult<byte> ReadByte(string address)
+        //{
+        //    var readResut = Read(address, 1);
+        //    var result = new IoTResult<byte>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = readResut.Value.ToByteFormat(Format)[0];
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取Int16
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<short> ReadInt16(string address)
-        {
-            var readResut = Read(address, 2);
-            var result = new IoTResult<short>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToInt16(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Int16
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<short> ReadInt16(string address)
+        //{
+        //    var readResut = Read(address, 2);
+        //    var result = new IoTResult<short>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToInt16(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取UInt16
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<ushort> ReadUInt16(string address)
-        {
-            var readResut = Read(address, 2);
-            var result = new IoTResult<ushort>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToUInt16(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取UInt16
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<ushort> ReadUInt16(string address)
+        //{
+        //    var readResut = Read(address, 2);
+        //    var result = new IoTResult<ushort>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToUInt16(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取Int32
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<int> ReadInt32(string address)
-        {
-            var readResut = Read(address, 4);
-            var result = new IoTResult<int>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToInt32(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Int32
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<int> ReadInt32(string address)
+        //{
+        //    var readResut = Read(address, 4);
+        //    var result = new IoTResult<int>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToInt32(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取UInt32
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<uint> ReadUInt32(string address)
-        {
-            var readResut = Read(address, 4);
-            var result = new IoTResult<uint>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToUInt32(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取UInt32
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<uint> ReadUInt32(string address)
+        //{
+        //    var readResut = Read(address, 4);
+        //    var result = new IoTResult<uint>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToUInt32(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取Int64
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<long> ReadInt64(string address)
-        {
-            var readResut = Read(address, 8);
-            var result = new IoTResult<long>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToInt64(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Int64
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<long> ReadInt64(string address)
+        //{
+        //    var readResut = Read(address, 8);
+        //    var result = new IoTResult<long>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToInt64(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取UInt64
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<ulong> ReadUInt64(string address)
-        {
-            var readResut = Read(address, 8);
-            var result = new IoTResult<ulong>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToUInt64(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取UInt64
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<ulong> ReadUInt64(string address)
+        //{
+        //    var readResut = Read(address, 8);
+        //    var result = new IoTResult<ulong>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToUInt64(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取Float
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<float> ReadFloat(string address)
-        {
-            var readResut = Read(address, 4);
-            var result = new IoTResult<float>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToSingle(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Float
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<float> ReadFloat(string address)
+        //{
+        //    var readResut = Read(address, 4);
+        //    var result = new IoTResult<float>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToSingle(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
 
-        /// <summary>
-        /// 读取Double
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public IoTResult<double> ReadDouble(string address)
-        {
-            var readResut = Read(address, 8);
-            var result = new IoTResult<double>(readResut);
-            if (result.IsSucceed)
-                result.Value = BitConverter.ToDouble(readResut.Value.ToByteFormat(Format), 0);
-            return result.ToEnd();
-        }
+        ///// <summary>
+        ///// 读取Double
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <returns></returns>
+        //public IoTResult<double> ReadDouble(string address)
+        //{
+        //    var readResut = Read(address, 8);
+        //    var result = new IoTResult<double>(readResut);
+        //    if (result.IsSucceed)
+        //        result.Value = BitConverter.ToDouble(readResut.Value.ToByteFormat(Format), 0);
+        //    return result.ToEnd();
+        //}
         #endregion
 
         #region Write
@@ -586,7 +604,7 @@ namespace Ping9719.IoT.PLC
                     tempData.Reverse();
                     newAddresses.Add(item.Key, new KeyValuePair<byte[], bool>(tempData.ToArray(), item.Value.GetType().Name == "Boolean"));
                 }
-                var arg = ConvertWriteArg(newAddresses);
+                var arg = SiemensWriteAddress.ConvertWriteArg(newAddresses);
                 byte[] command = GetWriteCommand(arg);
 
                 var sendResult = Client.SendReceive(command);
@@ -694,7 +712,7 @@ namespace Ping9719.IoT.PLC
             IoTResult result = new IoTResult();
             try
             {
-                var addr = ConvertArg(address);
+                var addr = SiemensWriteAddress.ConvertArg(address);
                 var cs = WordHelp.SplitBlock(data.Length, ReadWriteByteNum, addr.BeginAddress, 8);
                 for (var i = 0; i < cs.Count; i++)
                 {
@@ -702,7 +720,7 @@ namespace Ping9719.IoT.PLC
                     SiemensWriteAddress arg = new SiemensWriteAddress(addr);
                     arg.BeginAddress = item.Key;
                     arg.WriteData = data.Skip(i * ReadWriteByteNum).Take(item.Value).ToArray();
-                    arg.ReadWriteBit = isBit;
+                    arg.IsBit = isBit;
 
                     byte[] command = GetWriteCommand(arg);
 
@@ -759,266 +777,126 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, bool value)
-        {
-            return Write(address, new byte[1] { value ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, bool value)
+        //{
+        //    return Write(address, new byte[1] { value ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, byte value)
-        {
-            return Write(address, new byte[1] { value }.ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, byte value)
+        //{
+        //    return Write(address, new byte[1] { value }.ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, sbyte value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, sbyte value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, short value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, short value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, ushort value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, ushort value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, int value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, int value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, uint value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, uint value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, long value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, long value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, ulong value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, ulong value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, float value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, float value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
 
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        public IoTResult Write(string address, double value)
-        {
-            return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
-        }
-        #endregion
-
-        #region ConvertArg 根据地址信息转换成通讯需要的信息
-        /// <summary>
-        /// 获取区域类型代码
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        private SiemensAddress ConvertArg(string address)
-        {
-            try
-            {
-                //转换成大写
-                address = address.ToUpper();
-                var addressInfo = new SiemensAddress()
-                {
-                    Address = address,
-                    DbBlock = 0,
-                };
-                switch (address[0])
-                {
-                    case 'I':
-                        addressInfo.TypeCode = 0x81;
-                        break;
-                    case 'Q':
-                        addressInfo.TypeCode = 0x82;
-                        break;
-                    case 'M':
-                        addressInfo.TypeCode = 0x83;
-                        break;
-                    case 'D':
-                        addressInfo.TypeCode = 0x84;
-                        string[] adds = address.Split('.');
-                        if (address[1] == 'B')
-                            addressInfo.DbBlock = Convert.ToUInt16(adds[0].Substring(2));
-                        else
-                            addressInfo.DbBlock = Convert.ToUInt16(adds[0].Substring(1));
-                        //TODO 
-                        //addressInfo.BeginAddress = GetBeingAddress(address.Substring(address.IndexOf('.') + 1));
-                        break;
-                    case 'T':
-                        addressInfo.TypeCode = 0x1D;
-                        break;
-                    case 'C':
-                        addressInfo.TypeCode = 0x1C;
-                        break;
-                    case 'V':
-                        addressInfo.TypeCode = 0x84;
-                        addressInfo.DbBlock = 1;
-                        break;
-                }
-
-                //if (address[0] != 'D' && address[1] != 'B')
-                //    addressInfo.BeginAddress = GetBeingAddress(address.Substring(1));
-
-                //DB块
-                if (address[0] == 'D' && address[1] == 'B')
-                {
-                    //DB1.0.0、DB1.4（非PLC地址）
-                    var indexOfpoint = address.IndexOf('.') + 1;
-                    if (address[indexOfpoint] >= '0' && address[indexOfpoint] <= '9')
-                        addressInfo.BeginAddress = GetBeingAddress(address.Substring(indexOfpoint));
-                    //DB1.DBX0.0、DB1.DBD4（标准PLC地址）
-                    else
-                        addressInfo.BeginAddress = GetBeingAddress(address.Substring(address.IndexOf('.') + 4));
-                }
-                //非DB块
-                else
-                {
-                    //I0.0、V1004的情况（非PLC地址）
-                    if (address[1] >= '0' && address[1] <= '9')
-                        addressInfo.BeginAddress = GetBeingAddress(address.Substring(1));
-                    //VB1004的情况（标准PLC地址）
-                    else
-                        addressInfo.BeginAddress = GetBeingAddress(address.Substring(2));
-                }
-                return addressInfo;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"地址[{address}]解析异常，ConvertArg Err:{ex.Message}");
-            }
-        }
-
-        private SiemensAddress[] ConvertArg(Dictionary<string, DataTypeEnum> addresses)
-        {
-            return addresses.Select(t =>
-            {
-                var item = ConvertArg(t.Key);
-                item.DataType = t.Value;
-                switch (t.Value)
-                {
-                    case DataTypeEnum.Bool:
-                        item.ReadWriteLength = 1;
-                        item.ReadWriteBit = true;
-                        break;
-                    case DataTypeEnum.Byte:
-                        item.ReadWriteLength = 1;
-                        break;
-                    case DataTypeEnum.Int16:
-                        item.ReadWriteLength = 2;
-                        break;
-                    case DataTypeEnum.UInt16:
-                        item.ReadWriteLength = 2;
-                        break;
-                    case DataTypeEnum.Int32:
-                        item.ReadWriteLength = 4;
-                        break;
-                    case DataTypeEnum.UInt32:
-                        item.ReadWriteLength = 4;
-                        break;
-                    case DataTypeEnum.Int64:
-                        item.ReadWriteLength = 8;
-                        break;
-                    case DataTypeEnum.UInt64:
-                        item.ReadWriteLength = 8;
-                        break;
-                    case DataTypeEnum.Float:
-                        item.ReadWriteLength = 4;
-                        break;
-                    case DataTypeEnum.Double:
-                        item.ReadWriteLength = 8;
-                        break;
-                    default:
-                        throw new Exception($"未定义数据类型：{t.Value}");
-                }
-                return item;
-            }).ToArray();
-        }
-
-        private SiemensWriteAddress[] ConvertWriteArg(Dictionary<string, KeyValuePair<byte[], bool>> addresses)
-        {
-            return addresses.Select(t =>
-            {
-                var item = new SiemensWriteAddress(ConvertArg(t.Key));
-                item.WriteData = t.Value.Key;
-                item.ReadWriteBit = t.Value.Value;
-                return item;
-            }).ToArray();
-        }
+        ///// <summary>
+        ///// 写入数据
+        ///// </summary>
+        ///// <param name="address">地址</param>
+        ///// <param name="value">值</param>
+        ///// <returns></returns>
+        //public IoTResult Write(string address, double value)
+        //{
+        //    return Write(address, BitConverter.GetBytes(value).ToByteFormat(Format), false);
+        //}
         #endregion
 
         #region 获取指令
@@ -1055,9 +933,9 @@ namespace Ping9719.IoT.PLC
                 command[19 + i * 12] = 0x12;//variable specification
                 command[20 + i * 12] = 0x0A;//Length of following address specification
                 command[21 + i * 12] = 0x10;//Syntax Id: S7ANY 
-                command[22 + i * 12] = data.ReadWriteBit ? (byte)0x01 : (byte)0x02;//Transport size: BYTE 
-                command[23 + i * 12] = (byte)(data.ReadWriteLength / 256);
-                command[24 + i * 12] = (byte)(data.ReadWriteLength % 256);//[23][24]两个字节,访问数据的个数，以byte为单位；
+                command[22 + i * 12] = data.IsBit ? (byte)0x01 : (byte)0x02;//Transport size: BYTE 
+                command[23 + i * 12] = (byte)(data.Length / 256);
+                command[24 + i * 12] = (byte)(data.Length % 256);//[23][24]两个字节,访问数据的个数，以byte为单位；
                 command[25 + i * 12] = (byte)(data.DbBlock / 256);
                 command[26 + i * 12] = (byte)(data.DbBlock % 256);//[25][26]DB块的编号
                 command[27 + i * 12] = data.TypeCode;//访问数据块的类型
@@ -1125,7 +1003,7 @@ namespace Ping9719.IoT.PLC
                 command[19 + i * 12] = 0x12;
                 command[20 + i * 12] = 0x0A;
                 command[21 + i * 12] = 0x10;//[19]-[21]固定
-                command[22 + i * 12] = write.ReadWriteBit ? (byte)0x01 : (byte)0x02;//写入方式，1是按位，2是按字
+                command[22 + i * 12] = write.IsBit ? (byte)0x01 : (byte)0x02;//写入方式，1是按位，2是按字
                 command[23 + i * 12] = (byte)(writeData.Length / 256);
                 command[24 + i * 12] = (byte)(writeData.Length % 256);//写入数据个数
                 command[25 + i * 12] = (byte)(dbBlock / 256);
@@ -1142,16 +1020,16 @@ namespace Ping9719.IoT.PLC
             {
                 var write = writes[i];
                 var writeData = write.WriteData;
-                var coefficient = write.ReadWriteBit ? 1 : 8;
+                var coefficient = write.IsBit ? 1 : 8;
 
                 command[1 + index] = 0x00;
-                command[2 + index] = write.ReadWriteBit ? (byte)0x03 : (byte)0x04;// 03bit（位）04 byte(字节)
+                command[2 + index] = write.IsBit ? (byte)0x03 : (byte)0x04;// 03bit（位）04 byte(字节)
                 command[3 + index] = (byte)(writeData.Length * coefficient / 256);
                 command[4 + index] = (byte)(writeData.Length * coefficient % 256);//按位计算出的长度
 
                 if (write.WriteData.Length == 1)
                 {
-                    if (write.ReadWriteBit)
+                    if (write.IsBit)
                         command[5 + index] = writeData[0] == 0x01 ? (byte)0x01 : (byte)0x00; //True or False 
                     else command[5 + index] = writeData[0];
 
@@ -1180,99 +1058,70 @@ namespace Ping9719.IoT.PLC
 
         #endregion
 
-        #region protected
-
-        /// <summary>
-        /// 获取需要读取的长度
-        /// </summary>
-        /// <param name="head"></param>
-        /// <returns></returns>
-        protected int GetContentLength(byte[] head)
-        {
-            if (head?.Length >= 4)
-                return head[2] * 256 + head[3] - 4;
-            else
-                throw new ArgumentException("请传入正确的参数");
-        }
-
-        /// <summary>
-        /// 获取读取PLC地址的开始位置
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        protected int GetBeingAddress(string address)
-        {
-            //去掉V1025 前面的V
-            //address = address.Substring(1);
-            //I1.3地址的情况
-            if (address.IndexOf('.') < 0)
-                return int.Parse(address) * 8;
-            else
-            {
-                string[] temp = address.Split('.');
-                return Convert.ToInt32(temp[0]) * 8 + Convert.ToInt32(temp[1]);
-            }
-        }
-        #endregion
-
         #region IIoTBase
         public IoTResult<T> Read<T>(string address)
         {
-            var tType = typeof(T);
-            if (tType == typeof(bool))
-            {
-                var readResut = ReadBoolean(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(byte))
-            {
-                var readResut = ReadByte(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(float))
-            {
-                var readResut = ReadFloat(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(double))
-            {
-                var readResut = ReadDouble(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(short))
-            {
-                var readResut = ReadInt16(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(int))
-            {
-                var readResut = ReadInt32(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(long))
-            {
-                var readResut = ReadInt64(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(ushort))
-            {
-                var readResut = ReadUInt16(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(uint))
-            {
-                var readResut = ReadUInt32(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
-            else if (tType == typeof(ulong))
-            {
-                var readResut = ReadUInt64(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
+            //var tType = typeof(T);
+            //if (tType == typeof(bool))
+            //{
+            //    var readResut = ReadBoolean(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(byte))
+            //{
+            //    var readResut = ReadByte(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(float))
+            //{
+            //    var readResut = ReadFloat(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(double))
+            //{
+            //    var readResut = ReadDouble(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(short))
+            //{
+            //    var readResut = ReadInt16(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(int))
+            //{
+            //    var readResut = ReadInt32(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(long))
+            //{
+            //    var readResut = ReadInt64(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(ushort))
+            //{
+            //    var readResut = ReadUInt16(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(uint))
+            //{
+            //    var readResut = ReadUInt32(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else if (tType == typeof(ulong))
+            //{
+            //    var readResut = ReadUInt64(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
+            //else
+            //{
+            //    throw new NotImplementedException("暂不支持的类型");
+            //}
+
+            var info = Read<T>(address, 1);
+            if (info.IsSucceed)
+                return info.ToVal(info.Value.FirstOrDefault());
             else
-            {
-                throw new NotImplementedException("暂不支持的类型");
-            }
+                return info.ToVal(default(T));
         }
 
         public IoTResult<string> ReadString(string address, int length = -1, Encoding encoding = null)
@@ -1293,8 +1142,8 @@ namespace Ping9719.IoT.PLC
                 //获取长度
                 if (length < 0)
                 {
-                    var arg2 = ConvertArg(address);
-                    arg2.ReadWriteLength = 1;
+                    var arg2 = SiemensAddress.ConvertArg(address);
+                    arg2.Length = 1;
                     byte[] command2 = GetReadCommand(arg2);
                     //result.Requst = string.Join(" ", command2.Select(t => t.ToString("X2")));
                     var sendResult2 = Client.SendReceive(command2);
@@ -1309,8 +1158,8 @@ namespace Ping9719.IoT.PLC
                 }
 
                 //发送读取信息
-                var arg = ConvertArg(address);
-                arg.ReadWriteLength = Convert.ToUInt16(length);
+                var arg = SiemensAddress.ConvertArg(address);
+                arg.Length = Convert.ToUInt16(length);
                 byte[] command = GetReadCommand(arg);
 
                 var sendResult = Client.SendReceive(command);
@@ -1350,78 +1199,112 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            var tType = typeof(T);
-            var ynum = WordHelp.OccupyBitNum<T>();
-            if (tType == typeof(bool))
-                ynum = Convert.ToUInt16(number % 8 == 0 ? number / 8 : number / 8 + 1);
-            else
-                ynum = Convert.ToUInt16(number * ynum);
-
-            var readResut = Read(address, ynum, false);
-            if (readResut.IsSucceed)
+            try
             {
-                var obj = readResut.Value.ByteToObj<T>(Format, true);
+                bool isOneBool = false;
+                int address2 = 0;
+                var tType = typeof(T);
+                var ynum = WordHelp.OccupyBitNum<T>();
                 if (tType == typeof(bool))
-                    obj = obj.Take(number).ToArray();
+                {
+                    if (number == 1)
+                    {
+                        isOneBool = true;
+                        ynum = 1;
+                    }
+                    else
+                    {
+                        ynum = Convert.ToUInt16(number % 8 == 0 ? number / 8 : number / 8 + 1);
+                        var info = SiemensAddress.ConvertArg(address);
+                        address2 = info.Address2;
+                        if (address2 > 0)//跨长度补充
+                        {
+                            var v1 = 8 - address2;//剩下的数量
+                            var v2 = number < 8 ? number : number % 8;//读取数量
+                            if (v2 > v1)
+                            {
+                                ynum += 1;
+                            }
+                        }
+                    }
+                }
+                else
+                    ynum = Convert.ToUInt16(number * ynum);
 
-                return new IoTResult<IEnumerable<T>>(readResut, obj);
+                var readResut = Read(address, ynum, isOneBool);
+                if (readResut.IsSucceed)
+                {
+                    var obj = readResut.Value.ByteToObj<T>(Format, true);
+                    if (tType == typeof(bool))
+                    {
+                        obj = obj.Skip(address2).Take(number).ToArray();
+                    }
+
+                    return readResut.ToVal<IEnumerable<T>>(obj);
+                }
+                else
+                {
+                    return readResut.ToVal<IEnumerable<T>>();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return new IoTResult<IEnumerable<T>>(readResut, default);
+                return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
+            
         }
 
         public IoTResult Write<T>(string address, T value)
         {
-            if (value is bool boolv)
-            {
-                return Write(address, boolv);
-            }
-            else if (value is byte bytev)
-            {
-                return Write(address, bytev);
-            }
-            else if (value is sbyte sbytev)
-            {
-                return Write(address, sbytev);
-            }
-            else if (value is float floatv)
-            {
-                return Write(address, floatv);
-            }
-            else if (value is double doublev)
-            {
-                return Write(address, doublev);
-            }
-            else if (value is short Int16v)
-            {
-                return Write(address, Int16v);
-            }
-            else if (value is int Int32v)
-            {
-                return Write(address, Int32v);
-            }
-            else if (value is long Int64v)
-            {
-                return Write(address, Int64v);
-            }
-            else if (value is ushort UInt16v)
-            {
-                return Write(address, UInt16v);
-            }
-            else if (value is uint UInt32v)
-            {
-                return Write(address, UInt32v);
-            }
-            else if (value is ulong UInt64v)
-            {
-                return Write(address, UInt64v);
-            }
-            else
-            {
-                throw new NotImplementedException("暂不支持的类型");
-            }
+            //if (value is bool boolv)
+            //{
+            //    return Write(address, boolv);
+            //}
+            //else if (value is byte bytev)
+            //{
+            //    return Write(address, bytev);
+            //}
+            //else if (value is sbyte sbytev)
+            //{
+            //    return Write(address, sbytev);
+            //}
+            //else if (value is float floatv)
+            //{
+            //    return Write(address, floatv);
+            //}
+            //else if (value is double doublev)
+            //{
+            //    return Write(address, doublev);
+            //}
+            //else if (value is short Int16v)
+            //{
+            //    return Write(address, Int16v);
+            //}
+            //else if (value is int Int32v)
+            //{
+            //    return Write(address, Int32v);
+            //}
+            //else if (value is long Int64v)
+            //{
+            //    return Write(address, Int64v);
+            //}
+            //else if (value is ushort UInt16v)
+            //{
+            //    return Write(address, UInt16v);
+            //}
+            //else if (value is uint UInt32v)
+            //{
+            //    return Write(address, UInt32v);
+            //}
+            //else if (value is ulong UInt64v)
+            //{
+            //    return Write(address, UInt64v);
+            //}
+            //else
+            //{
+            //    throw new NotImplementedException("暂不支持的类型");
+            //}
+            return Write<T>(address, new T[] { value });
         }
 
         public IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
@@ -1438,12 +1321,24 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult Write<T>(string address, params T[] value)
         {
-            var tType = typeof(T);
-            if (tType == typeof(bool))
-                throw new NotImplementedException("暂不支持的类型");
+            try
+            {
+                var tType = typeof(T);
+                if (tType == typeof(bool))
+                {
+                    if (value.Length == 1)
+                        return Write(address, new byte[1] { (bool)(object)value[0] ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
+                    else
+                        throw new NotImplementedException("暂不支持写多个bool类型");
+                }
 
-            var obj = value.ObjToByte(Format);
-            return Write(address, obj, false);
+                var obj = value.ObjToByte(Format);
+                return Write(address, obj, false);
+            }
+            catch (Exception ex)
+            {
+                return IoTResult.Create().AddError(ex);
+            }
         }
         #endregion
     }

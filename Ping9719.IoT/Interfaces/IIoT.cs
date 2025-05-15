@@ -9,6 +9,9 @@ namespace Ping9719.IoT
 {
     public interface IIoT
     {
+        /// <summary>
+        /// 客户端
+        /// </summary>
         ClientBase Client { get; }
 
         /// <summary>
