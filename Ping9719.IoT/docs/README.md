@@ -56,7 +56,7 @@ Install-Package Ping9719.IoT
     - 温控 (TemperatureControl)
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
-        - 快克焊接机 (KuaiKeWeld)（不推荐） 
+        - 快克焊接机 (KuaiKeWeld)
 - [扩展 (Rests)](#扩展 (Rests))
     - [1.如何使用自定义协议 (Use a custom protocol)](#1.如何使用自定义协议 (Use a custom protocol))
 
@@ -82,8 +82,10 @@ client1.Client.Open();//打开
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
-client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+//重要！！！连接模式是非常重要的功能，有3种模式 
+client1.ConnectionMode = ConnectionMode.None;//手动。需要自己去打开和关闭，此方式比较灵活。
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接受会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 client1.Opened = (a) =>{Log.AddLog("链接成功")};
 client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
 client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
@@ -298,53 +300,52 @@ LRC.CheckLRC(bytes);
 ```
 
 # 设备和仪器 (Device)
+
+各种仪器需要长链接必须打开 `dev1.Client.Open();` 需要自动打开请设置 `dev1.Client.ConnectionMode = ConnectionMode.AutoOpen;` 以下列子中不在重复对客户端相关的描述或设置，非常重要或不一致除外。
+   
+
+
+## 科斯莫气密检测 (CosmoAirtight)
+```CSharp
+CosmoAirtight dev1 = new CosmoAirtight("COM1");//科斯莫
+```
+
 ## Fct
 ```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-MengXunFct dev1 = new MengXunFct(client1);
-dev1.Client.Open();
+MengXunFct dev1 = new MengXunFct("127.0.0.1");//盟讯电子
 ```
 ## 激光刻印 (Mark)
 ```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-DaZhuMark dev1 = new DaZhuMark(client1);//大族激光刻印
-HuaPuMark dev2 = new HuaPuMark(client1);//华普激光刻印
-dev1.Client.Open();
-dev2.Client.Open();
+DaZhuMark dev1 = new DaZhuMark("127.0.0.1");//大族
+HuaPuMark dev2 = new HuaPuMark("127.0.0.1");//华普
 ```
 ## 无线射频 (Rfid)
 ```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-BeiJiaFuRfid rfid = new BeiJiaFuRfid(client1);
-DongJiRfid rfid = new DongJiRfid(client1);
-TaiHeSenRfid rfid = new TaiHeSenRfid(client1);
-WanQuanRfid rfid = new WanQuanRfid(client1);
-rfid.Client.Open();
+BeiJiaFuRfid rfid1 = new BeiJiaFuRfid("127.0.0.1");//倍加福
+DongJiRfid rfid2 = new DongJiRfid("127.0.0.1");//东集
+TaiHeSenRfid rfid3 = new TaiHeSenRfid("127.0.0.1");//泰和森
+WanQuanRfid rfid4 = new WanQuanRfid("127.0.0.1");//万全
 
-//WanQuanRfid
-rfid.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
-rfid.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
+//万全使用方式 
+rfid4.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
+rfid4.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
 ```
 ## 扫码枪 (Scanner)
 ```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-HoneywellScanner dev1 = new HoneywellScanner(client1);
-MindeoScanner dev1 = new MindeoScanner(client1);
-dev1.Client.Open();
+HoneywellScanner dev1 = new HoneywellScanner("127.0.0.1");//霍尼韦尔
+MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
 ```
 ## 螺丝机 (Screw)
 ```CSharp
-TcpClient client1 = new TcpClient("127.0.0.1", 8080);
-MiLeScrew dev1 = new MiLeScrew(client1);
-dev1.Client.Open();
+MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 ```
 ## 温控 (TemperatureControl)
 ```CSharp
-//快克品牌不推荐
+//快克温控不推荐
 ```
 ## 焊接机 (Weld)
 ```CSharp
-//快克品牌不推荐
+KuaiKeWeld dev1 = new KuaiKeWeld("COM1");
 ```
 
 # 扩展 (Rests)
@@ -366,7 +367,7 @@ public class XXX
     //默认使用TcpClient
     public XXX(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
     //默认使用SerialPortClient
-    public XXX(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake = Handshake.None) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits, handshake)) { }
+    //public XXX(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake = Handshake.None) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits, handshake)) { }
 
     //这是一个示例，他发送“info1\r\n” 并等待返回字符串的结果
     public IoTResult ReadXXX()

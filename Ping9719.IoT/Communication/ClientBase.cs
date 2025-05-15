@@ -258,15 +258,15 @@ namespace Ping9719.IoT.Communication
     public enum ConnectionMode
     {
         /// <summary>
-        /// 手动
+        /// 手动。需要自己去打开和关闭，此方式比较灵活。
         /// </summary>
         Manual,
         /// <summary>
-        /// 自动打开。在没有执行Open()时每次发送和接受会自动打开和关闭。
+        /// 自动打开。没有执行Open()时每次发送和接受会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
         /// </summary>
         AutoOpen = 10,
         /// <summary>
-        /// 自动断线重连。在执行Open()后断开后会自动打开。
+        /// 自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
         /// </summary>
         AutoReconnection,
     }
