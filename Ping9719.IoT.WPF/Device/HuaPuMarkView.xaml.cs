@@ -47,7 +47,7 @@ namespace Ping9719.IoT.WPF
                 return;
             }
 
-            textBoxInfo.AppendText($"成功加载模板");
+            textBoxInfo.AppendText($"成功加载模板\r\n");
         }
 
         private void ksth(object sender, RoutedEventArgs e)
@@ -83,7 +83,7 @@ namespace Ping9719.IoT.WPF
                 return;
             }
 
-            textBoxInfo.AppendText($"打印完成，时间{bbb.TimeConsuming ?? 0}秒\r\n");
+            textBoxInfo.AppendText($"打印完成，时间{bbb.TimeConsuming?.TotalSeconds ?? 0}秒\r\n");
         }
 
         private void cxzt(object sender, RoutedEventArgs e)

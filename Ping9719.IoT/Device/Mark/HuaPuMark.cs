@@ -53,7 +53,7 @@ namespace Ping9719.IoT.Device.Mark
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
-        public HuaPuMark(string ip, int port = 1500, int timeout = 60000) : this(new TcpClient(ip, port)) { }
+        public HuaPuMark(string ip, int port = 2000, int timeout = 60000) : this(new TcpClient(ip, port)) { }
 
         /// <summary>
         /// 加载指定模板文件
@@ -69,7 +69,7 @@ namespace Ping9719.IoT.Device.Mark
                 if (!aaa.IsSucceed)
                     return aaa;
 
-                return Analysis(aaa.Value);
+                return Analysis(aaa);
             }
             catch (Exception ex)
             {
@@ -80,7 +80,6 @@ namespace Ping9719.IoT.Device.Mark
         /// <summary>
         /// 替换打印模板
         /// </summary>
-        /// <param name="id"></param>
         /// <param name="key">名称</param>
         /// <param name="value">值</param>
         /// <returns></returns>
@@ -93,7 +92,7 @@ namespace Ping9719.IoT.Device.Mark
                 if (!aaa.IsSucceed)
                     return aaa;
 
-                return Analysis(aaa.Value);
+                return Analysis(aaa);
             }
             catch (Exception ex)
             {
@@ -115,7 +114,7 @@ namespace Ping9719.IoT.Device.Mark
                 if (!aaa.IsSucceed)
                     return aaa;
 
-                return Analysis(aaa.Value);
+                return Analysis(aaa);
             }
             catch (Exception ex)
             {
@@ -135,7 +134,7 @@ namespace Ping9719.IoT.Device.Mark
                 if (!aaa.IsSucceed)
                     return aaa;
 
-                return Analysis(aaa.Value);
+                return Analysis(aaa);
             }
             catch (Exception ex)
             {
@@ -148,22 +147,22 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         /// <param name="str">返回的结果</param>
         /// <returns></returns>
-        private static IoTResult Analysis(string str)
+        private static IoTResult<string> Analysis(IoTResult<string> str)
         {
-            if (!str.EndsWith("\r\n"))
-                return IoTResult.Create().AddError("返回结果格式错误，结尾不是换行");
+            //if (!str.EndsWith("\r\n"))
+            //    return IoTResult.Create().AddError("返回结果格式错误，结尾不是换行");
 
-            if (byte.TryParse(str.Trim(), out byte b11))
+            if (byte.TryParse(str.Value.Trim(), out byte b11))
             {
                 if (b11 == 0)
-                    return IoTResult.Create();
+                    return str;
                 else if (errCode.ContainsKey(b11))
-                    return IoTResult.Create().AddError(errCode[b11]);
+                    return str.AddError(errCode[b11]);
                 else
-                    return IoTResult.Create().AddError($"返回结果格式错误，未知的错误代码[{b11}]");
+                    return str.AddError($"返回结果格式错误，未知的错误代码[{b11}]");
             }
             else
-                return IoTResult.Create().AddError($"返回结果格式错误，不是有效的数字[{str.Trim()}]");
+                return str.AddError($"返回结果格式错误，不是有效的数字[{str.Value.Trim()}]");
         }
     }
 }
