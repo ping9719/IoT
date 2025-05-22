@@ -13,6 +13,9 @@ namespace Ping9719.IoT.Device.Airtight
     /// </summary>
     public class CosmoAirtight
     {
+        //异常
+        //#00 00 00 80:BB
+        //#{机号} 00 {频号} {数据，错误}:{校验}
         public ClientBase Client { get; private set; }//通讯管道
 
         public CosmoAirtight(ClientBase client)
@@ -28,6 +31,7 @@ namespace Ping9719.IoT.Device.Airtight
         /// <summary>
         /// 启动
         /// </summary>
+        /// <returns></returns>
         public IoTResult<string> Start()
         {
             string comm = $"STT\r\n";
@@ -42,6 +46,30 @@ namespace Ping9719.IoT.Device.Airtight
         }
 
         /// <summary>
+        /// 启动并等待返回数据
+        /// </summary>
+        /// <returns>t1:错误信息，t2：正确的值</returns>
+        public IoTResult<Tuple<string, double>> StartWait(int time = 60000)
+        {
+            string comm = $"STT\r\n";
+            try
+            {
+                //#00 00 00 10:C2//已启动
+                //06 0D
+                var aa = Client.SendReceive(comm);
+                if (!aa.IsSucceed)
+                    return aa.ToVal<Tuple<string, double>>();
+
+                //#00 00 D +0.000:26
+                return Analysis(Client.ReceiveString(ReceiveMode.ParseTime(10, time)));
+            }
+            catch (Exception ex)
+            {
+                return IoTResult.Create<Tuple<string, double>>().AddError(ex);
+            }
+        }
+
+        /// <summary>
         /// 停止
         /// </summary>
         public IoTResult Stop()
@@ -49,6 +77,7 @@ namespace Ping9719.IoT.Device.Airtight
             string comm = $"STP\r\n";
             try
             {
+                //06 0D
                 return Client.SendReceive(comm);
             }
             catch (Exception ex)
@@ -60,16 +89,19 @@ namespace Ping9719.IoT.Device.Airtight
         /// <summary>
         /// 读取测试数据
         /// </summary>
-        public IoTResult<string> ReadTestData()
+        /// <returns>t1:错误信息，t2：正确的值</returns>
+        public IoTResult<Tuple<string, double>> ReadTestData()
         {
             string comm = $"RLD\r\n";
             try
             {
-                return Client.SendReceive(comm);
+                //#00 00 0 +0.000:3A
+                //#00 00 D +0.000:26
+                return Analysis(Client.SendReceive(comm));
             }
             catch (Exception ex)
             {
-                return IoTResult.Create<string>().AddError(ex);
+                return IoTResult.Create<Tuple<string, double>>().AddError(ex);
             }
         }
 
@@ -83,11 +115,48 @@ namespace Ping9719.IoT.Device.Airtight
             string comm = $"WCHN_{channel.ToString().PadLeft(2, '0')}\r\n";
             try
             {
+                //#00 00 00 01:C2
                 return Client.SendReceive(comm);
             }
             catch (Exception ex)
             {
                 return IoTResult.Create().AddError(ex);
+            }
+        }
+
+        private IoTResult<Tuple<string, double>> Analysis(IoTResult<string> str)
+        {
+            //#00 00 D +0.000:26
+            if (!str.IsSucceed)
+                return str.ToVal<Tuple<string, double>>();
+
+            var aa = str.Value.Split(new char[] { ' ', ':' });
+            if (aa.Length <= 4)
+                return str.ToVal<Tuple<string, double>>().AddError("返回数据长度不足");
+
+            if (aa[2] == "2" || aa[2] == "GOOD")
+            {
+                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>("", double.Parse(aa[2])));
+            }
+            else
+            {
+                string err = "未知错误";
+                if (aa[2] == "0")
+                    err = "未判断"; 
+                else if (aa[2] == "1")
+                    err = "Lo NG";
+                //else if (aa[2] == "2")
+                //    err = "GOOD";
+                else if (aa[2] == "3")
+                    err = "Hi NG";
+                else if (aa[2] == "4")
+                    err = "LL NG";
+                else if (aa[2] == "C")
+                    err = "HH NG";
+                else if (aa[2] == "D")
+                    err = "ERROR";
+
+                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>(err, 0));
             }
         }
     }
