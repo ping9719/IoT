@@ -7,60 +7,47 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Ping9719.IoT.Algorithm
 {
-    //public class Person2<T> where T : class
-    //{
-    //    /// <summary>
-    //    /// 待配对者
-    //    /// </summary>
-    //    public T Me { get; set; }
-    //    /// <summary>
-    //    /// 偏好列表
-    //    /// </summary>
-    //    public List<T> Preferences { get; set; } = new List<T>();
-    //    /// <summary>
-    //    /// 匹配完成的对象
-    //    /// </summary>
-    //    public T Match { get; set; }
-    //}
-
-    public class Person<T> where T : class
+    /// <summary>
+    /// 稳定婚姻配对项
+    /// </summary>
+    /// <typeparam name="T">项的类型</typeparam>
+    public class GaleShapleyItem<T> where T : class
     {
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        /// <param name="item">待配对者</param>
+        public GaleShapleyItem(T item)
+        {
+            Item = item;
+        }
+
         /// <summary>
         /// 待配对者
         /// </summary>
-        public T Me { get; set; }
+        public T Item { get; set; }
         /// <summary>
         /// 偏好列表
         /// </summary>
-        public List<Person<T>> Preferences { get; set; } = new List<Person<T>>();
+        public List<GaleShapleyItem<T>> Preferences { get; set; } = new List<GaleShapleyItem<T>>();
         /// <summary>
         /// 匹配完成的对象
         /// </summary>
-        public Person<T> Match { get; set; }
+        public GaleShapleyItem<T> Match { get; set; }
     }
 
     /// <summary>
     /// 稳定婚姻配对算法
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class GaleShapleyAlgorithm<T> where T : class
+    public static class GaleShapleyAlgorithm
     {
-        private List<Person<T>> mans, womens;
-
-        public GaleShapleyAlgorithm(List<Person<T>> mans)
+        /// <summary>
+        /// 开始计算
+        /// </summary>
+        public static void Run<T>(IEnumerable<GaleShapleyItem<T>> items) where T : class
         {
-            this.mans = mans;
-        }
-
-        //public GaleShapleyAlgorithm(List<Person<T>> mans, List<Person<T>> womens)
-        //{
-        //    this.mans = mans;
-        //    this.womens = womens;
-        //}
-
-        public void Run()
-        {
-            foreach (var man in mans)
+            foreach (var man in items)
             {
                 man.Match = null;
             }
@@ -68,11 +55,11 @@ namespace Ping9719.IoT.Algorithm
             while (true)
             {
                 bool anyMatchMade = false;
-                foreach (var man in mans)
+                foreach (var man in items)
                 {
                     if (man.Match == null)
                     {
-                        anyMatchMade |= Propose(man);
+                        anyMatchMade |= Propose(man);//任意一个是true，则是true
                     }
                 }
 
@@ -83,9 +70,9 @@ namespace Ping9719.IoT.Algorithm
             }
         }
 
-        private bool Propose(Person<T> mans)
+        private static bool Propose<T>(GaleShapleyItem<T> man) where T : class
         {
-            var nextPreference = mans.Preferences.Find(woman => woman.Match == null || woman.Preferences.IndexOf(mans) < woman.Preferences.IndexOf(woman.Match));
+            var nextPreference = man.Preferences.Find(woman => woman.Match == null || woman.Preferences.IndexOf(man) < woman.Preferences.IndexOf(woman.Match));
             if (nextPreference != null)
             {
                 if (nextPreference.Match != null)
@@ -93,8 +80,8 @@ namespace Ping9719.IoT.Algorithm
                     nextPreference.Match.Match = null; // 解除当前匹配
                 }
 
-                mans.Match = nextPreference;
-                nextPreference.Match = mans;
+                man.Match = nextPreference;
+                nextPreference.Match = man;
 
                 return true;
             }

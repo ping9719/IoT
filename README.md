@@ -38,8 +38,10 @@ client1.Client.Open();//打开
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
-client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+//重要！！！连接模式是非常重要的功能，有3种模式 
+client1.ConnectionMode = ConnectionMode.None;//手动。需要自己去打开和关闭，此方式比较灵活。
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接受会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 client1.Opened = (a) =>{Log.AddLog("链接成功")};
 client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
 client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
@@ -60,7 +62,7 @@ else
 ```
 
 # Ping9719.IoT
-- 通讯 (Communication)
+- [通讯 (Communication)]
     - TcpClient
     - TcpServer （待开发） 
     - SerialPortClient
@@ -69,25 +71,28 @@ else
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
-- Modbus
+- [Modbus]
     - ModbusRtuClient
     - ModbusTcpClient
     - ModbusAsciiClient
-- PLC
+- [PLC]
     - 罗克韦尔 (AllenBradleyCipClient) （进行中）   
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
     - 西门子 (SiemensS7Client)
-- 机器人 (Robot)
+- [机器人 (Robot)]
     - 爱普生 (EpsonRobot) （进行中） 
-- 算法 (Algorithm)
+- [算法 (Algorithm)]
     - CRC
     - LRC
     - 傅立叶算法(Fourier) （待开发） 
+    - 稳定婚姻配对算法(GaleShapleyAlgorithm)
     - PID （待开发） 
     - RSA （待开发） 
-- 设备和仪器 (Device)
+- [设备和仪器 (Device)]
+    - 气密检测 (Airtight)
+        - 科斯莫气密检测 (CosmoAirtight)
     - Fct
         - 盟讯电子 (MengXunFct)
     - 激光刻印 (Mark)
@@ -107,5 +112,5 @@ else
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
         - 快克焊接机 (KuaiKeWeld)（不推荐） 
-- 扩展 (Rests)
-    - 1.如何使用自定义协议 (Use a custom protocol)
+    - 扩展 (Rests)
+        - 1.如何使用自定义协议 (Use a custom protocol)

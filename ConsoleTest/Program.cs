@@ -1,4 +1,5 @@
 ﻿using Ping9719.IoT;
+using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using Ping9719.IoT.Device.Fct;
@@ -13,6 +14,31 @@ namespace ConsoleTest
     {
         static void Main(string[] args)
         {
+            //        private List<GaleShapleyItem<T>> mans;
+            //private List<T> womens;
+
+            //1.参与配对的所有人
+            var ms = new string[] { "M0", "M1", "M2", "M3", "M4", };
+            var ws = new string[] { "W0", "W1", "W2", "W3", "W4", };
+            //2.转为项
+            var msi = ms.Select(o => new GaleShapleyItem<string>(o)).ToList();
+            var wsi = ms.Select(o => new GaleShapleyItem<string>(o)).ToList();
+            //3.配置偏好列表。假如喜欢关系如下：（喜欢程度从高到低）
+            //M0❤W1,W0   M1❤W0,W1   M2❤W0,W1,W2,W3,W4   M3❤W3   M4❤W3
+            msi[0].Preferences = new List<GaleShapleyItem<string>>() { wsi[1], wsi[0] };
+            msi[1].Preferences = new List<GaleShapleyItem<string>>() { wsi[0], wsi[1] };
+            msi[2].Preferences = new List<GaleShapleyItem<string>>() { wsi[0], wsi[1], wsi[2], wsi[3], wsi[4] };
+            msi[3].Preferences = new List<GaleShapleyItem<string>>() { wsi[3] };
+            msi[4].Preferences = new List<GaleShapleyItem<string>>() { wsi[3] };
+            //4.开始计算
+            GaleShapleyAlgorithm.Run(msi);
+            //5.打印结果
+            foreach (var item in msi)
+            {
+                //M0❤M1   M1❤M0   M2❤M2   M3❤M3   M4❤null
+                Console.Write($"{item.Item}❤{(item.Match?.Item) ?? "null"}   ");
+            }
+
             //DCBA:0100
             var aaaa = BitConverter.GetBytes((long)1161981756646125696);
             //var asdasd = ModbusInfo.AddressAnalysis("100", 1);
