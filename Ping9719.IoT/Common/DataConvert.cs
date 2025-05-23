@@ -50,6 +50,25 @@ namespace Ping9719.IoT.Common
         }
 
         /// <summary>
+        /// 数组是否相等
+        /// </summary>
+        /// <param name="byteArray"></param>
+        /// <param name="byteArray2"></param>
+        /// <returns></returns>
+        public static bool ArrayEquals(this byte[] byteArray, byte[] byteArray2)
+        {
+            if (byteArray.Length != byteArray2.Length)
+                return false;
+
+            for (int i = 0; i < byteArray.Length; i++)
+            {
+                if (byteArray[i] != byteArray2[i])
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// 16进制字符串转字节数组
         /// </summary>
         /// <param name="str16"></param>

@@ -80,11 +80,11 @@ namespace Ping9719.IoT.WPF
             var bbb = DeviceData.Start();
             if (!bbb.IsSucceed)
             {
-                textBoxInfo.AppendText($"{bbb.Value}；{bbb.ErrorText}\r\n");
+                textBoxInfo.AppendText($"失败；{bbb.ErrorText}\r\n");
                 return;
             }
 
-            textBoxInfo.AppendText($"{bbb.Value}\r\n");
+            textBoxInfo.AppendText($"成功\r\n");
         }
 
         private void cxzt(object sender, RoutedEventArgs e)
@@ -95,14 +95,14 @@ namespace Ping9719.IoT.WPF
                 return;
             }
 
-            var bbb = DeviceData.Start();
+            var bbb = DeviceData.Stop();
             if (!bbb.IsSucceed)
             {
-                textBoxInfo.AppendText($"{bbb.Value}；{bbb.ErrorText}\r\n");
+                textBoxInfo.AppendText($"失败；{bbb.ErrorText}\r\n");
                 return;
             }
 
-            textBoxInfo.AppendText($"{bbb.Value}\r\n");
+            textBoxInfo.AppendText($"成功\r\n");
         }
     }
 }

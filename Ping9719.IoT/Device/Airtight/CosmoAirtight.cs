@@ -1,4 +1,5 @@
-﻿using Ping9719.IoT.Communication;
+﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -13,6 +14,7 @@ namespace Ping9719.IoT.Device.Airtight
     /// </summary>
     public class CosmoAirtight
     {
+        static byte[] OkByte = new byte[] { 0x06, 0x0d };
         //异常
         //#00 00 00 80:BB
         //#{机号} 00 {频号} {数据，错误}:{校验}
@@ -32,12 +34,16 @@ namespace Ping9719.IoT.Device.Airtight
         /// 启动
         /// </summary>
         /// <returns></returns>
-        public IoTResult<string> Start()
+        public IoTResult Start()
         {
             string comm = $"STT\r\n";
             try
             {
-                return Client.SendReceive(comm);
+                var aa = Client.SendReceive(Client.Encoding.GetBytes(comm));
+                if (!aa.IsSucceed)
+                    return aa;
+                aa.IsSucceed = aa.Value.ArrayEquals(OkByte);
+                return aa;
             }
             catch (Exception ex)
             {
@@ -112,11 +118,15 @@ namespace Ping9719.IoT.Device.Airtight
         /// <returns></returns>
         public IoTResult SetChannel(int channel)
         {
-            string comm = $"WCHN_{channel.ToString().PadLeft(2, '0')}\r\n";
+            string comm = $"WCHN {channel.ToString().PadLeft(2, '0')}\r\n";
             try
             {
                 //#00 00 00 01:C2
-                return Client.SendReceive(comm);
+                var aa = Client.SendReceive(Client.Encoding.GetBytes(comm));
+                if (!aa.IsSucceed)
+                    return aa;
+                aa.IsSucceed = aa.Value.ArrayEquals(OkByte);
+                return aa;
             }
             catch (Exception ex)
             {
@@ -127,6 +137,7 @@ namespace Ping9719.IoT.Device.Airtight
         private IoTResult<Tuple<string, double>> Analysis(IoTResult<string> str)
         {
             //#00 00 D +0.000:26
+            //#00 00 9 -0999.:14
             if (!str.IsSucceed)
                 return str.ToVal<Tuple<string, double>>();
 
@@ -136,7 +147,8 @@ namespace Ping9719.IoT.Device.Airtight
 
             if (aa[2] == "2" || aa[2] == "GOOD")
             {
-                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>("", double.Parse(aa[2])));
+                double.TryParse(aa[3], out double bbb);
+                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>("", bbb));
             }
             else
             {
@@ -156,7 +168,8 @@ namespace Ping9719.IoT.Device.Airtight
                 else if (aa[2] == "D")
                     err = "ERROR";
 
-                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>(err, 0));
+                double.TryParse(aa[3], out double bbb);
+                return str.ToVal<Tuple<string, double>>(new Tuple<string, double>(err, bbb));
             }
         }
     }
