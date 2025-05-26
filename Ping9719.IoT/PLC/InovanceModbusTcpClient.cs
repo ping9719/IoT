@@ -12,7 +12,7 @@ namespace Ping9719.IoT.PLC
     /// <summary>
     /// 汇川plc
     /// </summary>
-    public class InovanceModbusTcpClient : ModbusTcpClient
+    public class InovanceModbusTcpClient : ModbusTcpClient, IIoT
     {
         /// <summary>
         /// 
