@@ -1,14 +1,12 @@
 ﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Ping9719.IoT.Communication;
 
 namespace Ping9719.IoT.PLC
 {
@@ -17,13 +15,8 @@ namespace Ping9719.IoT.PLC
     /// https://blog.csdn.net/lishiming0308/article/details/85243041
     /// https://www.cnblogs.com/ChuFeiFan/p/10868241.html
     /// </summary>
-    public class AllenBradleyCipClient : SocketBase, IIoTBase
+    public class AllenBradleyCipClient : IIoT
     {
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
-
         /// <summary>
         /// 插槽
         /// </summary>
@@ -38,47 +31,17 @@ namespace Ping9719.IoT.PLC
 
         public byte[] BoolTrueByteVal = new byte[] { 0xFF, 0xFF };
 
-        public AllenBradleyCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500)
+        public ClientBase Client { get; private set; }
+        public AllenBradleyCipClient(ClientBase client, byte slot = 0, int timeout = 1500)
         {
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
-            Slot = slot;
-        }
-
-        /// <summary>
-        /// 会话句柄
-        /// </summary>
-        public readonly byte[] SessionByte = new byte[] { 0, 0, 0, 0 };
-
-        /// <summary>
-        /// 会话句柄(由AB PLC生成)
-        /// </summary>
-        public uint Session => BitConverter.ToUInt32(SessionByte, 0);
-
-        /// <summary>
-        /// 打开连接（如果已经是连接状态会先关闭再打开）
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Connect()
-        {
-            var result = new IoTResult();
-            SafeClose();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            try
+            Client = client;
+            Client.ReceiveMode = ReceiveMode.ParseTime();
+            Client.Encoding = Encoding.UTF8;
+            Client.TimeOut = timeout;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            Client.IsAutoDiscard = true;
+            Client.Opened = (a) =>
             {
-                //超时时间设置
-                socket.ReceiveTimeout = timeout;
-                socket.SendTimeout = timeout;
-
-                //连接
-                //socket.Connect(ipEndPoint);
-                IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-                //阻塞当前线程           
-                if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-                    throw new TimeoutException("连接超时");
-                socket.EndConnect(connectResult);
-
                 //注册命令
                 byte[] RegisteredCommand = new byte[28] {
                     0x65,0x00,//注册请求
@@ -90,20 +53,16 @@ namespace Ping9719.IoT.PLC
                     0x01,0x00,//协议版本（0x0001）
                     0x00,0x00,//选项标记（0x0000
                 };
-                result.Requests.Add(RegisteredCommand);
-                socket.Send(RegisteredCommand);
 
-                var socketReadResul = SocketRead(28);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var response = socketReadResul.Value;
-                result.Responses.Add(response);
-
-                //会话句柄
-                SessionByte[0] = response[4];
-                SessionByte[1] = response[5];
-                SessionByte[2] = response[6];
-                SessionByte[3] = response[7];
+                var socketReadResul = Client.SendReceive(RegisteredCommand);
+                if (!socketReadResul.IsSucceed || socketReadResul.Value == null || socketReadResul.Value.Length < 8)
+                {
+                    SessionByte[0] = 0;
+                    SessionByte[1] = 0;
+                    SessionByte[2] = 0;
+                    SessionByte[3] = 0;
+                    throw new Exception("打开cip获取会话句柄失败。");
+                }
 
                 //打开扩展请求
                 {
@@ -133,52 +92,71 @@ namespace Ping9719.IoT.PLC
                         0xc0, 0x80, 0xa7, 0x02, 0x02, 0x00, 0x00, 0x00, 0x80, 0x84, 0x1e, 0x00, 0xa0, 0x0f, 0x00, 0x42, 0x80, 0x84, 0x1e, 0x00, 0xa0, 0x0f, 0x00, 0x42, 0xa3, 0x03, 0x01, 0x00,
                         0x20, 0x02, 0x24, 0x01
                     };
-                    var aaa = SendPackageReliable(command);
+                    var aaa = Client.SendReceive(command);
                     if (!aaa.IsSucceed || aaa.Value.Length < 43)
                     {
-                        aaa.IsSucceed = false;
-                        return aaa;
+                        throw new Exception("打开扩展请求失败。");
                     }
                     if (BitConverter.ToUInt16(aaa.Value, 41) != 0)
                     {
-                        aaa.IsSucceed = false;
-                        aaa.AddError("打开扩展请求失败，错误码：" + BitConverter.ToUInt16(aaa.Value, 41));
-                        return aaa;
+                        throw new Exception("打开扩展请求失败，错误码：" + BitConverter.ToUInt16(aaa.Value, 41));
                     }
                 }
-            }
-            catch (Exception ex)
+
+                var response = socketReadResul.Value;
+                //会话句柄
+                SessionByte[0] = response[4];
+                SessionByte[1] = response[5];
+                SessionByte[2] = response[6];
+                SessionByte[3] = response[7];
+
+            };
+            Client.Closing = (a) =>
             {
-                SafeClose();
-                result.AddError(ex);
-            }
-            return result.ToEnd();
+                try
+                {
+                    byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                    Client.Send(command);
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                return true;
+            };
+
+            Slot = slot;
         }
+        public AllenBradleyCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500) : this(new TcpClient(ip, port), slot, timeout) { }
+
+
+        /// <summary>
+        /// 会话句柄
+        /// </summary>
+        public readonly byte[] SessionByte = new byte[] { 0, 0, 0, 0 };
+
+        /// <summary>
+        /// 会话句柄(由AB PLC生成)
+        /// </summary>
+        public uint Session => BitConverter.ToUInt32(SessionByte, 0);
 
         #region Read
         public IoTResult<object> Read(string address, int len = 1)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<object>(connectResult);
-                }
-            }
             var result = new IoTResult<object>();
             try
             {
                 var cpiadd = AllenBradleyAddress.Parse(address);
                 //var command = GetReadCommand(address, (UInt16)address.Length);
                 var command = GetReadCommand2(cpiadd);
-                
+
                 //发送命令 并获取响应报文
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return new IoTResult<object>() { IsSucceed = false };
                 var dataPackage = sendResult.Value;
-                
+
 
                 //int16 10
                 //0A 00 02 00 CC 00 00 00 C3 00 0A 00
@@ -269,27 +247,9 @@ namespace Ping9719.IoT.PLC
 
 
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -432,8 +392,8 @@ namespace Ping9719.IoT.PLC
                                                                //长度
                 Header[2] = BitConverter.GetBytes((short)(CommandSpecificData.Length + CipMessage.Count))[0];
                 Header[3] = BitConverter.GetBytes((short)(CommandSpecificData.Length + CipMessage.Count))[1];
-                CommandSpecificData[18] = BitConverter.GetBytes((short)(CipMessage.Count+2))[0];
-                CommandSpecificData[19] = BitConverter.GetBytes((short)(CipMessage.Count+2))[1];
+                CommandSpecificData[18] = BitConverter.GetBytes((short)(CipMessage.Count + 2))[0];
+                CommandSpecificData[19] = BitConverter.GetBytes((short)(CipMessage.Count + 2))[1];
                 CipMessage[1] = (byte)((CipMessage.Count - 4) / 2);
 
                 aadd = Header.Concat(CommandSpecificData).Concat(CipMessage).ToArray();
@@ -509,21 +469,12 @@ namespace Ping9719.IoT.PLC
             }
             return aadd;
         }
-        
 
         #endregion
 
         #region Write
         public IoTResult Write(string address, CipVariableType typeCode, byte[] data)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
             IoTResult result = new IoTResult();
             try
             {
@@ -531,13 +482,13 @@ namespace Ping9719.IoT.PLC
                 //发送写入信息
                 //var arg = ConvertWriteArg(address, data, false);
                 byte[] command = GetWriteCommand2(address, typeCode, data);
-                
-                var sendResult = SendPackageReliable(command);
+
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return sendResult;
 
                 var dataPackage = sendResult.Value;
-                
+
 
                 //var count = BitConverter.ToUInt16(dataPackage, 38);//数据总长度
                 var isok = BitConverter.ToUInt16(dataPackage, 42);//合格
@@ -547,27 +498,9 @@ namespace Ping9719.IoT.PLC
                 if (isok != 0)
                     throw new Exception("读取失败，错误代码" + isok);
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
