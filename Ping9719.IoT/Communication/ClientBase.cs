@@ -135,7 +135,7 @@ namespace Ping9719.IoT.Communication
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
         /// <summary>
-        /// 发送并等待接受
+        /// 发送并等待接受为字节
         /// </summary>
         /// <param name="data"></param>
         /// <param name="receiveMode"></param>
@@ -148,6 +148,13 @@ namespace Ping9719.IoT.Communication
         {
             var isok = SendReceive((encoding ?? Encoding).GetBytes(data), receiveMode);
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
+        }
+        /// <summary>
+        /// 发送为字符串并等待结果为字节
+        /// </summary>
+        public virtual IoTResult<byte[]> SendReceiveToByte(string data, ReceiveMode receiveMode = null, Encoding encoding = null)
+        {
+            return SendReceive((encoding ?? Encoding).GetBytes(data), receiveMode);
         }
 
         /// <summary>
