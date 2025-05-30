@@ -15,9 +15,10 @@ namespace Ping9719.IoT.Communication
     /// <summary>
     /// Tcp客户端
     /// </summary>
-    public class TcpClient : ClientBase
+    public class TcpClient : ClientBase, INetwork
     {
         public override bool IsOpen => tcpClient?.Connected ?? false && IsOpen2;
+        public Socket Socket => tcpClient?.Client;
 
         string ip; int port;
 
