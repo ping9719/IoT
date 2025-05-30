@@ -40,11 +40,11 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public virtual bool IsAutoDiscard { get; set; }
         /// <summary>
-        /// 字符串编码
+        /// 字符串编码，默认UTF8
         /// </summary>
         public virtual Encoding Encoding { get; set; } = Encoding.UTF8;
         /// <summary>
-        /// 超时（发送、接受、链接）（毫秒）-1永久
+        /// 超时（发送、接受、链接）（毫秒）-1永久，默认3000
         /// </summary>
         public virtual int TimeOut { get; set; } = 3000;
         /// <summary>
@@ -126,6 +126,12 @@ namespace Ping9719.IoT.Communication
         /// <returns></returns>
         public abstract IoTResult<byte[]> Receive(ReceiveMode receiveMode = null);
         /// <summary>
+        /// 接受
+        /// </summary>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <returns></returns>
+        public virtual IoTResult<byte[]> Receive(int timeOut) => Receive(ReceiveMode.SetTimeOut(ReceiveMode, timeOut));
+        /// <summary>
         /// 接受为字符串
         /// </summary>
         /// <returns></returns>
@@ -135,12 +141,28 @@ namespace Ping9719.IoT.Communication
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
         /// <summary>
+        /// 接受为字符串
+        /// </summary>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public virtual IoTResult<string> ReceiveString(int timeOut, Encoding encoding = null) => ReceiveString(ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
+
+
+        /// <summary>
         /// 发送并等待接受为字节
         /// </summary>
         /// <param name="data"></param>
         /// <param name="receiveMode"></param>
         /// <returns></returns>
         public abstract IoTResult<byte[]> SendReceive(byte[] data, ReceiveMode receiveMode = null);
+        /// <summary>
+        /// 发送并等待接受为字节
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <returns></returns>
+        public virtual IoTResult<byte[]> SendReceive(byte[] data, int timeOut) => SendReceive(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut));
         /// <summary>
         /// 发送并等待接受为字符串
         /// </summary>
@@ -150,12 +172,43 @@ namespace Ping9719.IoT.Communication
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
         /// <summary>
+        /// 发送并等待接受为字符串
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public virtual IoTResult<string> SendReceive(string data, int timeOut, Encoding encoding = null) => SendReceive(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
+
+
+        /// <summary>
         /// 发送为字符串并等待结果为字节
         /// </summary>
-        public virtual IoTResult<byte[]> SendReceiveToByte(string data, ReceiveMode receiveMode = null, Encoding encoding = null)
+        public virtual IoTResult<byte[]> SendReceiveToByte(string data, ReceiveMode receiveMode = null, Encoding encoding = null) => SendReceive((encoding ?? Encoding).GetBytes(data), receiveMode);
+        /// <summary>
+        /// 发送为字符串并等待结果为字节
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public virtual IoTResult<byte[]> SendReceiveToByte(string data, int timeOut, Encoding encoding = null) => SendReceiveToByte(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
+        /// <summary>
+        /// 发送为字节并等待结果为字符串
+        /// </summary>
+        public virtual IoTResult<string> SendReceiveToString(byte[] data, ReceiveMode receiveMode = null, Encoding encoding = null)
         {
-            return SendReceive((encoding ?? Encoding).GetBytes(data), receiveMode);
+            var isok = SendReceive(data, receiveMode);
+            return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
+        /// <summary>
+        /// 发送为字节并等待结果为字符串
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public virtual IoTResult<string> SendReceiveToString(byte[] data, int timeOut, Encoding encoding = null) => SendReceiveToString(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
 
         /// <summary>
         /// 是否超时
@@ -182,6 +235,11 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class ReceiveMode
     {
+        private ReceiveMode()
+        {
+
+        }
+
         /// <summary>
         /// 接受数据的方式
         /// </summary>
@@ -229,6 +287,14 @@ namespace Ping9719.IoT.Communication
         /// <param name="timeOut">超时（毫秒，-1永久 -2默认）</param>
         /// <returns></returns>
         public static ReceiveMode ParseToString(string endString = null, int timeOut = -2) => new ReceiveMode() { Type = ReceiveModeEnum.ToString, Data = endString ?? Environment.NewLine, TimeOut = timeOut };
+
+        /// <summary>
+        /// 初始化一个新对象并重新设置超时
+        /// </summary>
+        /// <param name="mode">响应模式</param>
+        /// <param name="timeOut">超时（毫秒，-1永久 -2默认）</param>
+        /// <returns></returns>
+        public static ReceiveMode SetTimeOut(ReceiveMode mode, int timeOut) => new ReceiveMode() { Type = mode.Type, Data = mode.Data, TimeOut = timeOut };
     }
 
     /// <summary>
