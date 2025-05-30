@@ -1,12 +1,11 @@
 ﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Ping9719.IoT.Communication;
 
 namespace Ping9719.IoT.PLC
 {
@@ -14,7 +13,7 @@ namespace Ping9719.IoT.PLC
     /// 欧姆龙客户端（Fins协议）
     /// https://flat2010.github.io/2020/02/23/Omron-Fins%E5%8D%8F%E8%AE%AE/
     /// </summary>
-    public class OmronFinsClient : SocketBase, IIoTBase
+    public class OmronFinsClient : IIoT
     {
         private EndianFormat endianFormat;
 
@@ -29,16 +28,6 @@ namespace Ping9719.IoT.PLC
             0x00, 0x00, 0x00, 0x00,//Error Code字段
             0x00, 0x00, 0x00, 0x0B //Client/Server Node Address字段
         };
-
-        /// <summary>
-        /// 版本
-        /// </summary>
-        public string Version => "OmronFins";
-
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
 
         /// <summary>
         /// DA2(即Destination unit address，目标单元地址)
@@ -58,134 +47,76 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         private byte DA1 { get; set; } = 0x01;
 
-        /// <summary>
-        /// 字符串编码格式。默认ASCII
-        /// </summary>
-        public Encoding Encoding { get; set; } = Encoding.ASCII;
-
+        public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
-        /// 
+        /// 初始化
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <param name="timeout"></param>
-        /// <param name="endianFormat"></param>
-        public OmronFinsClient(string ip, int port = 9600, int timeout = 1500, EndianFormat endianFormat = EndianFormat.CDAB)
+        /// <param name="client">客户端</param>
+        /// <param name="format">数据格式</param>
+        /// <param name="stationNumber">站号</param>
+        public OmronFinsClient(ClientBase client, int timeout = 1500, EndianFormat endianFormat = EndianFormat.CDAB)
         {
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
-            this.endianFormat = endianFormat;
-        }
-
-        /// <summary>
-        /// 打开连接（如果已经是连接状态会先关闭再打开）
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Connect()
-        {
-            var result = new IoTResult();
-            SafeClose();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            Client = client;
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseByteAll();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            Client.IsAutoDiscard = true;
+            Client.Opened = (a) =>
             {
-                //超时时间设置
-                socket.ReceiveTimeout = timeout;
-                socket.SendTimeout = timeout;
-
-                //socket.Connect(ipEndPoint);
-                IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-                //阻塞当前线程           
-                if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-                    throw new TimeoutException("连接超时");
-                socket.EndConnect(connectResult);
-
                 BasicCommand[19] = SA1;
-                result.Requests.Add(BasicCommand);
-                socket.Send(BasicCommand);
 
-                var socketReadResul = SocketRead(8);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var head = socketReadResul.Value;
-
-                byte[] buffer = new byte[4];
-                buffer[0] = head[7];
-                buffer[1] = head[6];
-                buffer[2] = head[5];
-                buffer[3] = head[4];
-                var length = BitConverter.ToInt32(buffer, 0);
-
-                socketReadResul = SocketRead(length);
-                if (!socketReadResul.IsSucceed)
-                    return socketReadResul;
-                var content = socketReadResul.Value;
-
-                var headContent = head.Concat(content).ToArray();
-                result.Responses.Add(headContent);
-                // 服务器节点编号
-                if (headContent.Length >= 24)
+                var info1 = Client.SendReceive(BasicCommand);
+                if (!info1.IsSucceed)
                 {
-                    SA1 = headContent[19];
-                    DA1 = headContent[23];
+                    Client.Close();
+                    throw new Exception(info1.ErrorText);
+                }
+
+                //4-7是Length字段 表示其后所有字段的总长度
+                //byte[] buffer = new byte[4];
+                //buffer[0] = head[7];
+                //buffer[1] = head[6];
+                //buffer[2] = head[5];
+                //buffer[3] = head[4];
+                //var length = BitConverter.ToInt32(buffer, 0);
+
+                // 服务器节点编号
+                if (info1.Value.Length >= 24)
+                {
+                    SA1 = info1.Value[19];
+                    DA1 = info1.Value[23];
                 }
                 else
                 {
                     SA1 = 0x0B;
-                    DA1 = Convert.ToByte(ipEndPoint.Address.ToString().Substring(ipEndPoint.Address.ToString().LastIndexOf(".") + 1));
+
+                    if (Client is INetwork network)
+                    {
+                        //Socket.LocalEndPoint = {[::ffff:127.0.0.1]:60521}
+                        var da = network?.Socket?.LocalEndPoint?.ToString()?.Split(']')?.ElementAtOrDefault(0)?.Split('.')?.LastOrDefault() ?? "0";
+                        DA1 = Convert.ToByte(da);
+                    }
+                    else
+                    {
+                        DA1 = 0x00;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                SafeClose();
-                result.AddError(ex);
-            }
-            return result.ToEnd();
+
+            };
+
+            this.endianFormat = endianFormat;
         }
 
         /// <summary>
-        /// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
+        /// 初始化
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public override IoTResult<byte[]> SendPackageSingle(byte[] command)
-        {
-            //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            lock (this)
-            {
-                IoTResult<byte[]> result = new IoTResult<byte[]>();
-                try
-                {
-                    socket.Send(command);
-                    var socketReadResul = SocketRead(8);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var head = socketReadResul.Value;
-
-                    byte[] buffer = new byte[4];
-                    buffer[0] = head[7];
-                    buffer[1] = head[6];
-                    buffer[2] = head[5];
-                    buffer[3] = head[4];
-                    //4-7是Length字段 表示其后所有字段的总长度
-                    var contentLength = BitConverter.ToInt32(buffer, 0);
-                    socketReadResul = SocketRead(contentLength);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
-
-                    result.Value = head.Concat(dataPackage).ToArray();
-                    return result.ToEnd();
-                }
-                catch (Exception ex)
-                {
-                    
-                    result.AddError(ex);
-                    
-                    return result.ToEnd();
-                }
-            }
-        }
+        /// <param name="ip">ip地址</param>
+        /// <param name="port">端口</param>
+        /// <param name="format">数据格式</param>
+        /// <param name="stationNumber">站号</param>
+        public OmronFinsClient(string ip, int port = 1500, int timeout = 1500, EndianFormat endianFormat = EndianFormat.CDAB) : this(new TcpClient(ip, port), timeout, endianFormat) { }
 
         #region Read
         /// <summary>
@@ -198,14 +129,6 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult<byte[]> Read(string address, ushort length, bool isBit = false, bool setEndian = true)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return new IoTResult<byte[]>(connectResult);
-                }
-            }
             var result = new IoTResult<byte[]>();
             try
             {
@@ -214,7 +137,7 @@ namespace Ping9719.IoT.PLC
                 byte[] command = GetReadCommand(arg, length);
                 result.Requests.Add(command);
                 //发送命令 并获取响应报文
-                var sendResult = SendPackageReliable(command);
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return sendResult;
                 var dataPackage = sendResult.Value;
@@ -227,27 +150,9 @@ namespace Ping9719.IoT.PLC
                 else
                     result.Value = responseData.ToArray();
             }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
@@ -559,52 +464,27 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult Write(string address, byte[] data, bool isBit = false)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
-            IoTResult result = new IoTResult();
+            IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
             try
             {
                 data = data.Reverse().ToArray().ByteFormatting(endianFormat);
-                //发送写入信息
                 var arg = ConvertArg(address, isBit: isBit);
                 byte[] command = GetWriteCommand(arg, data);
-                result.Requests .Add(command);
-                var sendResult = SendPackageReliable(command);
+
+                sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return sendResult;
 
-                var dataPackage = sendResult.Value;
-                result.Responses.Add(dataPackage);
-            }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
+                if (sendResult.Value.Length <= 0)
                 {
-                    result.AddError("连接超时") ;
+
                 }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
             }
             catch (Exception ex)
             {
-                result.AddError(ex);
-                SafeClose();
+                sendResult.AddError(ex);
             }
-            finally
-            {
-                if (isAutoOpen) Dispose();
-            }
-            return result.ToEnd();
+            return sendResult.ToEnd();
         }
 
         /// <summary>
@@ -616,14 +496,6 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult WriteString(string address, byte[] data, bool isBit = false)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
             IoTResult result = new IoTResult();
             try
             {
@@ -631,35 +503,17 @@ namespace Ping9719.IoT.PLC
                 //发送写入信息
                 var arg = ConvertArg(address, isBit: isBit);
                 byte[] command = GetWriteCommand(arg, data);
-                
-                var sendResult = SendPackageReliable(command);
+
+                var sendResult = Client.SendReceive(command);
                 if (!sendResult.IsSucceed)
                     return sendResult;
 
                 var dataPackage = sendResult.Value;
-                
-            }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError ( "连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
+
             }
             catch (Exception ex)
-            {;
-                result.AddError(ex);
-                SafeClose();
-            }
-            finally
             {
-                if (isAutoOpen) Dispose();
+                result.AddError(ex);
             }
             return result.ToEnd();
         }
