@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using Ping9719.IoT.Communication;
@@ -13,167 +12,41 @@ namespace Ping9719.IoT.PLC
     /// <summary>
     /// 三菱客户端（MC协议）
     /// </summary>
-    public class MitsubishiMcClient : SocketBase, IIoTBase
+    public class MitsubishiMcClient : IIoT
     {
         /// <summary>
         /// 版本
         /// </summary>
-        public string Version => version.ToString();
-        private MitsubishiVersion version;
-
+        public MitsubishiVersion Version { get; private set; }
 
         /// <summary>
         /// 字符串编码格式。默认ASCII
         /// </summary>
         public Encoding Encoding { get; set; } = Encoding.ASCII;
 
-        /// <summary>
-        /// 是否是连接的
-        /// </summary>
-        public override bool IsConnected => socket?.Connected ?? false;
+        public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
-        /// 构造函数
+        /// 初始化
         /// </summary>
-        /// <param name="version">三菱型号版本</param>
+        /// <param name="client">客户端</param>
+        public MitsubishiMcClient(MitsubishiVersion version, ClientBase client, int timeout = 1500)
+        {
+            Client = client;
+            Client.TimeOut = timeout;
+            Client.ReceiveMode = ReceiveMode.ParseByteAll();
+            Client.Encoding = Encoding.ASCII;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+
+            this.Version = version;
+        }
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
         /// <param name="ip">ip地址</param>
         /// <param name="port">端口</param>
-        /// <param name="timeout">超时时间</param>
-        public MitsubishiMcClient(MitsubishiVersion version, string ip, int port, int timeout = 1500)
-        {
-            this.version = version;
-            SetIpEndPoint(ip, port);
-            this.timeout = timeout;
-        }
-
-        /// <summary>
-        /// 打开连接（如果已经是连接状态会先关闭再打开）
-        /// </summary>
-        /// <returns></returns>
-        protected override IoTResult Connect()
-        {
-            var result = new IoTResult();
-            SafeClose();
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                //超时时间设置
-                socket.ReceiveTimeout = timeout;
-                socket.SendTimeout = timeout;
-
-                //socket.Connect(ipEndPoint);
-                IAsyncResult connectResult = socket.BeginConnect(ipEndPoint, null, null);
-                //阻塞当前线程           
-                if (!connectResult.AsyncWaitHandle.WaitOne(timeout))
-                    throw new TimeoutException("连接超时");
-                socket.EndConnect(connectResult);
-            }
-            catch (Exception ex)
-            {
-                SafeClose();
-                
-                result.AddError(ex);
-                
-                result.AddError(ex);
-            }
-            return result.ToEnd();
-        }
-
-        #region 发送报文，并获取响应报文
-        /// <summary>
-        /// 发送报文，并获取响应报文（建议使用SendPackageReliable，如果异常会自动重试一次）
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public override IoTResult<byte[]> SendPackageSingle(byte[] command)
-        {
-            //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            lock (this)
-            {
-                IoTResult<byte[]> result = new IoTResult<byte[]>();
-                try
-                {
-                    socket.Send(command);
-                    var socketReadResul = SocketRead(9);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
-
-                    //其后内容的总长度
-                    var contentLength = BitConverter.ToUInt16(headPackage, 7);
-                    socketReadResul = SocketRead(contentLength);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
-
-                    result.Value = headPackage.Concat(dataPackage).ToArray();
-                    return result.ToEnd();
-                }
-                catch (Exception ex)
-                {
-                    
-                    result.AddError(ex);
-                    
-                    return result.ToEnd();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 发送报文，并获取响应报文
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="receiveCount"></param>
-        /// <returns></returns>
-        public IoTResult<byte[]> SendPackage(byte[] command, int receiveCount)
-        {
-
-            IoTResult<byte[]> _sendPackage()
-            {
-                //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-                lock (this)
-                {
-                    IoTResult<byte[]> result = new IoTResult<byte[]>();
-                    socket.Send(command);
-                    var socketReadResul = SocketRead(receiveCount);
-                    if (!socketReadResul.IsSucceed)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
-
-                    result.Value = dataPackage.ToArray();
-                    return result.ToEnd();
-                }
-            }
-
-            try
-            {
-                var result = _sendPackage();
-                if (!result.IsSucceed)
-                {
-                    WarningLog?.Invoke(result.Error.FirstOrDefault());
-                    //如果出现异常，则进行一次重试         
-                    var conentResult = Connect();
-                    if (!conentResult.IsSucceed)
-                        return new IoTResult<byte[]>(conentResult);
-
-                    return _sendPackage();
-                }
-                else
-                    return result;
-            }
-            catch (Exception ex)
-            {
-                WarningLog?.Invoke( ex);
-                //如果出现异常，则进行一次重试
-                //重新打开连接
-                var conentResult = Connect();
-                if (!conentResult.IsSucceed)
-                    return new IoTResult<byte[]>(conentResult);
-
-                return _sendPackage();
-            }
-        }
-        #endregion
+        public MitsubishiMcClient(MitsubishiVersion version, string ip, int port = 1500, int timeout = 1500) : this(version, new TcpClient(ip, port), timeout) { }
 
         #region 读
         /// <summary>
@@ -185,7 +58,6 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult<byte[]> Read(string address, ushort length, bool isBit = false)
         {
-            if (!socket?.Connected ?? true) Connect();
             var result = new IoTResult<byte[]>();
             try
             {
@@ -193,7 +65,7 @@ namespace Ping9719.IoT.PLC
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
 
-                switch (version)
+                switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -204,31 +76,31 @@ namespace Ping9719.IoT.PLC
                         command = GetReadCommand_Qna_3E(arg.BeginAddress, arg.TypeCode, length, isBit);
                         break;
                 }
-                
+
 
                 IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
-                switch (version)
+                switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
                         var lenght = command[10] + command[11] * 256;
                         if (isBit)
-                            sendResult = SendPackage(command, (int)Math.Ceiling(lenght * 0.5) + 2);
+                            sendResult = Client.SendReceive(command, ReceiveMode.ParseByte((int)Math.Ceiling(lenght * 0.5) + 2));
                         else
-                            sendResult = SendPackage(command, lenght * 2 + 2);
+                            sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(lenght * 2 + 2));
                         break;
                     case MitsubishiVersion.Qna_3E:
-                        sendResult = SendPackageReliable(command);
+                        sendResult = Client.SendReceive(command);
                         break;
                 }
                 if (!sendResult.IsSucceed) return sendResult;
 
                 byte[] dataPackage = sendResult.Value;
-                
+
 
                 var bufferLength = length;
                 byte[] responseValue = null;
 
-                switch (version)
+                switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
                         responseValue = new byte[dataPackage.Length - 2];
@@ -247,22 +119,9 @@ namespace Ping9719.IoT.PLC
 
                 result.Value = responseValue;
             }
-            catch (SocketException ex)
+            catch (Exception ex)
             {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
+                result.AddError(ex);
             }
             return result.ToEnd();
         }
@@ -513,14 +372,6 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult Write(string address, byte[] data, bool isBit = false)
         {
-            if (!socket?.Connected ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSucceed)
-                {
-                    return connectResult;
-                }
-            }
             IoTResult result = new IoTResult();
             try
             {
@@ -529,7 +380,7 @@ namespace Ping9719.IoT.PLC
                 //发送写入信息
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
-                switch (version)
+                switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -540,44 +391,27 @@ namespace Ping9719.IoT.PLC
                         command = GetWriteCommand_Qna_3E(arg.BeginAddress, arg.TypeCode, data, isBit);
                         break;
                 }
-                
+
 
                 IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
-                switch (version)
+                switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
-                        sendResult = SendPackage(command, 2);
+                        sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(2));
                         break;
                     case MitsubishiVersion.Qna_3E:
-                        sendResult = SendPackageReliable(command);
+                        sendResult = Client.SendReceive(command);
                         break;
                 }
-                if (!sendResult.IsSucceed) return sendResult;
+                if (!sendResult.IsSucceed)
+                    return sendResult;
 
                 byte[] dataPackage = sendResult.Value;
-                
-            }
-            catch (SocketException ex)
-            {
-                
-                if (ex.SocketErrorCode == SocketError.TimedOut)
-                {
-                    result.AddError("连接超时");
-                }
-                else
-                {
-                    result.AddError(ex);
-                }
-                SafeClose();
+
             }
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SafeClose();
-            }
-            finally
-            {
-                if (isAutoOpen) Dispose();
             }
             return result.ToEnd();
         }
