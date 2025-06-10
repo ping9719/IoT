@@ -9,7 +9,7 @@ Install-Package Ping9719.IoT
 - [前言](#前言、亮点（Merit）)
 - [通讯 (Communication)](#通讯 (Communication))
     - TcpClient
-    - TcpServer （待开发） 
+    - TcpServer （待测试） 
     - SerialPortClient
     - UdpClient （进行中） 
     - UdpServer （待开发） 
@@ -93,6 +93,7 @@ client1.Open();
 
 client1.Send("abc");//发送
 client1.Receive();//等待并接受
+client1.Receive(5000);//等待并接受，超时5秒
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
 ```
@@ -152,6 +153,13 @@ client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾�
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
 ```
 
+## TcpServer
+`TcpServer : ServiceBase`
+```CSharp
+var service = new TcpService("127.0.0.1",8005);
+```
+
+
 ## SerialPortClient
 `SerialPortClient : ClientBase`
 ```CSharp
@@ -173,7 +181,6 @@ client1.Open();
 ```
 
 # Modbus
-## Modbus
 `ModbusRtuClient : IIoT`   
 `ModbusTcpClient : IIoT`   
 `ModbusAsciiClient : IIoT`

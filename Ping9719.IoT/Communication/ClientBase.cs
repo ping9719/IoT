@@ -14,10 +14,10 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public abstract class ClientBase
     {
-        /// <summary>
-        /// 类的名称
-        /// </summary>
-        public string Name { get => this.GetType().Name; }
+        ///// <summary>
+        ///// 类的名称
+        ///// </summary>
+        //public string Name { get => this.GetType().Name; }
         /// <summary>
         /// 是否打开
         /// </summary>

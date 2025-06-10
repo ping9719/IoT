@@ -40,6 +40,30 @@ namespace Ping9719.IoT.Communication
             this.port = port;
         }
 
+        internal TcpClient Get(System.Net.Sockets.TcpClient tcpClient, ServiceBase serviceBase)
+        {
+            ReceiveBufferSize = serviceBase.ReceiveBufferSize;
+            IsAutoDiscard = serviceBase.IsAutoDiscard;
+            Encoding = serviceBase.Encoding;
+            TimeOut = serviceBase.TimeOut;
+            ReceiveMode = serviceBase.ReceiveMode;
+            ReceiveModeReceived = serviceBase.ReceiveModeReceived;
+
+            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+            tcpClient.ReceiveTimeout = TimeOut;
+            tcpClient.SendTimeout = TimeOut;
+
+            IsOpen2 = true;
+            this.tcpClient = tcpClient;
+            stream = tcpClient.GetStream();
+            ReconnectionCount = 0;
+
+            IsUserClose = false;
+            GoRun();
+            Opened?.Invoke(this);
+            return this;
+        }
+
         public override IoTResult Open()
         {
             var result = new IoTResult();
