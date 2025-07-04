@@ -12,13 +12,15 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Communication
 {
-    public class TcpService : ServiceBase
+    public class TcpService : ServiceBase, INetwork
     {
         string ip; int port;
         bool IsOpen2 = false;
 
         private System.Net.Sockets.TcpListener tcpListener;
         private System.Net.Sockets.Socket stream;
+
+        public Socket Socket => stream;
 
         Task task;
         //客户端+初始化时间
