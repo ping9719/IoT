@@ -10,7 +10,9 @@ using Ping9719.IoT.Communication;
 namespace Ping9719.IoT.PLC
 {
     /// <summary>
-    /// 三菱客户端（MC协议）
+    /// 三菱客户端（MC协议）.
+    /// 已测试单个元素读写：bool,short
+    /// 已测试数组元素读写：bool,short
     /// </summary>
     public class MitsubishiMcClient : IIoT
     {
@@ -49,6 +51,7 @@ namespace Ping9719.IoT.PLC
         public MitsubishiMcClient(MitsubishiVersion version, string ip, int port = 1500, int timeout = 1500) : this(version, new TcpClient(ip, port), timeout) { }
 
         #region 读
+
         /// <summary>
         /// 读取数据
         /// </summary>
@@ -71,12 +74,12 @@ namespace Ping9719.IoT.PLC
                         arg = ConvertArg_A_1E(address);
                         command = GetReadCommand_A_1E(arg.BeginAddress, arg.TypeCode, length, isBit);
                         break;
+
                     case MitsubishiVersion.Qna_3E:
                         arg = ConvertArg_Qna_3E(address);
                         command = GetReadCommand_Qna_3E(arg.BeginAddress, arg.TypeCode, length, isBit);
                         break;
                 }
-
 
                 IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
                 switch (Version)
@@ -88,6 +91,7 @@ namespace Ping9719.IoT.PLC
                         else
                             sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(lenght * 2 + 2));
                         break;
+
                     case MitsubishiVersion.Qna_3E:
                         sendResult = Client.SendReceive(command);
                         break;
@@ -95,7 +99,6 @@ namespace Ping9719.IoT.PLC
                 if (!sendResult.IsSucceed) return sendResult;
 
                 byte[] dataPackage = sendResult.Value;
-
 
                 var bufferLength = length;
                 byte[] responseValue = null;
@@ -106,6 +109,7 @@ namespace Ping9719.IoT.PLC
                         responseValue = new byte[dataPackage.Length - 2];
                         Array.Copy(dataPackage, 2, responseValue, 0, responseValue.Length);
                         break;
+
                     case MitsubishiVersion.Qna_3E:
 
                         if (isBit)
@@ -131,7 +135,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<bool> ReadBoolean(string address)
+        private IoTResult<bool> ReadBoolean(string address)
         {
             var readResut = Read(address, 1, isBit: true);
             var result = new IoTResult<bool>(readResut);
@@ -146,16 +150,14 @@ namespace Ping9719.IoT.PLC
         /// <param name="address"></param>
         /// <param name="readNumber"></param>
         /// <returns></returns>
-        public IoTResult<List<KeyValuePair<string, bool>>> ReadBoolean(string address, ushort readNumber)
+        private IoTResult<List<bool>> ReadBoolean(string address, ushort readNumber)
         {
             var length = 1;
             var readResut = Read(address, Convert.ToUInt16(length * readNumber), isBit: true);
-            var result = new IoTResult<List<KeyValuePair<string, bool>>>(readResut);
-            var dbAddress = decimal.Parse(address.Substring(1));
-            var dbType = address.Substring(0, 1);
+            var result = new IoTResult<List<bool>>(readResut);
             if (result.IsSucceed)
             {
-                var values = new List<KeyValuePair<string, bool>>();
+                var values = new List<bool>();
                 for (ushort i = 0; i < readNumber; i++)
                 {
                     var index = i / 2;
@@ -165,7 +167,7 @@ namespace Ping9719.IoT.PLC
                         value = (readResut.Value[index] & 0b00010000) != 0;
                     else
                         value = (readResut.Value[index] & 0b00000001) != 0;
-                    values.Add(new KeyValuePair<string, bool>($"{dbType}{dbAddress + i * length}", value));
+                    values.Add(value);
                 }
                 result.Value = values;
             }
@@ -177,7 +179,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<short> ReadInt16(string address)
+        private IoTResult<short> ReadInt16(string address)
         {
             var readResut = Read(address, 2);
             var result = new IoTResult<short>(readResut);
@@ -192,19 +194,17 @@ namespace Ping9719.IoT.PLC
         /// <param name="address"></param>
         /// <param name="readNumber"></param>
         /// <returns></returns>
-        public IoTResult<List<KeyValuePair<string, short>>> ReadInt16(string address, ushort readNumber)
+        private IoTResult<List<short>> ReadInt16(string address, ushort readNumber)
         {
             var length = 2;
             var readResut = Read(address, Convert.ToUInt16(length * readNumber));
-            var dbAddress = int.Parse(address.Substring(1));
-            var dbType = address.Substring(0, 1);
-            var result = new IoTResult<List<KeyValuePair<string, short>>>(readResut);
+            var result = new IoTResult<List<short>>(readResut);
             if (result.IsSucceed)
             {
-                var values = new List<KeyValuePair<string, short>>();
+                var values = new List<short>();
                 for (int i = 0; i < readNumber; i++)
                 {
-                    values.Add(new KeyValuePair<string, short>($"{dbType}{dbAddress + i}", BitConverter.ToInt16(readResut.Value, i * length)));
+                    values.Add(BitConverter.ToInt16(readResut.Value, i * length));
                 }
                 result.Value = values;
             }
@@ -347,9 +347,11 @@ namespace Ping9719.IoT.PLC
                 result.Value = BitConverter.ToDouble(readResut.Value, 0);
             return result.ToEnd();
         }
-        #endregion
+
+        #endregion 读
 
         #region 写
+
         /// <summary>
         /// 写入数据
         /// </summary>
@@ -386,12 +388,12 @@ namespace Ping9719.IoT.PLC
                         arg = ConvertArg_A_1E(address);
                         command = GetWriteCommand_A_1E(arg.BeginAddress, arg.TypeCode, data, isBit);
                         break;
+
                     case MitsubishiVersion.Qna_3E:
                         arg = ConvertArg_Qna_3E(address);
                         command = GetWriteCommand_Qna_3E(arg.BeginAddress, arg.TypeCode, data, isBit);
                         break;
                 }
-
 
                 IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
                 switch (Version)
@@ -399,6 +401,7 @@ namespace Ping9719.IoT.PLC
                     case MitsubishiVersion.A_1E:
                         sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(2));
                         break;
+
                     case MitsubishiVersion.Qna_3E:
                         sendResult = Client.SendReceive(command);
                         break;
@@ -407,7 +410,6 @@ namespace Ping9719.IoT.PLC
                     return sendResult;
 
                 byte[] dataPackage = sendResult.Value;
-
             }
             catch (Exception ex)
             {
@@ -557,39 +559,50 @@ namespace Ping9719.IoT.PLC
                 case DataTypeEnum.Bool:
                     result = Write(address, Convert.ToBoolean(value));
                     break;
+
                 case DataTypeEnum.Byte:
                     result = Write(address, Convert.ToByte(value));
                     break;
+
                 case DataTypeEnum.Int16:
                     result = Write(address, Convert.ToInt16(value));
                     break;
+
                 case DataTypeEnum.UInt16:
                     result = Write(address, Convert.ToUInt16(value));
                     break;
+
                 case DataTypeEnum.Int32:
                     result = Write(address, Convert.ToInt32(value));
                     break;
+
                 case DataTypeEnum.UInt32:
                     result = Write(address, Convert.ToUInt32(value));
                     break;
+
                 case DataTypeEnum.Int64:
                     result = Write(address, Convert.ToInt64(value));
                     break;
+
                 case DataTypeEnum.UInt64:
                     result = Write(address, Convert.ToUInt64(value));
                     break;
+
                 case DataTypeEnum.Float:
                     result = Write(address, Convert.ToSingle(value));
                     break;
+
                 case DataTypeEnum.Double:
                     result = Write(address, Convert.ToDouble(value));
                     break;
             }
             return result;
         }
-        #endregion
+
+        #endregion 写
 
         #region 生成报文命令
+
         /// <summary>
         /// 获取Qna_3E读取命令
         /// </summary>
@@ -644,7 +657,7 @@ namespace Ping9719.IoT.PLC
             command[1] = 0xFF; //PLC编号
             command[2] = 0x0A;
             command[3] = 0x00;
-            command[4] = BitConverter.GetBytes(beginAddress)[0]; // 
+            command[4] = BitConverter.GetBytes(beginAddress)[0]; //
             command[5] = BitConverter.GetBytes(beginAddress)[1]; // 开始读取的地址
             command[6] = 0x00;
             command[7] = 0x00;
@@ -723,11 +736,13 @@ namespace Ping9719.IoT.PLC
             data.Reverse().ToArray().CopyTo(command, 12);
             return command;
         }
-        #endregion
 
-        #region private        
+        #endregion 生成报文命令
+
+        #region private
 
         #region 地址解析
+
         /// <summary>
         /// Qna_3E地址解析
         /// </summary>
@@ -752,6 +767,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'X':// X输入继电器
                     {
                         addressInfo.TypeCode = new byte[] { 0x9C };
@@ -761,6 +777,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'Y'://Y输出继电器
                     {
                         addressInfo.TypeCode = new byte[] { 0x9D };
@@ -770,6 +787,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'D'://D数据寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0xA8 };
@@ -779,6 +797,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'W'://W链接寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0xB4 };
@@ -788,6 +807,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'L'://L锁存继电器
                     {
                         addressInfo.TypeCode = new byte[] { 0x92 };
@@ -797,6 +817,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'F'://F报警器
                     {
                         addressInfo.TypeCode = new byte[] { 0x93 };
@@ -806,6 +827,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'V'://V边沿继电器
                     {
                         addressInfo.TypeCode = new byte[] { 0x94 };
@@ -815,6 +837,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'B'://B链接继电器
                     {
                         addressInfo.TypeCode = new byte[] { 0xA0 };
@@ -824,6 +847,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'R'://R文件寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0xAF };
@@ -833,6 +857,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'S':
                     {
                         //累计定时器的线圈
@@ -982,6 +1007,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'Y'://Y输出寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0x59, 0x20 };
@@ -991,6 +1017,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'M'://M中间寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0x4D, 0x20 };
@@ -1000,6 +1027,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'S'://S状态寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0x53, 0x20 };
@@ -1009,6 +1037,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'D'://D数据寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0x44, 0x20 };
@@ -1018,6 +1047,7 @@ namespace Ping9719.IoT.PLC
                         addressInfo.TypeChar = address.Substring(0, 1);
                     }
                     break;
+
                 case 'R'://R文件寄存器
                     {
                         addressInfo.TypeCode = new byte[] { 0x52, 0x20 };
@@ -1030,138 +1060,8 @@ namespace Ping9719.IoT.PLC
             }
             return addressInfo;
         }
-        #endregion
 
-        #region TODO
-        public IoTResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber)
-        {
-            var result = new IoTResult<Dictionary<string, object>>();
-            result.Value = new Dictionary<string, object>();
-
-            var mitsubishiMCAddresses = addresses.Select(t => ConvertArg_Qna_3E(t.Key, t.Value)).ToList();
-            var typeChars = mitsubishiMCAddresses.Select(t => t.TypeChar).Distinct();
-            foreach (var typeChar in typeChars)
-            {
-                var tempAddresses = mitsubishiMCAddresses.Where(t => t.TypeChar == typeChar).ToList();
-                var minAddress = tempAddresses.Select(t => t.BeginAddress).Min();
-                var maxAddress = tempAddresses.Select(t => t.BeginAddress).Max();
-
-                while (maxAddress >= minAddress)
-                {
-                    int readLength = 121;//TODO 分批读取的长度
-
-                    var tempAddress = tempAddresses.Where(t => t.BeginAddress >= minAddress && t.BeginAddress <= minAddress + readLength).ToList();
-                    //如果范围内没有数据。按正确逻辑不存在这种情况。
-                    if (!tempAddress.Any())
-                    {
-                        minAddress = minAddress + readLength;
-                        continue;
-                    }
-
-                    var tempMax = tempAddress.OrderByDescending(t => t.BeginAddress).FirstOrDefault();
-                    switch (tempMax.DataTypeEnum)
-                    {
-                        case DataTypeEnum.Bool:
-                        case DataTypeEnum.Byte:
-                            readLength = tempMax.BeginAddress + 1 - minAddress;
-                            break;
-                        case DataTypeEnum.Int16:
-                        case DataTypeEnum.UInt16:
-                            readLength = tempMax.BeginAddress * 2 + 2 - minAddress * 2;
-                            break;
-                        case DataTypeEnum.Int32:
-                        case DataTypeEnum.UInt32:
-                        case DataTypeEnum.Float:
-                            readLength = tempMax.BeginAddress * 4 + 4 - minAddress * 4;
-                            break;
-                        case DataTypeEnum.Int64:
-                        case DataTypeEnum.UInt64:
-                        case DataTypeEnum.Double:
-                            readLength = tempMax.BeginAddress + 8 - minAddress;
-                            break;
-                        default:
-                            throw new Exception("Err BatchRead 未定义类型 -1");
-                    }
-
-                    //TODO isbit
-                    //TODO 直接传入MitsubishiMCAddress
-                    var tempResult = Read(typeChar + minAddress.ToString(), Convert.ToUInt16(readLength), false);
-
-                    if (!tempResult.IsSucceed)
-                    {
-                        return result.AddError(tempResult.Error).ToEnd();
-                    }
-
-                    var rValue = tempResult.Value.ToArray();
-                    foreach (var item in tempAddress)
-                    {
-                        object tempVaue = null;
-
-                        switch (item.DataTypeEnum)
-                        {
-                            case DataTypeEnum.Bool:
-                            //tempVaue = ReadCoil(minAddress, item.Key, rValue).Value;
-                            //break;
-                            case DataTypeEnum.Byte:
-                                throw new Exception("Err BatchRead 未定义类型 -2");
-                            case DataTypeEnum.Int16:
-                                tempVaue = ReadInt16(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            //case DataTypeEnum.UInt16:
-                            //    tempVaue = ReadUInt16(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            //case DataTypeEnum.Int32:
-                            //    tempVaue = ReadInt32(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            //case DataTypeEnum.UInt32:
-                            //    tempVaue = ReadUInt32(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            //case DataTypeEnum.Int64:
-                            //    tempVaue = ReadInt64(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            //case DataTypeEnum.UInt64:
-                            //    tempVaue = ReadUInt64(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            case DataTypeEnum.Float:
-                                tempVaue = ReadFloat(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            //case DataTypeEnum.Double:
-                            //    tempVaue = ReadDouble(minAddress, item.BeginAddress, rValue).Value;
-                            //    break;
-                            default:
-                                throw new Exception("Err BatchRead 未定义类型 -3");
-                        }
-
-                        result.Value.Add(item.TypeChar + item.BeginAddress.ToString(), tempVaue);
-                    }
-                    minAddress = minAddress + readLength;
-
-                    if (tempAddresses.Any(t => t.BeginAddress >= minAddress))
-                        minAddress = tempAddresses.Where(t => t.BeginAddress >= minAddress).OrderBy(t => t.BeginAddress).FirstOrDefault().BeginAddress;
-                    //else
-                    //    return result.ToEnd();
-                }
-                //return result.ToEnd();
-            }
-            return result.ToEnd();
-        }
-
-        public IoTResult<byte> ReadByte(string address)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IoTResult<string> ReadString(string address)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IoTResult BatchWrite(Dictionary<string, object> addresses, int batchNumber)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
+        #endregion 地址解析
 
         ///// <summary>
         ///// 获取地址的区域类型
@@ -1179,9 +1079,11 @@ namespace Ping9719.IoT.PLC
         //    else
         //        return address.Substring(0, 1);
         //}
-        #endregion
+
+        #endregion private
 
         #region IIoTBase
+
         public IoTResult<T> Read<T>(string address)
         {
             var tType = typeof(T);
@@ -1252,6 +1154,16 @@ namespace Ping9719.IoT.PLC
             if (tType == typeof(byte))
             {
                 var readResut = Read(address, Convert.ToUInt16(number));
+                return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+            }
+            else if (tType == typeof(bool))
+            {
+                var readResut = ReadBoolean(address, (ushort)number);
+                return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+            }
+            else if (tType == typeof(short))
+            {
+                var readResut = ReadInt16(address, (ushort)number);
                 return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
             }
             else
@@ -1338,6 +1250,6 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        #endregion
+        #endregion IIoTBase
     }
 }

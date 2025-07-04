@@ -23,22 +23,109 @@ namespace ConsoleTest
 
             client.Client.Open();
 
-            // Int16测试
-            var readResult = client.ReadInt16("D100", 3);
-            if (readResult.IsSucceed)
+            // 测试short的批量读写
+            TestShortReadWrite(client);
+
+            // 测试bool的读写
+            //TestBoolReadWrite(client);
+        }
+
+        /// <summary>
+        /// 测试short类型的批量读写
+        /// </summary>
+        /// <param name="client">三菱PLC客户端</param>
+        private static void TestShortReadWrite(MitsubishiMcClient client)
+        {
+            string address = "D100";
+            short[] valuesToWrite = { 1234, 5678, -100, 4321 };
+            Console.WriteLine("\n--- 批量写入 short ---");
+
+            // 提取前缀和起始数字
+            string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
+            int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
+
+            for (int i = 0; i < valuesToWrite.Length; i++)
             {
-                foreach (var kv in readResult.Value)
+                string writeAddr = prefix + (startNum + i);
+                var w = client.Write(writeAddr, valuesToWrite[i]);
+                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
+            }
+
+            // 批量读取
+            Console.WriteLine("\n--- 批量读取 short ---");
+            var readMulti = client.Read<short>(address, valuesToWrite.Length);
+            if (readMulti.IsSucceed)
+            {
+                int idx = 0;
+                for (int i = 0; i < valuesToWrite.Length; i++)
                 {
-                    Console.WriteLine($"地址: {kv.Key}, 值: {kv.Value}");
+                    string readAddr = prefix + (startNum + i);
+                    Console.WriteLine($"{readAddr} 读取值: {readMulti.Value.ElementAt(idx)}");
+                    idx++;
                 }
             }
             else
             {
-                Console.WriteLine($"读取失败: {readResult.Error}");
+                Console.WriteLine($"批量读取失败: {readMulti.Error}");
             }
 
-            var writeResult = client.Write("D100", (short)1234);
-            Console.WriteLine($"写入D100结果: {writeResult.IsSucceed}, 错误: {writeResult.Error}");
+            var aaaa = client.Write<short>(address, 34);
+            var readSingle = client.Read<short>(address);
+            Console.WriteLine($" 单个读取值: {readSingle.Value}");
+        }
+
+        /// <summary>
+        /// 测试bool类型的单点和连续读写
+        /// </summary>
+        /// <param name="client">三菱PLC客户端</param>
+        private static void TestBoolReadWrite(MitsubishiMcClient client)
+        {
+            string address = "M100";
+            //Console.WriteLine("\n--- Bool 单点写入 true ---");
+            //var writeTrue = client.Write(address, true);
+            //Console.WriteLine($"写入{address}=true 结果: {writeTrue.IsSucceed}");
+            //var readTrue = client.ReadBoolean(address);
+            //Console.WriteLine($"读取{address} 结果: {readTrue.IsSucceed}, 值: {readTrue.Value}");
+
+            //Console.WriteLine("\n--- Bool 单点写入 false ---");
+            //var writeFalse = client.Write(address, false);
+            //Console.WriteLine($"写入{address}=false 结果: {writeFalse.IsSucceed}");
+            //var readFalse = client.ReadBoolean(address);
+            //Console.WriteLine($"读取{address} 结果: {readFalse.IsSucceed}, 值: {readFalse.Value}");
+
+            //// 连续写入
+            string[] boolAddresses = { "M101", "M102", "M103", "M104" };
+            bool[] boolValues = { true, true, true, false };
+            Console.WriteLine("\n--- 连续写入 bool ---");
+            for (int i = 0; i < boolAddresses.Length; i++)
+            {
+                var w = client.Write(boolAddresses[i], boolValues[i]);
+                Console.WriteLine($"写入{boolAddresses[i]}={boolValues[i]} 结果: {w.IsSucceed}");
+            }
+
+            // 连续读取
+            Console.WriteLine("\n--- 连续读取 bool ---");
+            var readMulti = client.Read<bool>("M101", 4);
+            if (readMulti.IsSucceed)
+            {
+                foreach (var kv in readMulti.Value)
+                {
+                    Console.WriteLine($" 值: {kv}");
+                }
+            }
+
+            //var readMulti = client.ReadBoolean("M101", (ushort)boolAddresses.Length);
+            //if (readMulti.IsSucceed)
+            //{
+            //    foreach (var kv in readMulti.Value)
+            //    {
+            //        Console.WriteLine($" 值: {kv}");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"连续读取失败: {readMulti.Error}");
+            //}
         }
 
         private void Test1()
