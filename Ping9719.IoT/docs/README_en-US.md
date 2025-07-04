@@ -1,6 +1,6 @@
 ﻿# 语言选择：
 [简体中文](Ping9719.IoT/docs/README.md) --
-[English](Ping9719.IoT/docs/README_en-US.md) --
+[English](Ping9719.IoT/docs/README2.md) --
 
 # 安装包 [NuGet]
 ```CSharp

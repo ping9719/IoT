@@ -4,20 +4,24 @@
 ##### Iot device communication protocol implementation, including mainstream PLC, ModBus, CIP, MC, FINS...... Such common protocols.
 #
 
-### 全部文档：[doc]
-[查看 "IoT" 文档 ( "IoT" document)](Ping9719.IoT/docs/README.md)   
-[查看 "IoT" 版本文档 ( "IoT" Version document)](Ping9719.IoT/docs/VERSION.md)  
+### 语言选择：[language choice]
+[简体中文](README.md) --
+[English](README_en-US.md) --
 
-[查看 "IoT.WPF" 文档 ( "IoT.WPF" document)](Ping9719.IoT.WPF/docs/README.md)   
-[查看 "IoT.Avalonia" 文档 ( "IoT.Avalonia" document)](Ping9719.IoT.Avalonia/docs/README.md)   
+### 全部文档：[docs]
+[查看 "IoT" 文档](Ping9719.IoT/docs/README.md)   
+[查看 "IoT" 版本文档](Ping9719.IoT/docs/VERSION.md)  
+
+[查看 "IoT.WPF" 文档](Ping9719.IoT.WPF/docs/README.md)   
+[查看 "IoT.Avalonia" 文档](Ping9719.IoT.Avalonia/docs/README.md)   
 #
 
-### 库：[library]
+### 库：
 源代码：[Github (主库)](https://github.com/ping9719/IoT)  
 源代码：[Gitee (备用库)](https://gitee.com/ping9719/IoT)   
 #
 
-# 前言、亮点（Merit）
+# 前言、亮点
 1.常用设备实现接口“IIoT”可进行读写 
 ```CSharp
 client.Read<bool>("abc");//读1个
