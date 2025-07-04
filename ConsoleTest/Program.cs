@@ -12,7 +12,36 @@ namespace ConsoleTest
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
+        {
+            // 测试三菱PLC MC协议客户端
+            var client = new MitsubishiMcClient(
+                MitsubishiVersion.Qna_3E,
+                "127.0.0.1",
+                6000
+            );
+
+            client.Client.Open();
+
+            // Int16测试
+            var readResult = client.ReadInt16("D100", 3);
+            if (readResult.IsSucceed)
+            {
+                foreach (var kv in readResult.Value)
+                {
+                    Console.WriteLine($"地址: {kv.Key}, 值: {kv.Value}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"读取失败: {readResult.Error}");
+            }
+
+            var writeResult = client.Write("D100", (short)1234);
+            Console.WriteLine($"写入D100结果: {writeResult.IsSucceed}, 错误: {writeResult.Error}");
+        }
+
+        private void Test1()
         {
             //        private List<GaleShapleyItem<T>> mans;
             //private List<T> womens;
@@ -70,8 +99,8 @@ namespace ConsoleTest
             WanQuanRfid wanQuan2Rfid = new WanQuanRfid(WanQuanRfidVer.IR610P_HF, ip: "192.168.0.90", 502);
             //var aaa = wanQuan2Rfid.Client.Open();
             var aaaa1 = wanQuan2Rfid.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693), "0102");
-            var aaaa2 = wanQuan2Rfid.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693),4);
-            var aaa1122= 1;
+            var aaaa2 = wanQuan2Rfid.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693), 4);
+            var aaa1122 = 1;
             //OmronCipClient omronCip = new OmronCipClient("172.22.124.21", 44818);
             //var aaa = omronCip.Client.Open();
 
@@ -121,10 +150,10 @@ namespace ConsoleTest
             ////client1.SendReceive("abc");
             ////client1.Send("abc");//发送
             ////client1.Receive();//等待并接受
-            ////client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
-            ////client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
-            ////client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
-            ////client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
+            ////client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒
+            ////client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒
+            ////client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒
+            ////client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒
 
             //Console.WriteLine("结束");
             //Console.ReadLine();
