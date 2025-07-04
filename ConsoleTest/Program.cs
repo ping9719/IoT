@@ -24,10 +24,13 @@ namespace ConsoleTest
             client.Client.Open();
 
             // 测试short的批量读写
-            TestShortReadWrite(client);
+            //TestShortReadWrite(client);
 
             // 测试bool的读写
             //TestBoolReadWrite(client);
+
+            //TestFloatReadWrite(client);
+            TestDoubleReadWrite(client);
         }
 
         /// <summary>
@@ -126,6 +129,98 @@ namespace ConsoleTest
             //{
             //    Console.WriteLine($"连续读取失败: {readMulti.Error}");
             //}
+        }
+
+        /// <summary>
+        /// 测试float类型的单个和连续读写
+        /// </summary>
+        /// <param name="client">三菱PLC客户端</param>
+        private static void TestFloatReadWrite(MitsubishiMcClient client)
+        {
+            string address = "D200";
+            float[] valuesToWrite = { 1.23f, 4.56f, -7.89f, 10.11f };
+            Console.WriteLine("\n--- 批量写入 float ---");
+
+            // 提取前缀和起始数字
+            string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
+            int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
+
+            for (int i = 0; i < valuesToWrite.Length; i++)
+            {
+                string writeAddr = prefix + (startNum + i * 2); // float占2个寄存器
+                var w = client.Write(writeAddr, valuesToWrite[i]);
+                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
+            }
+
+            // 批量读取
+            Console.WriteLine("\n--- 批量读取 float ---");
+            var readMulti = client.Read<float>(address, valuesToWrite.Length);
+            if (readMulti.IsSucceed)
+            {
+                int idx = 0;
+                for (int i = 0; i < valuesToWrite.Length; i++)
+                {
+                    string readAddr = prefix + (startNum + i * 2);
+                    Console.WriteLine($"{readAddr} 读取值: {readMulti.Value.ElementAt(idx)}");
+                    idx++;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"批量读取失败: {readMulti.Error}");
+            }
+
+            // 单个写入和读取
+            var singleWrite = client.Write<float>(address, 3.14f);
+            Console.WriteLine($"单个写入{address}=3.14 结果: {singleWrite.IsSucceed}");
+            var readSingle = client.Read<float>(address);
+            Console.WriteLine($"单个读取值: {readSingle.Value}");
+        }
+
+        /// <summary>
+        /// 测试double类型的单个和连续读写
+        /// </summary>
+        /// <param name="client">三菱PLC客户端</param>
+        private static void TestDoubleReadWrite(MitsubishiMcClient client)
+        {
+            string address = "D300";
+            double[] valuesToWrite = { 123.456, -789.012, 3456.789, 0.00123 };
+            Console.WriteLine("\n--- 批量写入 double ---");
+
+            // 提取前缀和起始数字
+            string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
+            int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
+
+            for (int i = 0; i < valuesToWrite.Length; i++)
+            {
+                string writeAddr = prefix + (startNum + i * 4); // double占4个寄存器
+                var w = client.Write(writeAddr, valuesToWrite[i]);
+                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
+            }
+
+            // 批量读取
+            Console.WriteLine("\n--- 批量读取 double ---");
+            var readMulti = client.Read<double>(address, valuesToWrite.Length);
+            if (readMulti.IsSucceed)
+            {
+                int idx = 0;
+                for (int i = 0; i < valuesToWrite.Length; i++)
+                {
+                    string readAddr = prefix + (startNum + i * 4);
+                    Console.WriteLine($"{readAddr} 读取值: {readMulti.Value.ElementAt(idx)}");
+                    idx++;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"批量读取失败: {readMulti.Error}");
+            }
+
+            // 单个写入和读取
+            var singleWrite = client.Write<double>(address, 3.1415926);
+            Console.WriteLine($"单个写入{address}=3.1415926 结果: {singleWrite.IsSucceed}");
+            var readSingle = client.Read<double>(address);
+            Console.WriteLine($"单个读取值: {readSingle.Value}");
         }
 
         private void Test1()

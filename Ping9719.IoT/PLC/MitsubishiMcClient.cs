@@ -11,8 +11,8 @@ namespace Ping9719.IoT.PLC
 {
     /// <summary>
     /// 三菱客户端（MC协议）.
-    /// 已测试单个元素读写：bool,short
-    /// 已测试数组元素读写：bool,short
+    /// 已测试单个元素读写：bool,short,float,double
+    /// 已测试数组元素读写：bool,short,float,double
     /// </summary>
     public class MitsubishiMcClient : IIoT
     {
@@ -211,25 +211,6 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        private IoTResult<short> ReadInt16(int startAddressInt, int addressInt, byte[] values)
-        {
-            //if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-            //    throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = addressInt - startAddressInt;
-                var byteArry = values.Skip(interval * 2).Take(2).ToArray();
-                return new IoTResult<short>
-                {
-                    Value = BitConverter.ToInt16(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<short>().AddError(ex);
-            }
-        }
-
         /// <summary>
         /// 读取UInt16
         /// </summary>
@@ -241,6 +222,29 @@ namespace Ping9719.IoT.PLC
             var result = new IoTResult<ushort>(readResut);
             if (result.IsSucceed)
                 result.Value = BitConverter.ToUInt16(readResut.Value, 0);
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 读取UInt16
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<ushort>> ReadUInt16(string address, ushort readNumber)
+        {
+            var length = 2;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<ushort>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<ushort>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToUInt16(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
             return result.ToEnd();
         }
 
@@ -259,6 +263,29 @@ namespace Ping9719.IoT.PLC
         }
 
         /// <summary>
+        /// 读取Int32
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<int>> ReadInt32(string address, ushort readNumber)
+        {
+            var length = 4;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<int>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<int>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToInt32(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
+            return result.ToEnd();
+        }
+
+        /// <summary>
         /// 读取UInt32
         /// </summary>
         /// <param name="address">地址</param>
@@ -269,6 +296,29 @@ namespace Ping9719.IoT.PLC
             var result = new IoTResult<uint>(readResut);
             if (result.IsSucceed)
                 result.Value = BitConverter.ToUInt32(readResut.Value, 0);
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 读取UInt32
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<uint>> ReadUInt32(string address, ushort readNumber)
+        {
+            var length = 4;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<uint>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<uint>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToUInt32(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
             return result.ToEnd();
         }
 
@@ -287,6 +337,29 @@ namespace Ping9719.IoT.PLC
         }
 
         /// <summary>
+        /// 读取Int64
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<long>> ReadInt64(string address, ushort readNumber)
+        {
+            var length = 8;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<long>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<long>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToInt64(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
+            return result.ToEnd();
+        }
+
+        /// <summary>
         /// 读取UInt64
         /// </summary>
         /// <param name="address">地址</param>
@@ -297,6 +370,29 @@ namespace Ping9719.IoT.PLC
             var result = new IoTResult<ulong>(readResut);
             if (result.IsSucceed)
                 result.Value = BitConverter.ToUInt64(readResut.Value, 0);
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 读取UInt64
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<ulong>> ReadUInt64(string address, ushort readNumber)
+        {
+            var length = 8;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<ulong>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<ulong>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToUInt64(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
             return result.ToEnd();
         }
 
@@ -314,26 +410,6 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        public IoTResult<float> ReadFloat(int beginAddressInt, int addressInt, byte[] values)
-        {
-            //if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-            //    throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 2;
-                var offset = (addressInt - beginAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray();//.ByteFormatting(format);
-                return new IoTResult<float>
-                {
-                    Value = BitConverter.ToSingle(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<float>().AddError(ex);
-            }
-        }
-
         /// <summary>
         /// 读取Double
         /// </summary>
@@ -345,6 +421,52 @@ namespace Ping9719.IoT.PLC
             var result = new IoTResult<double>(readResut);
             if (result.IsSucceed)
                 result.Value = BitConverter.ToDouble(readResut.Value, 0);
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 读取Double
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<double>> ReadDouble(string address, ushort readNumber)
+        {
+            var length = 8;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<double>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<double>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToDouble(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
+            return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 读取Float
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readNumber"></param>
+        /// <returns></returns>
+        private IoTResult<List<float>> ReadFloat(string address, ushort readNumber)
+        {
+            var length = 4;
+            var readResut = Read(address, Convert.ToUInt16(length * readNumber));
+            var result = new IoTResult<List<float>>(readResut);
+            if (result.IsSucceed)
+            {
+                var values = new List<float>();
+                for (int i = 0; i < readNumber; i++)
+                {
+                    values.Add(BitConverter.ToSingle(readResut.Value, i * length));
+                }
+                result.Value = values;
+            }
             return result.ToEnd();
         }
 
@@ -1092,11 +1214,11 @@ namespace Ping9719.IoT.PLC
                 var readResut = ReadBoolean(address);
                 return new IoTResult<T>(readResut, (T)(object)readResut.Value);
             }
-            else if (tType == typeof(byte))
-            {
-                var readResut = ReadByte(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
+            //else if (tType == typeof(byte))
+            //{
+            //    var readResut = ReadByte(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
             else if (tType == typeof(float))
             {
                 var readResut = ReadFloat(address);
@@ -1137,11 +1259,11 @@ namespace Ping9719.IoT.PLC
                 var readResut = ReadUInt64(address);
                 return new IoTResult<T>(readResut, (T)(object)readResut.Value);
             }
-            else if (tType == typeof(string))
-            {
-                var readResut = ReadString(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            }
+            //else if (tType == typeof(string))
+            //{
+            //    var readResut = ReadString(address);
+            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+            //}
             else
             {
                 throw new NotImplementedException("暂不支持的类型");
@@ -1164,6 +1286,16 @@ namespace Ping9719.IoT.PLC
             else if (tType == typeof(short))
             {
                 var readResut = ReadInt16(address, (ushort)number);
+                return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+            }
+            else if (tType == typeof(float))
+            {
+                var readResut = ReadFloat(address, (ushort)number);
+                return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+            }
+            else if (tType == typeof(double))
+            {
+                var readResut = ReadDouble(address, (ushort)number);
                 return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
             }
             else
