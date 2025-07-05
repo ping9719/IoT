@@ -30,7 +30,9 @@ namespace ConsoleTest
             //TestBoolReadWrite(client);
 
             //TestFloatReadWrite(client);
-            TestDoubleReadWrite(client);
+            //TestDoubleReadWrite(client);
+
+            TestInt32ReadWrite(client);
         }
 
         /// <summary>
@@ -47,12 +49,9 @@ namespace ConsoleTest
             string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
             int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
 
-            for (int i = 0; i < valuesToWrite.Length; i++)
-            {
-                string writeAddr = prefix + (startNum + i);
-                var w = client.Write(writeAddr, valuesToWrite[i]);
-                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
-            }
+            // 真正的批量写入
+            var batchWrite = client.Write<short>(address, valuesToWrite);
+            Console.WriteLine($"批量写入 {address} 结果: {batchWrite.IsSucceed}");
 
             // 批量读取
             Console.WriteLine("\n--- 批量读取 short ---");
@@ -84,11 +83,11 @@ namespace ConsoleTest
         private static void TestBoolReadWrite(MitsubishiMcClient client)
         {
             string address = "M100";
-            //Console.WriteLine("\n--- Bool 单点写入 true ---");
-            //var writeTrue = client.Write(address, true);
-            //Console.WriteLine($"写入{address}=true 结果: {writeTrue.IsSucceed}");
-            //var readTrue = client.ReadBoolean(address);
-            //Console.WriteLine($"读取{address} 结果: {readTrue.IsSucceed}, 值: {readTrue.Value}");
+            Console.WriteLine("\n--- Bool 单点写入 true ---");
+            var writeTrue = client.Write<bool>(address, true);
+            Console.WriteLine($"写入{address}=true 结果: {writeTrue.IsSucceed}");
+            var readTrue = client.Read<bool>(address);
+            Console.WriteLine($"读取{address} 结果: {readTrue.IsSucceed}, 值: {readTrue.Value}");
 
             //Console.WriteLine("\n--- Bool 单点写入 false ---");
             //var writeFalse = client.Write(address, false);
@@ -98,13 +97,9 @@ namespace ConsoleTest
 
             //// 连续写入
             string[] boolAddresses = { "M101", "M102", "M103", "M104" };
-            bool[] boolValues = { true, true, true, false };
+            bool[] boolValues = { false, true, false, true };
             Console.WriteLine("\n--- 连续写入 bool ---");
-            for (int i = 0; i < boolAddresses.Length; i++)
-            {
-                var w = client.Write(boolAddresses[i], boolValues[i]);
-                Console.WriteLine($"写入{boolAddresses[i]}={boolValues[i]} 结果: {w.IsSucceed}");
-            }
+            client.Write<bool>("M101", boolValues);
 
             // 连续读取
             Console.WriteLine("\n--- 连续读取 bool ---");
@@ -116,19 +111,6 @@ namespace ConsoleTest
                     Console.WriteLine($" 值: {kv}");
                 }
             }
-
-            //var readMulti = client.ReadBoolean("M101", (ushort)boolAddresses.Length);
-            //if (readMulti.IsSucceed)
-            //{
-            //    foreach (var kv in readMulti.Value)
-            //    {
-            //        Console.WriteLine($" 值: {kv}");
-            //    }
-            //}
-            //else
-            //{
-            //    Console.WriteLine($"连续读取失败: {readMulti.Error}");
-            //}
         }
 
         /// <summary>
@@ -138,19 +120,16 @@ namespace ConsoleTest
         private static void TestFloatReadWrite(MitsubishiMcClient client)
         {
             string address = "D200";
-            float[] valuesToWrite = { 1.23f, 4.56f, -7.89f, 10.11f };
+            float[] valuesToWrite = { 1.23f, 4.56f, -7.89f, 11.11f };
             Console.WriteLine("\n--- 批量写入 float ---");
 
             // 提取前缀和起始数字
             string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
             int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
 
-            for (int i = 0; i < valuesToWrite.Length; i++)
-            {
-                string writeAddr = prefix + (startNum + i * 2); // float占2个寄存器
-                var w = client.Write(writeAddr, valuesToWrite[i]);
-                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
-            }
+            // 真正的批量写入
+            var batchWrite = client.Write<float>(address, valuesToWrite);
+            Console.WriteLine($"批量写入 {address} 结果: {batchWrite.IsSucceed}");
 
             // 批量读取
             Console.WriteLine("\n--- 批量读取 float ---");
@@ -191,12 +170,9 @@ namespace ConsoleTest
             string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
             int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
 
-            for (int i = 0; i < valuesToWrite.Length; i++)
-            {
-                string writeAddr = prefix + (startNum + i * 4); // double占4个寄存器
-                var w = client.Write(writeAddr, valuesToWrite[i]);
-                Console.WriteLine($"写入{writeAddr}={valuesToWrite[i]} 结果: {w.IsSucceed}");
-            }
+            // 真正的批量写入
+            var batchWrite = client.Write<double>(address, valuesToWrite);
+            Console.WriteLine($"批量写入 {address} 结果: {batchWrite.IsSucceed}");
 
             // 批量读取
             Console.WriteLine("\n--- 批量读取 double ---");
@@ -342,6 +318,49 @@ namespace ConsoleTest
             //client1.Close();
             //Console.WriteLine("结束2");
             Console.ReadLine();
+        }
+
+        /// <summary>
+        /// 测试int32类型的单个和连续读写
+        /// </summary>
+        /// <param name="client">三菱PLC客户端</param>
+        private static void TestInt32ReadWrite(MitsubishiMcClient client)
+        {
+            string address = "D400";
+            int[] valuesToWrite = { 123456, -789012, 3456789, 0 };
+            Console.WriteLine("\n--- 批量写入 int32 ---");
+
+            // 提取前缀和起始数字
+            string prefix = new string(address.TakeWhile(char.IsLetter).ToArray());
+            int startNum = int.Parse(new string(address.SkipWhile(char.IsLetter).ToArray()));
+
+            // 真正的批量写入
+            var batchWrite = client.Write<int>(address, valuesToWrite);
+            Console.WriteLine($"批量写入 {address} 结果: {batchWrite.IsSucceed}");
+
+            // 批量读取
+            Console.WriteLine("\n--- 批量读取 int32 ---");
+            var readMulti = client.Read<int>(address, valuesToWrite.Length);
+            if (readMulti.IsSucceed)
+            {
+                int idx = 0;
+                for (int i = 0; i < valuesToWrite.Length; i++)
+                {
+                    string readAddr = prefix + (startNum + i * 2);
+                    Console.WriteLine($"{readAddr} 读取值: {readMulti.Value.ElementAt(idx)}");
+                    idx++;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"批量读取失败: {readMulti.Error}");
+            }
+
+            // 单个写入和读取
+            var singleWrite = client.Write<int>(address, 3141592);
+            Console.WriteLine($"单个写入{address}=3141592 结果: {singleWrite.IsSucceed}");
+            var readSingle = client.Read<int>(address);
+            Console.WriteLine($"单个读取值: {readSingle.Value}");
         }
     }
 }
