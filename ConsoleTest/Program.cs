@@ -32,7 +32,8 @@ namespace ConsoleTest
             //TestFloatReadWrite(client);
             //TestDoubleReadWrite(client);
 
-            TestInt32ReadWrite(client);
+            //TestInt32ReadWrite(client);
+            TestStringReadWrite(client);
         }
 
         /// <summary>
@@ -197,6 +198,17 @@ namespace ConsoleTest
             Console.WriteLine($"单个写入{address}=3.1415926 结果: {singleWrite.IsSucceed}");
             var readSingle = client.Read<double>(address);
             Console.WriteLine($"单个读取值: {readSingle.Value}");
+        }
+
+        private static void TestStringReadWrite(MitsubishiMcClient client)
+        {
+            //下面两种方式写入都可以
+            client.Write<string>("D500", "ABCD1234");
+            client.WriteString("D500", "124234da", 0, Encoding.ASCII);
+
+            var aaaa = client.ReadString("D500", 8, Encoding.ASCII);
+
+            Console.WriteLine(aaaa.Value);
         }
 
         private void Test1()

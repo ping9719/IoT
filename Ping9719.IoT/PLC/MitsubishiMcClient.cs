@@ -11,8 +11,8 @@ namespace Ping9719.IoT.PLC
 {
     /// <summary>
     /// 三菱客户端（MC协议）.
-    /// 已测试单个元素读写：bool,short,int32,float,double
-    /// 已测试数组元素读写：bool(循环写入速度较慢),short,int32,float,double
+    /// 已测试单个元素读写：bool,short,int32,float,double,string
+    /// 已测试数组元素读写：bool(循环写入速度较慢),short,int32,float,double,string
     /// </summary>
     public class MitsubishiMcClient : IIoT
     {
@@ -323,22 +323,6 @@ namespace Ping9719.IoT.PLC
             }
             // 直接调用底层批量写入
             return Write(address, allBytes, false);
-        }
-
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <returns></returns>
-        private IoTResult Write(string address, string value)
-        {
-            var valueBytes = Encoding.ASCII.GetBytes(value);
-            var bytes = new byte[valueBytes.Length + 1];
-            bytes[0] = (byte)valueBytes.Length;
-            valueBytes.CopyTo(bytes, 1);
-            Array.Reverse(bytes);
-            return Write(address, bytes);
         }
 
         #endregion 写
@@ -836,56 +820,57 @@ namespace Ping9719.IoT.PLC
                 var readResut = ReadBoolean(address);
                 return new IoTResult<T>(readResut, (T)(object)readResut.Value);
             }
-            if (tType == typeof(byte))
+            else if (tType == typeof(byte))
             {
                 var r = ReadValue(address, 1, (b, i) => b[i]);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(sbyte))
+            else if (tType == typeof(sbyte))
             {
                 var r = ReadValue(address, 1, (b, i) => (sbyte)b[i]);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(short))
+            else if (tType == typeof(short))
             {
                 var r = ReadValue(address, 2, BitConverter.ToInt16);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(ushort))
+            else if (tType == typeof(ushort))
             {
                 var r = ReadValue(address, 2, BitConverter.ToUInt16);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(int))
+            else if (tType == typeof(int))
             {
                 var r = ReadValue(address, 4, BitConverter.ToInt32);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(uint))
+            else if (tType == typeof(uint))
             {
                 var r = ReadValue(address, 4, BitConverter.ToUInt32);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(long))
+            else if (tType == typeof(long))
             {
                 var r = ReadValue(address, 8, BitConverter.ToInt64);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(ulong))
+            else if (tType == typeof(ulong))
             {
                 var r = ReadValue(address, 8, BitConverter.ToUInt64);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(float))
+            else if (tType == typeof(float))
             {
                 var r = ReadValue(address, 4, BitConverter.ToSingle);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
-            if (tType == typeof(double))
+            else if (tType == typeof(double))
             {
                 var r = ReadValue(address, 8, BitConverter.ToDouble);
                 return new IoTResult<T>(r, (T)(object)r.Value);
             }
+
             throw new NotImplementedException("暂不支持的类型");
         }
 
@@ -952,7 +937,8 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
-            throw new NotImplementedException();
+            var r = ReadValue(address, length, (b, i) => encoding.GetString(b, i, length));
+            return new IoTResult<string>(r, (string)(object)r.Value);
         }
 
         public IoTResult Write<T>(string address, T value)
@@ -1004,7 +990,7 @@ namespace Ping9719.IoT.PLC
             }
             else if (value is string Stringv)
             {
-                return Write(address, Stringv);
+                return WriteValue(address, Stringv, v => Encoding.GetBytes(v));
             }
             else
             {
@@ -1014,7 +1000,7 @@ namespace Ping9719.IoT.PLC
 
         public IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
-            throw new NotImplementedException();
+            return WriteValue(address, value, v => encoding.GetBytes(v));
         }
 
         public IoTResult Write<T>(string address, params T[] value)
