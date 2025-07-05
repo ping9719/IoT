@@ -81,24 +81,23 @@ namespace Ping9719.IoT.PLC
                         break;
                 }
 
-                IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
                 switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
                         var lenght = command[10] + command[11] * 256;
                         if (isBit)
-                            sendResult = Client.SendReceive(command, ReceiveMode.ParseByte((int)Math.Ceiling(lenght * 0.5) + 2));
+                            result = Client.SendReceive(command, ReceiveMode.ParseByte((int)Math.Ceiling(lenght * 0.5) + 2));
                         else
-                            sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(lenght * 2 + 2));
+                            result = Client.SendReceive(command, ReceiveMode.ParseByte(lenght * 2 + 2));
                         break;
 
                     case MitsubishiVersion.Qna_3E:
-                        sendResult = Client.SendReceive(command);
+                        result = Client.SendReceive(command);
                         break;
                 }
-                if (!sendResult.IsSucceed) return sendResult;
+                if (!result.IsSucceed) return result;
 
-                byte[] dataPackage = sendResult.Value;
+                byte[] dataPackage = result.Value;
 
                 var bufferLength = length;
                 byte[] responseValue = null;
@@ -264,21 +263,20 @@ namespace Ping9719.IoT.PLC
                         break;
                 }
 
-                IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
                 switch (Version)
                 {
                     case MitsubishiVersion.A_1E:
-                        sendResult = Client.SendReceive(command, ReceiveMode.ParseByte(2));
+                        result = Client.SendReceive(command, ReceiveMode.ParseByte(2));
                         break;
 
                     case MitsubishiVersion.Qna_3E:
-                        sendResult = Client.SendReceive(command);
+                        result = Client.SendReceive(command);
                         break;
                 }
-                if (!sendResult.IsSucceed)
-                    return sendResult;
+                if (!result.IsSucceed)
+                    return result;
 
-                byte[] dataPackage = sendResult.Value;
+                //byte[] dataPackage = result.Value;
             }
             catch (Exception ex)
             {
