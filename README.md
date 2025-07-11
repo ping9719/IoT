@@ -1,45 +1,52 @@
 ﻿# Ping9719.IoT
 
-### 工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议。
-##### Iot device communication protocol implementation, including mainstream PLC, ModBus, CIP, MC, FINS...... Such common protocols.
+### 工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议可通过不同的管道（TCP、UDP、MQTT、USB、蓝牙...）简单的交互数据。
+##### The industrial internet communication library protocol has been implemented, including mainstream PLC, ModBus, CIP, MC, FINS... and other common protocols. Through different channels (TCP, UDP, MQTT, USB, Bluetooth...), data can be simply exchanged.
 #
 
-### 语言选择：[language choice]
-[简体中文](README.md) --
-[English](README_en-US.md) --
+### 语言选择：
+[简体中文](README.md) </br>
+[English](README_en-US.md) </br>
 
-### 全部文档：[docs]
-[查看 "IoT" 文档](Ping9719.IoT/docs/README.md)   
-[查看 "IoT" 版本文档](Ping9719.IoT/docs/VERSION.md)  
-
-[查看 "IoT.WPF" 文档](Ping9719.IoT.WPF/docs/README.md)   
-[查看 "IoT.Avalonia" 文档](Ping9719.IoT.Avalonia/docs/README.md)   
+### 源代码：
+[Github (主库)](https://github.com/ping9719/IoT)  
+[Gitee (备用库)](https://gitee.com/ping9719/IoT)   
 #
 
-### 库：
-源代码：[Github (主库)](https://github.com/ping9719/IoT)  
-源代码：[Gitee (备用库)](https://gitee.com/ping9719/IoT)   
+### 目录：  
+| 目录     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）</br>(稳定后发布) | 简介|
+|----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|-------|
+| IoT      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 | 跨平台的库。主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...） |
+| Hid      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 跨平台管道链接库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接受数据，使PLC和设备通信可使用USB或蓝牙  |
+| WPF      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF             | 界面UI库。只支持在windows平台上快速的调试IoT中的协议和设备   |
+| Avalonia | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia        | 跨平台的界面UI库。支持在windows、安卓、苹果的手机、平板、电脑上快速的调试IoT中的协议和设备 |
+
 #
 
-# 前言、亮点
-1.常用设备实现接口“IIoT”可进行读写 
+
+
+# 必读、前言、亮点
+1.常用设备实现接口“IIoT”可通过泛型方式进行读写  
 ```CSharp
 client.Read<bool>("abc");//读1个
-client.Read<bool>("abc",5);//读5个
-client.Write<bool>("abc",true);//写值
-client.Write<int>("abc",10,20,30);//写多个
+client.Read<bool>("abc", 5);//读5个
+client.Write<bool>("abc", true);//写值
+client.Write<int>("abc", 10, 20, 30);//写多个
+client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 ```
 2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
 ```CSharp
 var type1 = new TcpClient(ip, port);//Tcp方式
 var type2 = new SerialPortClient(portName, baudRate);//串口方式
 var type3 = new UdpClient(ip, port);//Udp方式
+var type4 = new UsbHidClient(ip, port);//USB方式 
 
 var client1 = new ModbusTcpClient(type1);//使用Tcp方式
 var client2 = new ModbusTcpClient(type2);//使用串口方式
 client1.Client.Open();//打开
 ```
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
+> 注意：所有的客户端都是一样的，包含TcpClient，SerialPortClient，UsbHidClient...
 ```CSharp
 ClientBase client1 = new TcpClient(ip, port);//Tcp方式
 //重要！！！连接模式是非常重要的功能，有3种模式 
@@ -52,11 +59,14 @@ client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
 client1.Open();
 
 client1.Send("abc");//发送
-client1.Receive();//等待并接受
+client1.Receive();//等待接受
+client1.Receive(3000);//等待接受，3秒超时
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
+client1.SendReceive("abc",3000);//发送并等待接受，3秒超时
 ```
 4.返回为“IoTResult”，内置了异常处理等信息
+> `IoTResult<T>`包含`Value`，`IoTResult`不包含 
 ```CSharp
 var info = client.Read<bool>("abc");
 if (info.IsSucceed)//应该判断后在取值
@@ -66,35 +76,35 @@ else
 ```
 
 # Ping9719.IoT
-- [通讯 (Communication)]
+- [通讯 (Communication)](#通讯 (Communication))
     - TcpClient
-    - TcpServer （待开发） 
+    - TcpServer （待测试） 
     - SerialPortClient
     - UdpClient （进行中） 
     - UdpServer （待开发） 
     - HttpServer （待开发） 
     - MqttClient （待开发） 
     - MqttServer （待开发） 
-- [Modbus]
+- [Modbus](#Modbus)
     - ModbusRtuClient
     - ModbusTcpClient
     - ModbusAsciiClient
-- [PLC]
-    - 罗克韦尔 (AllenBradleyCipClient) （进行中）   
+- [PLC](#PLC)
+    - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
     - 西门子 (SiemensS7Client)
-- [机器人 (Robot)]
-    - 爱普生 (EpsonRobot) （进行中） 
-- [算法 (Algorithm)]
+- [机器人 (Robot)](#机器人 (Robot))
+    - 爱普生 (EpsonRobot) （待测试） 
+- [算法 (Algorithm)](#算法 (Algorithm))
     - CRC
     - LRC
     - 傅立叶算法(Fourier) （待开发） 
-    - 配对算法(GaleShapleyAlgorithm)
+    - 稳定婚姻配对算法(GaleShapleyAlgorithm)
     - PID （待开发） 
     - RSA （待开发） 
-- [设备和仪器 (Device)]
+- [设备和仪器 (Device)](#设备和仪器 (Device))
     - 气密检测 (Airtight)
         - 科斯莫气密检测 (CosmoAirtight)
     - Fct
@@ -115,23 +125,6 @@ else
     - 温控 (TemperatureControl)
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - 焊接机 (Weld)
-        - 快克焊接机 (KuaiKeWeld)（不推荐） 
-    - 扩展 (Rests)
-        - 1.如何使用自定义协议 (Use a custom protocol)
-
-
-# 三菱MC客户端功能测试覆盖表
-
-| 类型         | 单点读写         | 批量读写（数组）         |
-|--------------|------------------|-------------------------|
-| bool         | ✔️               | ✔️（循环单点写入，较慢） |
-| short        | ✔️               | ✔️                      |
-| int32        | ✔️               | ✔️                      |
-| float        | ✔️               | ✔️                      |
-| double       | ✔️               | ✔️                      |
-| string       | ✔️               | ✔️                      |
-
-> 注：bool数组批量写入采用循环单点写入方式，速度相对较慢。
->
-> ​        还支持byte、sbyte、ushort、uint32、int64、uint64类型。由于用到的情况较少，请自行测试。
-
+        - 快克焊接机 (KuaiKeWeld)
+- [扩展](#扩展)
+    - [1.如何使用自定义协议](#1.如何使用自定义协议)

@@ -1,4 +1,6 @@
-﻿using Ping9719.IoT.Common;
+﻿using HidSharp;
+using Ping9719.IoT.Common;
+using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,43 +12,38 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Communication
+namespace Ping9719.IoT.Hid
 {
     /// <summary>
-    /// 串口客户端
+    /// UsbHid客户端
     /// </summary>
-    public class SerialPortClient : ClientBase
+    public class UsbHidClient : ClientBase
     {
-        public static string[] GetNames => System.IO.Ports.SerialPort.GetPortNames();
-        public override bool IsOpen => serialPort?.IsOpen ?? false && IsOpen2;
+        public static string[] GetNames => DeviceList.Local.GetHidDevices().Select(o => o.DevicePath).ToArray();
+        public override bool IsOpen => IsOpen2;// hidDevice?.IsOpen ?? false && IsOpen2;
 
-        string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One; Handshake handshake = Handshake.None;
+        string devicePath;
 
         object obj1 = new object();
         bool IsOpen2 = false;
         bool IsUserClose = false;//是否用户关闭
         bool isSendReceive = false;//是否正在发送和接受中
 
-        private System.IO.Ports.SerialPort serialPort;
+        private HidSharp.HidDevice hidDevice;
         private System.IO.Stream stream;
         QueueByteFixed dataEri;
         Task task;
         int ReconnectionCount = 0;
         CancellationTokenSource flushCts;
 
-        public SerialPortClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake= Handshake.None)
+        public UsbHidClient(string devicePath)
         {
-            this.portName = portName;
-            this.baudRate = baudRate;
-            this.dataBits = dataBits;
-            this.stopBits = stopBits;
-            this.parity = parity;
-            this.handshake = handshake;
+            this.devicePath = devicePath;
 
             ConnectionMode = ConnectionMode.Manual;
             Encoding = Encoding.ASCII;
-            ReceiveMode = ReceiveMode.ParseTime();
-            ReceiveModeReceived = ReceiveMode.ParseTime();
+            ReceiveMode = ReceiveMode.ParseByteAll();
+            ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
 
         public override IoTResult Open()
@@ -97,7 +94,7 @@ namespace Ping9719.IoT.Communication
             try
             {
                 dataEri?.Clear();
-                serialPort?.DiscardInBuffer();
+                //hidDevice?..DiscardInBuffer();
                 return new IoTResult().ToEnd();
             }
             catch (Exception ex)
@@ -217,7 +214,7 @@ namespace Ping9719.IoT.Communication
         {
             task = Task.Factory.StartNew(async (a) =>
             {
-                var cc = (SerialPortClient)a;
+                var cc = (UsbHidClient)a;
                 byte[] data = new byte[ReceiveBufferSize];
                 while (true)
                 {
@@ -227,7 +224,8 @@ namespace Ping9719.IoT.Communication
                         {
                             break;
                         }
-                        else if (cc.IsOpen2 && cc.IsOpen)
+                        //else if (cc.IsOpen2 && cc.IsOpen)
+                        else if (cc.IsOpen)
                         {
                             int readLength;
                             try
@@ -326,16 +324,19 @@ namespace Ping9719.IoT.Communication
         void Open2(bool IsReconnection)
         {
             dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-            serialPort = new System.IO.Ports.SerialPort(portName, baudRate, parity, dataBits, stopBits);
-            serialPort.Encoding = Encoding;
-            serialPort.ReadTimeout = TimeOut;
-            serialPort.WriteTimeout = TimeOut;
-            serialPort.Handshake = handshake;
+            hidDevice = DeviceList.Local.GetHidDevices().FirstOrDefault(o => o.DevicePath == devicePath);
+            if (hidDevice == null)
+                throw new InvalidOperationException($"无法找到设备[{devicePath}]");
 
-            serialPort.Open();
+
+            stream = hidDevice.Open();
+
+            //stream.Encoding = Encoding;
+            stream.ReadTimeout = TimeOut;
+            stream.WriteTimeout = TimeOut;
+            //stream.Handshake = handshake;
 
             IsOpen2 = true;
-            stream = serialPort.BaseStream;
             ReconnectionCount = 0;
 
             if (!IsReconnection)
@@ -354,8 +355,8 @@ namespace Ping9719.IoT.Communication
                 IsUserClose = isUser;
                 dataEri = null;
 
-                serialPort?.Close();
-                serialPort?.Dispose();
+                stream?.Close();
+                stream?.Dispose();
             }
             catch (Exception ex)
             {

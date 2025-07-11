@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HidSharp" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ping9719.IoT.Hid\Ping9719.IoT.Hid.csproj" />
     <ProjectReference Include="..\Ping9719.IoT\Ping9719.IoT.csproj" />
   </ItemGroup>
 

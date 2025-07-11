@@ -1,14 +1,11 @@
-﻿# 语言选择：
-[简体中文](Ping9719.IoT/docs/README.md) --
-[English](Ping9719.IoT/docs/README_en-US.md) --
+﻿# Ping9719.IoT
+主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...）
 
-# 安装包 [NuGet]
-```CSharp
-//等待稳定后发布，现在请自行拉取代码 
-Install-Package Ping9719.IoT
-```
-# Ping9719.IoT
-- [前言](#前言、亮点)
+# 语言选择：
+[简体中文](README.md) </br>
+[English](README_en-US.md) </br>
+
+# 目录 
 - [通讯 (Communication)](#通讯 (Communication))
     - TcpClient
     - TcpServer （待测试） 
@@ -23,13 +20,13 @@ Install-Package Ping9719.IoT
     - ModbusTcpClient
     - ModbusAsciiClient
 - [PLC](#PLC)
-    - 罗克韦尔 (AllenBradleyCipClient) （进行中）   
+    - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
     - 汇川 (InovanceModbusTcpClient)
     - 三菱 (MitsubishiMcClient)
     - 欧姆龙 (OmronFinsClient,OmronCipClient)
     - 西门子 (SiemensS7Client)
 - [机器人 (Robot)](#机器人 (Robot))
-    - 爱普生 (EpsonRobot) （进行中） 
+    - 爱普生 (EpsonRobot) （待测试） 
 - [算法 (Algorithm)](#算法 (Algorithm))
     - CRC
     - LRC
@@ -61,52 +58,6 @@ Install-Package Ping9719.IoT
         - 快克焊接机 (KuaiKeWeld)
 - [扩展](#扩展)
     - [1.如何使用自定义协议](#1.如何使用自定义协议)
-
-
-# 前言、亮点
-1.常用设备实现接口“IIoT”可进行读写 
-```CSharp
-client.Read<bool>("abc");//读1个
-client.Read<bool>("abc",5);//读5个
-client.Write<bool>("abc",true);//写值
-client.Write<int>("abc",10,20,30);//写多个
-```
-2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
-```CSharp
-var type1 = new TcpClient(ip, port);//Tcp方式
-var type2 = new SerialPortClient(portName, baudRate);//串口方式
-var type3 = new UdpClient(ip, port);//Udp方式
-
-var client1 = new ModbusTcpClient(type1);//使用Tcp方式
-var client2 = new ModbusTcpClient(type2);//使用串口方式
-client1.Client.Open();//打开
-```
-3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
-```CSharp
-ClientBase client1 = new TcpClient(ip, port);//Tcp方式
-//重要！！！连接模式是非常重要的功能，有3种模式 
-client1.ConnectionMode = ConnectionMode.None;//手动。需要自己去打开和关闭，此方式比较灵活。
-client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接受会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
-client1.Opened = (a) =>{Log.AddLog("链接成功")};
-client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
-client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
-client1.Open();
-
-client1.Send("abc");//发送
-client1.Receive();//等待并接受
-client1.Receive(5000);//等待并接受，超时5秒
-client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾为\n的，超时为5秒 
-client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
-```
-4.返回为“IoTResult”，内置了异常处理等信息
-```CSharp
-var info = client.Read<bool>("abc");
-if (info.IsSucceed)//应该判断后在取值
-{ var val = info.Value; }
-else
-{ var err = info.ErrorText; }
-```
 
 # 通讯 (Communication)
 ## TcpClient
@@ -242,6 +193,22 @@ client.Write<Int16>("D1",12);//写
 ```
 
 ## 三菱 (MitsubishiMcClient)
+### 三菱MC客户端功能测试覆盖表
+
+| 类型         | 单点读写         | 批量读写（数组）         |
+|--------------|------------------|-------------------------|
+| bool         | ✔️               | ✔️（循环单点写入，较慢） |
+| short        | ✔️               | ✔️                      |
+| int32        | ✔️               | ✔️                      |
+| float        | ✔️               | ✔️                      |
+| double       | ✔️               | ✔️                      |
+| string       | ✔️               | ✔️                      |
+
+> 注：bool数组批量写入采用循环单点写入方式，速度相对较慢。
+>
+> ​        还支持byte、sbyte、ushort、uint32、int64、uint64类型。由于用到的情况较少，请自行测试。
+
+
 ```CSharp
 MitsubishiMcClient client = new MitsubishiMcClient("127.0.0.1");
 client.Read<Int16>("W0");//读
