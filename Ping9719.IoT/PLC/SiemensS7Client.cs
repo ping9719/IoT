@@ -50,16 +50,16 @@ namespace Ping9719.IoT.PLC
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
         /// <param name="timeout">超时时间（毫秒）</param>
-        public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
+        public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00)
         {
             this.Version = version;
             Client = client;
             Slot = slot;
             Rack = rack;
-            Client.TimeOut = timeout;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.TimeOut = timeout;
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            //Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
 
             Client.Opened = (a) =>
@@ -129,7 +129,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
         /// <param name="timeout">超时时间（毫秒）</param>
-        public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00, int timeout = 1500) : this(version, new TcpClient(ip, port), slot, rack, timeout) { }
+        public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00) : this(version, new TcpClient(ip, port), slot, rack) { }
 
         #region Read 
         /// <summary>
@@ -175,6 +175,8 @@ namespace Ping9719.IoT.PLC
                     byte[] responseData = new byte[arg.Length];
                     Array.Copy(dataPackage, dataPackage.Length - arg.Length, responseData, 0, arg.Length);
 
+                    result.Requests.Add(sendResult.Requests.FirstOrDefault());
+                    result.Responses.Add(sendResult.Responses.FirstOrDefault());
                     result.Value = result.Value.Concat(responseData).ToArray();
 
                     //0x04 读 0x01 读取一个长度 //如果是批量读取，批量读取方法里面有验证
@@ -701,15 +703,7 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public IoTResult Write(string address, byte[] data, bool isBit = false)
         {
-            //if (!socket?.Connected ?? true)
-            //{
-            //    var connectResult = Connect();
-            //    if (!connectResult.IsSucceed)
-            //    {
-            //        return connectResult;
-            //    }
-            //}
-            IoTResult result = new IoTResult();
+            IoTResult<byte[]> ioTResult = new IoTResult<byte[]>();
             try
             {
                 var addr = SiemensWriteAddress.ConvertArg(address);
@@ -725,56 +719,33 @@ namespace Ping9719.IoT.PLC
                     byte[] command = GetWriteCommand(arg);
 
                     var sendResult = Client.SendReceive(command);
+                    ioTResult.Requests.Add(sendResult.Requests.FirstOrDefault());
+                    ioTResult.Responses.Add(sendResult.Responses.FirstOrDefault());
+
                     if (!sendResult.IsSucceed)
-                        return sendResult;
+                        return ioTResult.AddError(sendResult.Error);
 
                     var dataPackage = sendResult.Value;
-
-
                     var offset = dataPackage.Length - 1;
                     if (dataPackage[offset] == 0x0A)
                     {
-
-                        result.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
-                        return result;
+                        return ioTResult.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                     }
                     else if (dataPackage[offset] == 0x05)
                     {
-
-                        result.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
-                        return result;
+                        return ioTResult.AddError($"写入{address}失败，请确认是否存在地址{address}，异常代码[{offset}]:{dataPackage[offset]}");
                     }
                     else if (dataPackage[offset] != 0xFF)
                     {
-
-                        result.AddError($"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}");
-                        return result;
+                        return ioTResult.AddError($"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}");
                     }
                 }
             }
-            //catch (SocketException ex)
-            //{
-            //    result.IsSucceed = false;
-            //    if (ex.SocketErrorCode == SocketError.TimedOut)
-            //    {
-            //        result.AddError("连接超时");
-            //    }
-            //    else
-            //    {
-            //        result.AddError(ex);
-            //    }
-            //    SafeClose();
-            //}
             catch (Exception ex)
             {
-                result.AddError(ex);
-                //SafeClose();
+                ioTResult.AddError(ex);
             }
-            //finally
-            //{
-            //    if (isAutoOpen) Dispose();
-            //}
-            return result.ToEnd();
+            return ioTResult.ToEnd();
         }
 
         ///// <summary>
@@ -1061,62 +1032,6 @@ namespace Ping9719.IoT.PLC
         #region IIoTBase
         public IoTResult<T> Read<T>(string address)
         {
-            //var tType = typeof(T);
-            //if (tType == typeof(bool))
-            //{
-            //    var readResut = ReadBoolean(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(byte))
-            //{
-            //    var readResut = ReadByte(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(float))
-            //{
-            //    var readResut = ReadFloat(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(double))
-            //{
-            //    var readResut = ReadDouble(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(short))
-            //{
-            //    var readResut = ReadInt16(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(int))
-            //{
-            //    var readResut = ReadInt32(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(long))
-            //{
-            //    var readResut = ReadInt64(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(ushort))
-            //{
-            //    var readResut = ReadUInt16(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(uint))
-            //{
-            //    var readResut = ReadUInt32(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else if (tType == typeof(ulong))
-            //{
-            //    var readResut = ReadUInt64(address);
-            //    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
-            //}
-            //else
-            //{
-            //    throw new NotImplementedException("暂不支持的类型");
-            //}
-
             var info = Read<T>(address, 1);
             if (info.IsSucceed)
                 return info.ToVal(info.Value.FirstOrDefault());
@@ -1124,87 +1039,49 @@ namespace Ping9719.IoT.PLC
                 return info.ToVal(default(T));
         }
 
-        public IoTResult<string> ReadString(string address, int length = -1, Encoding encoding = null)
+        /// <summary>
+        /// 针对与PLC中类型“WString”的读
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="length">无效</param>
+        /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
+        /// <returns></returns>
+        public IoTResult<string> ReadString(string address, int length = 512, Encoding encoding = null)
         {
-            encoding = encoding ?? Client.Encoding;
-
-            //if (!socket?.Connected ?? true)
-            //{
-            //    var connectResult = Connect();
-            //    if (!connectResult.IsSucceed)
-            //    {
-            //        return new IoTResult<string>(connectResult);
-            //    }
-            //}
-            var result = new IoTResult<string>();
+            encoding = encoding ?? Encoding.BigEndianUnicode;
+            var readResut = new IoTResult<byte[]>();
             try
             {
-                //获取长度
-                if (length < 0)
+                //[总长度][数量][数据...]
+                readResut = Read(address, (UInt16)length, false);
+                if (readResut.IsSucceed)
                 {
-                    var arg2 = SiemensAddress.ConvertArg(address);
-                    arg2.Length = 1;
-                    byte[] command2 = GetReadCommand(arg2);
-                    //result.Requst = string.Join(" ", command2.Select(t => t.ToString("X2")));
-                    var sendResult2 = Client.SendReceive(command2);
-                    if (!sendResult2.IsSucceed)
-                    {
-                        return new IoTResult<string>(sendResult2);
-                    }
-                    else
-                    {
-                        length = sendResult2.Value[0] + 1;
-                    }
+                    var sl = BitConverter.ToUInt16(new byte[] { readResut.Value[3], readResut.Value[2] }, 0) * 2;
+                    var strData = readResut.Value.Skip(4).Take(sl).ToArray();
+                    var nr = encoding.GetString(strData);
+
+                    return readResut.ToVal<string>(nr);
                 }
-
-                //发送读取信息
-                var arg = SiemensAddress.ConvertArg(address);
-                arg.Length = Convert.ToUInt16(length);
-                byte[] command = GetReadCommand(arg);
-
-                var sendResult = Client.SendReceive(command);
-                if (!sendResult.IsSucceed)
-                    return new IoTResult<string>(sendResult);
-
-                var dataPackage = sendResult.Value;
-                byte[] requst = new byte[length];
-                Array.Copy(dataPackage, 25, requst, 0, length);
-
-                result.Value = encoding.GetString(requst, 1, requst[0]);
+                else
+                {
+                    return readResut.ToVal<string>();
+                }
             }
-            //catch (SocketException ex)
-            //{
-            //    result.IsSucceed = false;
-            //    if (ex.SocketErrorCode == SocketError.TimedOut)
-            //    {
-            //        result.AddError("连接超时");
-            //    }
-            //    else
-            //    {
-            //        result.AddError(ex);
-            //    }
-            //    SafeClose();
-            //}
             catch (Exception ex)
             {
-                result.AddError(ex);
-                //SafeClose();
+                readResut.AddError(ex);
             }
-            finally
-            {
-                //if (isAutoOpen) Dispose();
-            }
-            return result.ToEnd();
+            return readResut.ToVal<string>().ToEnd();
         }
 
         public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             try
             {
-                bool isOneBool = false;
-                int address2 = 0;
+                bool isOneBool = false;//是否为bool类型且数量为1
+                int address2 = 0;//DB10.2.3 中的3
                 var tType = typeof(T);
-                var ynum = WordHelp.OccupyBitNum<T>();
+                var ynum = WordHelp.OccupyBitNum<T>();//实际的读取长度
                 if (tType == typeof(bool))
                 {
                     if (number == 1)
@@ -1228,19 +1105,56 @@ namespace Ping9719.IoT.PLC
                         }
                     }
                 }
+                else if (tType == typeof(string))
+                {
+                    ynum = Convert.ToUInt16(number * 256);//string
+                }
+                else if (tType == typeof(DateTime))
+                {
+                    ynum = Convert.ToUInt16(number * 2);
+                }
+                else if (tType == typeof(TimeSpan))
+                {
+                    ynum = Convert.ToUInt16(number * 4);
+                }
+                else if (tType == typeof(Char))
+                {
+                    ynum = Convert.ToUInt16(number * 1);
+                }
                 else
                     ynum = Convert.ToUInt16(number * ynum);
 
                 var readResut = Read(address, ynum, isOneBool);
                 if (readResut.IsSucceed)
                 {
-                    var obj = readResut.Value.ByteToObj<T>(Format, true);
-                    if (tType == typeof(bool))
+                    T[] valJg = new T[0];
+                    if (tType == typeof(string))
                     {
-                        obj = obj.Skip(address2).Take(number).ToArray();
+                        valJg = readResut.Value.SplitBlock(256, true).Select(o => (T)(object)Client.Encoding.GetString(o.Skip(2).Take(o[1]).ToArray())).ToArray();
+                    }
+                    else if (tType == typeof(DateTime))
+                    {
+                        valJg = readResut.Value.ByteToObj<UInt16>(Format, true).Select(o => (T)(object)new DateTime(1990, 1, 1).AddDays(o)).ToArray();
+                    }
+                    else if (tType == typeof(TimeSpan))
+                    {
+                        valJg = readResut.Value.ByteToObj<UInt32>(Format, true).Select(o => (T)(object)TimeSpan.FromMilliseconds(o)).ToArray();
+                    }
+                    else if (tType == typeof(Char))
+                    {
+                        valJg = Client.Encoding.GetString(readResut.Value).Select(o => (T)(object)o).ToArray();
+                    }
+                    //正常类型
+                    else
+                    {
+                        valJg = readResut.Value.ByteToObj<T>(Format, true);
+                        if (tType == typeof(bool))
+                        {
+                            valJg = valJg.Skip(address2).Take(number).ToArray();
+                        }
                     }
 
-                    return readResut.ToVal<IEnumerable<T>>(obj);
+                    return readResut.ToVal<IEnumerable<T>>(valJg);
                 }
                 else
                 {
@@ -1251,72 +1165,32 @@ namespace Ping9719.IoT.PLC
             {
                 return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
-            
+
         }
 
         public IoTResult Write<T>(string address, T value)
         {
-            //if (value is bool boolv)
-            //{
-            //    return Write(address, boolv);
-            //}
-            //else if (value is byte bytev)
-            //{
-            //    return Write(address, bytev);
-            //}
-            //else if (value is sbyte sbytev)
-            //{
-            //    return Write(address, sbytev);
-            //}
-            //else if (value is float floatv)
-            //{
-            //    return Write(address, floatv);
-            //}
-            //else if (value is double doublev)
-            //{
-            //    return Write(address, doublev);
-            //}
-            //else if (value is short Int16v)
-            //{
-            //    return Write(address, Int16v);
-            //}
-            //else if (value is int Int32v)
-            //{
-            //    return Write(address, Int32v);
-            //}
-            //else if (value is long Int64v)
-            //{
-            //    return Write(address, Int64v);
-            //}
-            //else if (value is ushort UInt16v)
-            //{
-            //    return Write(address, UInt16v);
-            //}
-            //else if (value is uint UInt32v)
-            //{
-            //    return Write(address, UInt32v);
-            //}
-            //else if (value is ulong UInt64v)
-            //{
-            //    return Write(address, UInt64v);
-            //}
-            //else
-            //{
-            //    throw new NotImplementedException("暂不支持的类型");
-            //}
             return Write<T>(address, new T[] { value });
         }
 
+        /// <summary>
+        /// 针对与PLC中类型“WString”的写
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="length">无效</param>
+        /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
+        /// <returns></returns>
         public IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
         {
-            encoding = encoding ?? Client.Encoding;
+            encoding = encoding ?? Encoding.BigEndianUnicode;
 
             var valueBytes = encoding.GetBytes(value);
-            var bytes = new byte[valueBytes.Length + 1];
-            bytes[0] = (byte)valueBytes.Length;
-            valueBytes.CopyTo(bytes, 1);
-            Array.Reverse(bytes);
-            return Write(address, bytes);
+            if (valueBytes.Length > 508)
+                return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
+
+            var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
+            var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
+            return Write(address, bytes, false);
         }
 
         public IoTResult Write<T>(string address, params T[] value)
@@ -1331,9 +1205,47 @@ namespace Ping9719.IoT.PLC
                     else
                         throw new NotImplementedException("暂不支持写多个bool类型");
                 }
+                else if (tType == typeof(string))
+                {
+                    var valueBytes = value.Select(o => Client.Encoding.GetBytes((string)(object)o));
+                    if (valueBytes.Any(o => o.Length > 254))
+                        return IoTResult.Create().AddError($"字符串长度不能超过{254}");
 
-                var obj = value.ObjToByte(Format);
-                return Write(address, obj, false);
+                    List<byte> bytes = new List<byte>(256 * value.Count());
+                    if (value.Length == 1)
+                    {
+                        bytes.AddRange(new byte[] { 254, Convert.ToByte(valueBytes.FirstOrDefault().Count()) }.Concat(valueBytes.FirstOrDefault()));
+                    }
+                    else
+                    {
+                        foreach (var item in valueBytes)
+                        {
+                            var bc = Enumerable.Repeat<byte>(0, 254 - item.Length);
+                            bytes.AddRange(new byte[] { 254, Convert.ToByte(item.Length) }.Concat(item).Concat(bc));
+                        }
+                    }
+                    return Write(address, bytes.ToArray(), false);
+                }
+                else if (tType == typeof(DateTime))
+                {
+                    var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).Reverse()).SelectMany(o=>o).ToArray();
+                    return Write(address, data2, false);
+                }
+                else if (tType == typeof(TimeSpan))
+                {
+                    var data = value.Select(o => BitConverter.GetBytes(Convert.ToUInt32(((TimeSpan)(object)o).TotalMilliseconds)).Reverse()).SelectMany(o => o).ToArray();
+                    return Write(address, data, false);
+                }
+                else if (tType == typeof(Char))
+                {
+                    var data = Client.Encoding.GetBytes(value.Select(o => (Char)(object)o).ToArray());
+                    return Write(address, data, false);
+                }
+                else
+                {
+                    var obj = value.ObjToByte(Format);
+                    return Write(address, obj, false);
+                }
             }
             catch (Exception ex)
             {
