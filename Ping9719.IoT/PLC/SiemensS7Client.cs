@@ -59,7 +59,7 @@ namespace Ping9719.IoT.PLC
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            //Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
 
             Client.Opened = (a) =>

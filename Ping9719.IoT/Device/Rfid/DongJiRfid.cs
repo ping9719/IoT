@@ -16,12 +16,12 @@ namespace Ping9719.IoT.Device.Rfid
     public class DongJiRfid
     {
         public ClientBase Client { get; private set; }
-        public DongJiRfid(ClientBase client, int timeout = 1500)
+        public DongJiRfid(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             //Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public DongJiRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }

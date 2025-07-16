@@ -29,8 +29,8 @@ namespace Ping9719.IoT.Modbus
         public ModbusAsciiClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
         {
             Client = client;
-            Client.TimeOut = 1500;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.TimeOut = 1500;
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
 

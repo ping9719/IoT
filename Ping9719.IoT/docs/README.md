@@ -6,9 +6,9 @@
 
 # 目录 
 - [通讯 (Communication)](#Communication)
-    - TcpClient
+    - [TcpClient](#TcpClient)
     - TcpServer （待测试） 
-    - SerialPortClient
+    - [SerialPortClient](#SerialPortClient)
     - UdpClient （进行中） 
     - UdpServer （待开发） 
     - HttpServer （待开发） 
@@ -60,7 +60,7 @@
     - 1.如何使用自定义协议
 
 # 通讯 (Communication) <a id="Communication"></a>
-## TcpClient
+## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
@@ -113,7 +113,7 @@ var service = new TcpService("127.0.0.1",8005);
 ```
 
 
-## SerialPortClient
+## SerialPortClient <a id="SerialPortClient"></a>
 `SerialPortClient : ClientBase`
 ```CSharp
 var client1 = new SerialPortClient("COM1", 9600);
@@ -372,7 +372,7 @@ public class XXX
     public XXX(ClientBase client)
     {
         Client = client;
-        Client.ReceiveMode = ReceiveMode.ParseTime();
+        //Client.ReceiveMode = ReceiveMode.ParseTime();
         Client.Encoding = Encoding.ASCII;
         Client.ConnectionMode = ConnectionMode.AutoOpen;
     }

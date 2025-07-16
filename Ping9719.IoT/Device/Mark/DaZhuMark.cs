@@ -14,12 +14,12 @@ namespace Ping9719.IoT.Device.Mark
     public class DaZhuMark
     {
         public ClientBase Client { get; private set; }
-        public DaZhuMark(ClientBase client, int timeout = 60000)
+        public DaZhuMark(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.UTF8;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
@@ -176,13 +176,13 @@ namespace Ping9719.IoT.Device.Mark
         /// 开始打印
         /// </summary>
         /// <returns>打印时间（秒）</returns>
-        public IoTResult<double> MarkStart(params string[] id)
+        public IoTResult<double> MarkStart(int timeout = 60000, params string[] id)
         {
             string comm = $"<MarkStart,{string.Join(",", id)}>";
             var result = new IoTResult<double>();
             try
             {
-                var aaa = Client.SendReceive(comm);
+                var aaa = Client.SendReceive(comm, timeout);
                 if (!aaa.IsSucceed)
                     return aaa.ToVal<double>().ToEnd();
 
@@ -203,13 +203,13 @@ namespace Ping9719.IoT.Device.Mark
         /// 红光预览
         /// </summary>
         /// <returns>预览时间（秒）</returns>
-        public IoTResult<double> RedStart(params string[] id)
+        public IoTResult<double> RedStart(int timeout = 60000, params string[] id)
         {
             string comm = $"<RedStart,{string.Join(",", id)}>";
             var result = new IoTResult<double>();
             try
             {
-                var aaa = Client.SendReceive(comm);
+                var aaa = Client.SendReceive(comm, timeout);
                 if (!aaa.IsSucceed)
                     return aaa.ToVal<double>().ToEnd();
 

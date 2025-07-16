@@ -22,13 +22,12 @@ namespace Ping9719.IoT.Device.Rfid
     {
         WanQuanRfidVer ver;
         public ClientBase Client { get; private set; }
-        public WanQuanRfid(WanQuanRfidVer ver, ClientBase client, byte stationNumber = 0x01, int timeout = 1500) : base(client, stationNumber: stationNumber)
+        public WanQuanRfid(WanQuanRfidVer ver, ClientBase client, byte stationNumber = 0x01) : base(client, stationNumber: stationNumber)
         {
             Client = client;
-            Client.TimeOut = timeout;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.TimeOut = timeout;
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.ver = ver;

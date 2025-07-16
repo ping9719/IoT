@@ -23,12 +23,12 @@ namespace Ping9719.IoT.Device.TemperatureControl
         private byte stationNumber = 1;
 
         public ClientBase Client { get; private set; }
-        public KuaiKeTemperatureControl(ClientBase client, int timeout = 1500, EndianFormat format = EndianFormat.BADC, byte stationNumber = 20)
+        public KuaiKeTemperatureControl(ClientBase client, EndianFormat format = EndianFormat.BADC, byte stationNumber = 20)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             //Client.IsAutoOpen = true;
             Client.IsAutoDiscard = true;
 

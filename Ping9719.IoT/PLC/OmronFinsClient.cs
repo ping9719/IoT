@@ -55,11 +55,11 @@ namespace Ping9719.IoT.PLC
         /// <param name="client">客户端</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public OmronFinsClient(ClientBase client, int timeout = 1500, EndianFormat endianFormat = EndianFormat.CDAB)
+        public OmronFinsClient(ClientBase client, EndianFormat endianFormat = EndianFormat.CDAB)
         {
             Client = client;
-            Client.TimeOut = timeout;
-            Client.ReceiveMode = ReceiveMode.ParseByteAll();
+            //Client.TimeOut = timeout;
+            //Client.ReceiveMode = ReceiveMode.ParseByteAll();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
@@ -116,7 +116,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="port">端口</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public OmronFinsClient(string ip, int port = 1500, int timeout = 1500, EndianFormat endianFormat = EndianFormat.CDAB) : this(new TcpClient(ip, port), timeout, endianFormat) { }
+        public OmronFinsClient(string ip, int port = 1500, EndianFormat endianFormat = EndianFormat.CDAB) : this(new TcpClient(ip, port), endianFormat) { }
 
         #region Read
         /// <summary>

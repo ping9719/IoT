@@ -19,12 +19,12 @@ namespace Ping9719.IoT.Device.Fct
         int version = 2;
 
         public ClientBase Client { get; private set; }
-        public MengXunFct(ClientBase client, int timeout = 1500, int version = 2)
+        public MengXunFct(ClientBase client, int version = 2)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public MengXunFct(string ip, int port) : this(new TcpClient(ip, port)) { }

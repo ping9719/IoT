@@ -44,16 +44,16 @@ namespace Ping9719.IoT.Device.Mark
             {32,"接受错误的消息" },
         };
         public ClientBase Client { get; private set; }
-        public HuaPuMark(ClientBase client, int timeout = 60000)
+        public HuaPuMark(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
-        public HuaPuMark(string ip, int port = 2000, int timeout = 60000) : this(new TcpClient(ip, port)) { }
+        public HuaPuMark(string ip, int port = 2000) : this(new TcpClient(ip, port)) { }
 
         /// <summary>
         /// 加载指定模板文件
@@ -105,12 +105,12 @@ namespace Ping9719.IoT.Device.Mark
         /// </summary>
         /// <param name="isAgain">是否强制打标，是不验证，否变量 0-9 是不会进行重码检验的，变量 10、11、12、13、14 会进行重码检验, 重码不打标</param>
         /// <returns></returns>
-        public IoTResult MarkStart(bool isAgain = true)
+        public IoTResult MarkStart(bool isAgain = true, int timeout = 60000)
         {
             string comm = isAgain ? "RUN AGAIN \r\n" : $"RUN \r\n";
             try
             {
-                var aaa = Client.SendReceive(comm);
+                var aaa = Client.SendReceive(comm, timeout);
                 if (!aaa.IsSucceed)
                     return aaa;
 

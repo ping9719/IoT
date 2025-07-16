@@ -32,11 +32,11 @@ namespace Ping9719.IoT.PLC
         /// 初始化
         /// </summary>
         /// <param name="client">客户端</param>
-        public MitsubishiMcClient(MitsubishiVersion version, ClientBase client, int timeout = 1500)
+        public MitsubishiMcClient(MitsubishiVersion version, ClientBase client)
         {
             Client = client;
-            Client.TimeOut = timeout;
-            Client.ReceiveMode = ReceiveMode.ParseByteAll();
+            //Client.TimeOut = timeout;
+            //Client.ReceiveMode = ReceiveMode.ParseByteAll();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.AutoReconnection;
 
@@ -48,7 +48,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="ip">ip地址</param>
         /// <param name="port">端口</param>
-        public MitsubishiMcClient(MitsubishiVersion version, string ip, int port = 1500, int timeout = 1500) : this(version, new TcpClient(ip, port), timeout) { }
+        public MitsubishiMcClient(MitsubishiVersion version, string ip, int port = 1500) : this(version, new TcpClient(ip, port)) { }
 
         #region 读
 

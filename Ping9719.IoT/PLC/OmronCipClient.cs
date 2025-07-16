@@ -30,12 +30,12 @@ namespace Ping9719.IoT.PLC
         byte[] BoolTrueByteVal = new byte[] { 0x01, 0x00 };
 
         public ClientBase Client { get; private set; }
-        public OmronCipClient(ClientBase client, byte slot = 0, int timeout = 1500)
+        public OmronCipClient(ClientBase client, byte slot = 0)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.UTF8;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
             Client.Opened = (a) =>
@@ -88,7 +88,7 @@ namespace Ping9719.IoT.PLC
 
             Slot = slot;
         }
-        public OmronCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500) : this(new TcpClient(ip, port), slot, timeout) { }
+        public OmronCipClient(string ip, int port = 44818, byte slot = 0) : this(new TcpClient(ip, port), slot) { }
 
         /// <summary>
         /// 会话句柄

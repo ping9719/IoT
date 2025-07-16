@@ -21,12 +21,12 @@ namespace Ping9719.IoT.Device.Scanner
     public class HoneywellScanner : IScannerBase
     {
         public ClientBase Client { get; private set; }
-        public HoneywellScanner(ClientBase client, int timeout = 1500)
+        public HoneywellScanner(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public HoneywellScanner(string ip, int port = 55256) : this(new TcpClient(ip, port)) { }

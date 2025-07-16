@@ -32,12 +32,12 @@ namespace Ping9719.IoT.PLC
         public byte[] BoolTrueByteVal = new byte[] { 0xFF, 0xFF };
 
         public ClientBase Client { get; private set; }
-        public AllenBradleyCipClient(ClientBase client, byte slot = 0, int timeout = 1500)
+        public AllenBradleyCipClient(ClientBase client, byte slot = 0)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.UTF8;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
             Client.Opened = (a) =>
@@ -128,7 +128,7 @@ namespace Ping9719.IoT.PLC
 
             Slot = slot;
         }
-        public AllenBradleyCipClient(string ip, int port = 44818, byte slot = 0, int timeout = 1500) : this(new TcpClient(ip, port), slot, timeout) { }
+        public AllenBradleyCipClient(string ip, int port = 44818, byte slot = 0) : this(new TcpClient(ip, port), slot) { }
 
 
         /// <summary>

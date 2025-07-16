@@ -23,7 +23,7 @@ namespace Ping9719.IoT.Device.Airtight
         public CosmoAirtight(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }

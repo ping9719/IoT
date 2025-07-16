@@ -20,12 +20,12 @@ namespace Ping9719.IoT.Device.Rfid
         /// </summary>
         public EndianFormat format { get; set; } = EndianFormat.BADC;
         public ClientBase Client { get; private set; }
-        public TaiHeSenRfid(ClientBase client, int timeout = 1500)
+        public TaiHeSenRfid(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public TaiHeSenRfid(string ip, int port = 4000) : this(new TcpClient(ip, port)) { }

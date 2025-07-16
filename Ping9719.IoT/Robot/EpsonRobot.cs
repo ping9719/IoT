@@ -15,16 +15,16 @@ namespace Ping9719.IoT.Robot
     public class EpsonRobot
     {
         public ClientBase Client { get; private set; }
-        public EpsonRobot(ClientBase client, int timeout = 3000)
+        public EpsonRobot(ClientBase client)
         {
             Client = client;
-            Client.TimeOut = timeout;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.TimeOut = timeout;
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             Client.ConnectionMode = ConnectionMode.Manual;
             Client.IsAutoDiscard = true;
         }
-        public EpsonRobot(string ip, int port = 5000, int timeout = 3000) : this(new TcpClient(ip, port), timeout) { }
+        public EpsonRobot(string ip, int port = 5000) : this(new TcpClient(ip, port)) { }
 
 
         /// <summary>

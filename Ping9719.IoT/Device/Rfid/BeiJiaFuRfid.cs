@@ -15,12 +15,12 @@ namespace Ping9719.IoT.Device.Rfid
     public class BeiJiaFuRfid
     {
         public ClientBase Client { get; private set; }
-        public BeiJiaFuRfid(ClientBase client, int timeout = 1500)
+        public BeiJiaFuRfid(ClientBase client)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public BeiJiaFuRfid(string ip, int port = 10000) : this(new TcpClient(ip, port)) { }

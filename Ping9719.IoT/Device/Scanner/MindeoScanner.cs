@@ -18,12 +18,12 @@ namespace Ping9719.IoT.Device.Scanner
     {
         int Ver = 1;
         public ClientBase Client { get; private set; }
-        public MindeoScanner(ClientBase client, int timeout = 1500, int ver = 1)
+        public MindeoScanner(ClientBase client, int ver = 1)
         {
             Client = client;
-            Client.ReceiveMode = ReceiveMode.ParseTime();
+            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.TimeOut = timeout;
+            //Client.TimeOut = timeout;
             Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             Ver = ver;
