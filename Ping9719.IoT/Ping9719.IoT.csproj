@@ -9,7 +9,6 @@
     <Description>工业互联网通讯库(Industrial Internet communications library)
 https://github.com/ping9719/IoT</Description>
     <PackageProjectUrl>https://github.com/ping9719/IoT</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ping9719/IoT</RepositoryUrl>
 	<Version>1.0.0</Version>
   </PropertyGroup>

@@ -2,11 +2,10 @@
 主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...）
 
 # 语言选择：
-[简体中文](README.md) </br>
-[English](README_en-US.md) </br>
+[简体中文](README.md) || [English](README_en-US.md) 
 
 # 目录 
-- [通讯 (Communication)](#通讯 (Communication))
+- [通讯 (Communication)](#Communication)
     - TcpClient
     - TcpServer （待测试） 
     - SerialPortClient
@@ -20,46 +19,47 @@
     - ModbusTcpClient
     - ModbusAsciiClient
 - [PLC](#PLC)
+    - [常用plc类型对照表，重要，必读 ！！！](#PlcType)
     - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
-    - 汇川 (InovanceModbusTcpClient)
-    - 三菱 (MitsubishiMcClient)
-    - 欧姆龙 (OmronFinsClient,OmronCipClient)
-    - 西门子 (SiemensS7Client)
-- [机器人 (Robot)](#机器人 (Robot))
+    - [汇川 (InovanceModbusTcpClient)](#InovanceModbusTcpClient)
+    - [三菱 (MitsubishiMcClient)](#MitsubishiMcClient)
+    - [欧姆龙 (OmronFinsClient,OmronCipClient)](#OmronFinsClient)
+    - [西门子 (SiemensS7Client)](#SiemensS7Client)
+- [机器人 (Robot)](#Robot)
     - 爱普生 (EpsonRobot) （待测试） 
-- [算法 (Algorithm)](#算法 (Algorithm))
-    - CRC
+- [算法 (Algorithm)](#Algorithm)
+    - [CRC](#CRC)
     - LRC
     - 傅立叶算法(Fourier) （待开发） 
-    - 稳定婚姻配对算法(GaleShapleyAlgorithm)
+    - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)
     - PID （待开发） 
     - RSA （待开发） 
-- [设备和仪器 (Device)](#设备和仪器 (Device))
-    - 气密检测 (Airtight)
+- [设备和仪器 (Device)](#Device)
+    - [气密检测 (Airtight)](#Airtight)
         - 科斯莫气密检测 (CosmoAirtight)
     - Fct
         - 盟讯电子 (MengXunFct)
-    - 激光刻印 (Mark)
+    - [激光刻印 (Mark)](#Mark)
         - 大族激光刻印 (DaZhuMark)
         - 华普激光刻印 (HuaPuMark)
-    - 无线射频 (Rfid)
+    - [无线射频 (Rfid)](#Rfid)
         - 倍加福Rfid (BeiJiaFuRfid)
         - 泰和森Rfid (TaiHeSenRfid)
         - 万全Rfid (WanQuanRfid)
-    - 扫码枪 (Scanner)
+    - [扫码枪 (Scanner)](#Scanner)
         - 霍尼韦尔扫码器 (HoneywellScanner)
         - 民德扫码器 (MindeoScanner)
-    - 螺丝机 (Screw)
+    - [螺丝机 (Screw)](#Screw)
         - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)（不推荐） 
         - 米勒螺丝机 (MiLeScrew)
-    - 温控 (TemperatureControl)
+    - [温控 (TemperatureControl)](#TemperatureControl)
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
-    - 焊接机 (Weld)
+    - [焊接机 (Weld)](#Weld)
         - 快克焊接机 (KuaiKeWeld)
-- [扩展](#扩展)
-    - [1.如何使用自定义协议](#1.如何使用自定义协议)
+- [扩展](#Ext)
+    - 1.如何使用自定义协议
 
-# 通讯 (Communication)
+# 通讯 (Communication) <a id="Communication"></a>
 ## TcpClient
 `TcpClient : ClientBase`
 ```CSharp
@@ -133,7 +133,7 @@ client1.Open();
 //所有发送和接受和TcpClient一样，这里不在重复
 ```
 
-# Modbus
+# Modbus <a id="Modbus"></a>
 `ModbusRtuClient : IIoT`   
 `ModbusTcpClient : IIoT`   
 `ModbusAsciiClient : IIoT`
@@ -158,22 +158,26 @@ client.ReadString("100", 5, null);//读字符串，以16进制的方式
 client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0时且不足会自动在结尾补充0X00在结尾
 ```
 
-# PLC
-## 常用plc类型对照表
+# PLC <a id="PLC"></a>
+## 常用plc类型对照表 <a id="PlcType"></a>
+> 带 * 号的为常用类型，一般情况下没有特殊说明就是全部支持的。
+
 | C#</br>.Net | 西门子S7</br>SiemensS7 | 三菱MC</br>MitsubishiMc | 欧姆龙Fins</br>OmronFins |欧姆龙Cip</br>OmronCip |汇川</br>Inovance |
-| -- | -------- | ------ | ---------- | -------- | --- |
-| Bool |Bool|||BOOL||
-| Byte |Byte|||BYTE||
-| Float |Real|||REAL||
-| Double |LReal|||LREAL||
-| Int16 |Int|||INT||
-| Int32 |DInt|||DINT||
-| Int64 ||||LINT||
-| UInt16 |Word|||UINT||
-| UInt32 |DWord|||UDINT||
-| UInt64 ||||ULINT||
-| string ||||STRING||
-| DateTime ||||DATE_AND_TIME||
+| ----------- | ---------------------- | ----------------------- | ------------------------ | --------------------- | ---------------- |
+| Bool        |Bool|||BOOL||
+| Byte        |Byte|||BYTE||
+| Float *     |Real|||REAL||
+| Double *    |LReal|||LREAL||
+| Int16 *     |Int|||INT||
+| Int32 *     |DInt|||DINT||
+| Int64 *     ||||LINT||
+| UInt16 *    |Word|||UINT||
+| UInt32 *    |DWord|||UDINT||
+| UInt64 *    ||||ULINT||
+| string      |String|||STRING||
+| DateTime    |Date|||DATE_AND_TIME||
+| TimeSpan    |Time|||||
+| Char        |Char|||||
 
 ## 罗克韦尔 (AllenBradleyCipClient)
 ```CSharp
@@ -183,7 +187,7 @@ client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 ```
 
-## 汇川 (InovanceModbusTcpClient)
+## 汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>
 ```CSharp
 InovanceModbusTcpClient client = new InovanceModbusTcpClient("127.0.0.1");
 client.Read<bool>("M1");//读
@@ -192,8 +196,8 @@ client.Write<bool>("M1",true);//写
 client.Write<Int16>("D1",12);//写
 ```
 
-## 三菱 (MitsubishiMcClient)
-### 三菱MC客户端功能测试覆盖表
+## 三菱 (MitsubishiMcClient) <a id="MitsubishiMcClient"></a>
+### 测试覆盖表
 
 | 类型         | 单点读写         | 批量读写（数组）         |
 |--------------|------------------|-------------------------|
@@ -215,6 +219,13 @@ client.Read<Int16>("W0");//读
 client.Write<Int16>("W0",10);//写
 ```
 
+## 欧姆龙 (OmronFinsClient) <a id="OmronFinsClient"></a>
+```CSharp
+OmronFinsClient client = new OmronFinsClient("127.0.0.1");
+client.Read<Int16>("W0");//读
+client.Write<Int16>("W0",10);//写
+```
+
 ## 欧姆龙 (OmronCipClient)
 ```CSharp
 OmronCipClient client = new OmronCipClient("127.0.0.1");
@@ -222,20 +233,19 @@ client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 ```
 
-## 欧姆龙 (OmronFinsClient)
-```CSharp
-OmronFinsClient client = new OmronFinsClient("127.0.0.1");
-client.Read<Int16>("W0");//读
-client.Write<Int16>("W0",10);//写
-```
-## 西门子 (SiemensS7Client)
+## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
 ```CSharp
 SiemensS7Client client = new SiemensS7Client("127.0.0.1");
+//读写支持：基础(int,float...),在加额外的：string、DateTime、TimeSpan、Char
 client.Read<Int16>("BD100");//读
 client.Write<Int16>("BD100",10);//写
+
+//字符串
+client.Read<string>("BD100");//plc的类型必须为string，只支持字母数字等ASCII编码
+client.ReadString("BD100");//plc的类型必须为WString，支持中文等UTF16编码，
 ```
 
-# 机器人 (Robot)
+# 机器人 (Robot) <a id="Robot"></a>
 ## 爱普生 (EpsonRobot)
 ```CSharp
 EpsonRobot client = new EpsonRobot("127.0.0.1");
@@ -244,37 +254,40 @@ client.Start();
 client.Pause();
 ```
 
-# 算法 (Algorithm)
-## CRC
+# 算法 (Algorithm) <a id="Algorithm"></a>
+## CRC <a id="CRC"></a>
 ```CSharp
-byte[] bytes = new byte[0];
-//CRC
-CRC.Crc8(bytes);
-CRC.Crc8Itu(bytes);
-CRC.Crc8Rohc(bytes);
-CRC.Crc16(bytes);
-CRC.Crc16Usb(bytes);
-CRC.Crc16Modbus(bytes);
-CRC.Crc32(bytes);
-CRC.Crc32Q(bytes);
-CRC.Crc32Sata(bytes);
+byte[] bytes = new byte[] { 1, 2 };
+//CRC 算法
+var c1 = CRC.Crc8(bytes);
+var c2 = CRC.Crc8Itu(bytes);
+var c3 = CRC.Crc8Rohc(bytes);
+var c4 = CRC.Crc16(bytes);
+var c5 = CRC.Crc16Usb(bytes);
+var c6 = CRC.Crc16Modbus(bytes);
+var c7 = CRC.Crc32(bytes);
+var c8 = CRC.Crc32Q(bytes);
+var c9 = CRC.Crc32Sata(bytes);
 //CRC 验证
-CRC.CheckCrc8(bytes);
-CRC.CheckCrc8Itu(bytes);
-CRC.CheckCrc8Rohc(bytes);
-CRC.CheckCrc16(bytes);
-CRC.CheckCrc16Usb(bytes);
-CRC.CheckCrc16Modbus(bytes);
-CRC.CheckCrc32(bytes);
-CRC.CheckCrc32Q(bytes);
-CRC.CheckCrc32Sata(bytes);
+CRC.CheckCrc8(c1);
+CRC.CheckCrc8Itu(c2);
+CRC.CheckCrc8Rohc(c3);
+CRC.CheckCrc16(c4);
+CRC.CheckCrc16Usb(c5);
+CRC.CheckCrc16Modbus(c6);
+CRC.CheckCrc32(c7);
+CRC.CheckCrc32Q(c8);
+CRC.CheckCrc32Sata(c9);
 ```
 ## LRC
 ```CSharp
 LRC.GetLRC(bytes);
 LRC.CheckLRC(bytes);
 ```
-## 稳定婚姻配对算法(GaleShapleyAlgorithm)
+## 稳定婚姻配对算法(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>
+>假如偏好关系如下（越喜欢的越靠前）：<br/>
+M0❤W1,W0<br/>M1❤W0,W1<br/>M2❤W0,W1,W2,W3,W4<br/>M3❤W3<br/>M4❤W3
+
 ```CSharp
 //1.参与配对的所有人
 var ms = new string[] { "M0", "M1", "M2", "M3", "M4", };
@@ -299,13 +312,13 @@ foreach (var item in msi)
 }
 ```
 
-# 设备和仪器 (Device)
+# 设备和仪器 (Device) <a id="Device"></a>
 
 各种仪器需要长链接必须打开 `dev1.Client.Open();` 需要自动打开请设置 `dev1.Client.ConnectionMode = ConnectionMode.AutoOpen;` 以下列子中不在重复对客户端相关的描述或设置，非常重要或不一致除外。
    
 
 
-## 科斯莫气密检测 (CosmoAirtight)
+## 科斯莫气密检测 (CosmoAirtight) <a id="CosmoAirtight"></a>
 ```CSharp
 CosmoAirtight dev1 = new CosmoAirtight("COM1");//科斯莫
 ```
@@ -314,12 +327,12 @@ CosmoAirtight dev1 = new CosmoAirtight("COM1");//科斯莫
 ```CSharp
 MengXunFct dev1 = new MengXunFct("127.0.0.1");//盟讯电子
 ```
-## 激光刻印 (Mark)
+## 激光刻印 (Mark) <a id="Mark"></a>
 ```CSharp
 DaZhuMark dev1 = new DaZhuMark("127.0.0.1");//大族
 HuaPuMark dev2 = new HuaPuMark("127.0.0.1");//华普
 ```
-## 无线射频 (Rfid)
+## 无线射频 (Rfid) <a id="Rfid"></a>
 ```CSharp
 BeiJiaFuRfid rfid1 = new BeiJiaFuRfid("127.0.0.1");//倍加福
 DongJiRfid rfid2 = new DongJiRfid("127.0.0.1");//东集
@@ -330,25 +343,25 @@ WanQuanRfid rfid4 = new WanQuanRfid("127.0.0.1");//万全
 rfid4.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
 rfid4.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
 ```
-## 扫码枪 (Scanner)
+## 扫码枪 (Scanner) <a id="Scanner"></a>
 ```CSharp
 HoneywellScanner dev1 = new HoneywellScanner("127.0.0.1");//霍尼韦尔
 MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
 ```
-## 螺丝机 (Screw)
+## 螺丝机 (Screw) <a id="Screw"></a>
 ```CSharp
 MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 ```
-## 温控 (TemperatureControl)
+## 温控 (TemperatureControl) <a id="TemperatureControl"></a>
 ```CSharp
 //快克温控不推荐
 ```
-## 焊接机 (Weld)
+## 焊接机 (Weld) <a id="Weld"></a>
 ```CSharp
 KuaiKeWeld dev1 = new KuaiKeWeld("COM1");
 ```
 
-# 扩展
+# 扩展 <a id="Ext"></a>
 ## 1.如何使用自定义协议
 ```CSharp
 //XXX协议实现

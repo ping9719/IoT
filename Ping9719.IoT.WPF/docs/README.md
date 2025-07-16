@@ -2,8 +2,7 @@
 支持在windows平台上快速的调试IoT中的协议和设备。
 
 # 语言选择：
-[简体中文](README.md) </br>
-[English](README_en-US.md) </br>
+[简体中文](README.md) || [English](README_en-US.md) 
 
 ### 列子:[ensample code:]
 ```CSharp

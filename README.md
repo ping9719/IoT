@@ -5,8 +5,7 @@
 #
 
 ### 语言选择：
-[简体中文](README.md) </br>
-[English](README_en-US.md) </br>
+[简体中文](README.md) || [English](README_en-US.md) 
 
 ### 源代码：
 [Github (主库)](https://github.com/ping9719/IoT)  
