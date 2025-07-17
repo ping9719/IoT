@@ -12,8 +12,8 @@
 [Gitee (备用库)](https://gitee.com/ping9719/IoT)   
 #
 
-### 目录：  
-| 目录     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）</br>(稳定后发布) | 简介|
+### 项目：  
+| 项目     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）</br>(稳定后发布) | 简介|
 |----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|-------|
 | IoT      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 | 跨平台的库。主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...） |
 | Hid      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 跨平台管道链接库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接受数据，使PLC和设备通信可使用USB或蓝牙  |
@@ -33,15 +33,17 @@ client.Write<bool>("abc", true);//写值
 client.Write<int>("abc", 10, 20, 30);//写多个
 client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 ```
-2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB等中切换 
-```CSharp
-var type1 = new TcpClient(ip, port);//Tcp方式
-var type2 = new SerialPortClient(portName, baudRate);//串口方式
-var type3 = new UdpClient(ip, port);//Udp方式
-var type4 = new UsbHidClient(ip, port);//USB方式 
+2.通信管道实现“ClientBase”可实现简单快速的从TCP、串口、UDP、USB...等中切换 
+> 这里以`ModbusRtu`举列，默认只支持串口。但是如果你想实现`ModbusRtuOverTcpClient`（使用TCP的方式走`ModbusRtu`协议）其他的都是同理。 
 
-var client1 = new ModbusTcpClient(type1);//使用Tcp方式
-var client2 = new ModbusTcpClient(type2);//使用串口方式
+```CSharp
+var type1 = new TcpClient("192.168.0.1", 5000);//Tcp方式
+var type2 = new UsbHidClient("xxxxx001");//USB方式 
+
+var client0 = new ModbusRtuClient("COM1");//使用串口方式，这是构造函数包含的默认方式 
+var client1 = new ModbusRtuClient(type1);//使用Tcp方式，ModbusRtuOverTcpClient
+var client2 = new ModbusRtuClient(type2);//使用Usb方式，ModbusRtuOverUsbClient
+
 client1.Client.Open();//打开
 ```
 3.客户端“ClientBase”实现事件，ReceiveMode多种接受模式
@@ -64,7 +66,16 @@ client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接受字符串结尾�
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接受 ，超时为5秒 
 client1.SendReceive("abc",3000);//发送并等待接受，3秒超时
 ```
-4.返回为“IoTResult”，内置了异常处理等信息
+4.客户端和服务端支持消息处理器（进行中）
+> 消息处理器：在发送和接受数据时预先处理数据（比如发送时末尾加换行，接受时末尾去换行），
+也可以自定义消息处理器。
+
+```CSharp
+ClientBase client1 = new TcpClient(ip, port);
+client1.InfoProcessor.Add(InfoProcessor.NewLine());//添加系统自带的换行处理器。发送时末尾加换行，接受时末尾去换行。
+```
+
+5.返回为“IoTResult”，内置了异常处理等信息
 > `IoTResult<T>`包含`Value`，`IoTResult`不包含 
 ```CSharp
 var info = client.Read<bool>("abc");

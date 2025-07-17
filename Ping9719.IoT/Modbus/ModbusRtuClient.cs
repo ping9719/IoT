@@ -51,7 +51,7 @@ namespace Ping9719.IoT.Modbus
         public ModbusRtuClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
             : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), format, stationNumber) { }
         
-        #region IIoTBase
+        #region IIoT
         /// <summary>
         /// 读取
         /// </summary>
