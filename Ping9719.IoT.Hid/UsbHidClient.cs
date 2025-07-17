@@ -27,7 +27,7 @@ namespace Ping9719.IoT.Hid
         object obj1 = new object();
         bool IsOpen2 = false;
         bool IsUserClose = false;//是否用户关闭
-        bool isSendReceive = false;//是否正在发送和接受中
+        bool isSendReceive = false;//是否正在发送和接收中
 
         private HidSharp.HidDevice hidDevice;
         private System.IO.Stream stream;

@@ -99,7 +99,7 @@ client1.Warning = (a, b) =>
 client1.Open();
 
 client1.Send("abc");//发送
-client1.Receive();//等待并接受
+client1.Receive();//等待并接收
 client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
 client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
 client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
@@ -122,7 +122,7 @@ var client1 = new SerialPortClient("COM1", 9600);
 client1.ConnectionMode = ConnectionMode.Manual;//手动打开，串口使用断线重连意义不大
 client1.Encoding = Encoding.ASCII;//如何解析字符串
 client1.TimeOut = 3000;//超时时间
-client1.ReceiveMode = ReceiveMode.ParseTime();//方法“Receive()”的默认方式，串口根据时间来接受数据更好
+client1.ReceiveMode = ReceiveMode.ParseTime();//方法“Receive()”的默认方式，串口根据时间来接收数据更好
 client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的默认方式
 
 //所有事件和TcpClient一样，这里不在重复
@@ -130,7 +130,7 @@ client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的�
 //打开链接，设置所有属性必须在打开前
 client1.Open();
 
-//所有发送和接受和TcpClient一样，这里不在重复
+//所有发送和接收和TcpClient一样，这里不在重复
 ```
 
 # Modbus <a id="Modbus"></a>

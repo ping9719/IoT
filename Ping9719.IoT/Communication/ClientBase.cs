@@ -31,12 +31,12 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public int MaxReconnectionTime { get; set; } = 10 * 1000;
         /// <summary>
-        /// 接受区，缓冲区大小（默认1024 * 100）
+        /// 接收区，缓冲区大小（默认1024 * 100）
         /// </summary>
         public int ReceiveBufferSize { get; set; } = 1024 * 100;
 
         /// <summary>
-        /// 是否在发送和接受时丢弃来自缓冲区的数据（默认false）
+        /// 是否在发送和接收时丢弃来自缓冲区的数据（默认false）
         /// </summary>
         public virtual bool IsAutoDiscard { get; set; }
         /// <summary>
@@ -44,15 +44,15 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public virtual Encoding Encoding { get; set; } = Encoding.UTF8;
         /// <summary>
-        /// 超时（发送、接受、链接）（毫秒）-1永久，默认3000
+        /// 超时（发送、接收、链接）（毫秒）-1永久，默认3000
         /// </summary>
         public virtual int TimeOut { get; set; } = 3000;
         /// <summary>
-        /// 接受数据的方式
+        /// 接收数据的方式
         /// </summary>
         public virtual ReceiveMode ReceiveMode { get; set; } = ReceiveMode.ParseByteAll();
         /// <summary>
-        /// 接受数据的方式，在事件 Received 下。注意 ReceiveModeEnum.Time 模式下时间设置太长或对方一直在发送消息，可能会死锁 ！
+        /// 接收数据的方式，在事件 Received 下。注意 ReceiveModeEnum.Time 模式下时间设置太长或对方一直在发送消息，可能会死锁 ！
         /// </summary>
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
@@ -87,7 +87,7 @@ namespace Ping9719.IoT.Communication
         public abstract IoTResult Close();
 
         /// <summary>
-        /// 清空接受缓存
+        /// 清空接收缓存
         /// </summary>
         public abstract IoTResult DiscardInBuffer();
 
@@ -121,18 +121,18 @@ namespace Ping9719.IoT.Communication
         }
 
         /// <summary>
-        /// 接受
+        /// 接收
         /// </summary>
         /// <returns></returns>
         public abstract IoTResult<byte[]> Receive(ReceiveMode receiveMode = null);
         /// <summary>
-        /// 接受
+        /// 接收
         /// </summary>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <returns></returns>
         public virtual IoTResult<byte[]> Receive(int timeOut) => Receive(ReceiveMode.SetTimeOut(ReceiveMode, timeOut));
         /// <summary>
-        /// 接受为字符串
+        /// 接收为字符串
         /// </summary>
         /// <returns></returns>
         public virtual IoTResult<string> ReceiveString(ReceiveMode receiveMode = null, Encoding encoding = null)
@@ -141,30 +141,30 @@ namespace Ping9719.IoT.Communication
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
         /// <summary>
-        /// 接受为字符串
+        /// 接收为字符串
         /// </summary>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <param name="encoding"></param>
         /// <returns></returns>
         public virtual IoTResult<string> ReceiveString(int timeOut, Encoding encoding = null) => ReceiveString(ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
 
 
         /// <summary>
-        /// 发送并等待接受为字节
+        /// 发送并等待接收为字节
         /// </summary>
         /// <param name="data"></param>
         /// <param name="receiveMode"></param>
         /// <returns></returns>
         public abstract IoTResult<byte[]> SendReceive(byte[] data, ReceiveMode receiveMode = null);
         /// <summary>
-        /// 发送并等待接受为字节
+        /// 发送并等待接收为字节
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <returns></returns>
         public virtual IoTResult<byte[]> SendReceive(byte[] data, int timeOut) => SendReceive(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut));
         /// <summary>
-        /// 发送并等待接受为字符串
+        /// 发送并等待接收为字符串
         /// </summary>
         public virtual IoTResult<string> SendReceive(string data, ReceiveMode receiveMode = null, Encoding encoding = null)
         {
@@ -172,10 +172,10 @@ namespace Ping9719.IoT.Communication
             return isok.IsSucceed ? isok.ToVal((encoding ?? Encoding).GetString(isok.Value)) : isok.ToVal<string>();
         }
         /// <summary>
-        /// 发送并等待接受为字符串
+        /// 发送并等待接收为字符串
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <param name="encoding"></param>
         /// <returns></returns>
         public virtual IoTResult<string> SendReceive(string data, int timeOut, Encoding encoding = null) => SendReceive(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
@@ -189,7 +189,7 @@ namespace Ping9719.IoT.Communication
         /// 发送为字符串并等待结果为字节
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <param name="encoding"></param>
         /// <returns></returns>
         public virtual IoTResult<byte[]> SendReceiveToByte(string data, int timeOut, Encoding encoding = null) => SendReceiveToByte(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
@@ -205,7 +205,7 @@ namespace Ping9719.IoT.Communication
         /// 发送为字节并等待结果为字符串
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="timeOut">重设接受数据模式的超时（毫秒，-1永久 -2默认）</param>
+        /// <param name="timeOut">重设接收数据模式的超时（毫秒，-1永久 -2默认）</param>
         /// <param name="encoding"></param>
         /// <returns></returns>
         public virtual IoTResult<string> SendReceiveToString(byte[] data, int timeOut, Encoding encoding = null) => SendReceiveToString(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
@@ -241,7 +241,7 @@ namespace Ping9719.IoT.Communication
         }
 
         /// <summary>
-        /// 接受数据的方式
+        /// 接收数据的方式
         /// </summary>
         public ReceiveModeEnum Type { get; private set; }
         /// <summary>
@@ -298,7 +298,7 @@ namespace Ping9719.IoT.Communication
     }
 
     /// <summary>
-    /// 接受数据的方式
+    /// 接收数据的方式
     /// </summary>
     public enum ReceiveModeEnum
     {
@@ -335,7 +335,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         Manual,
         /// <summary>
-        /// 自动打开。没有执行Open()时每次发送和接受会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
+        /// 自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
         /// </summary>
         AutoOpen = 10,
         /// <summary>

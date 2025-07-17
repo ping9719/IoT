@@ -319,7 +319,7 @@ namespace ConsoleTest
             ////client1.SendReceive("abc");
             ////client1.SendReceive("abc");
             ////client1.Send("abc");//发送
-            ////client1.Receive();//等待并接受
+            ////client1.Receive();//等待并接收
             ////client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒
             ////client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒
             ////client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒

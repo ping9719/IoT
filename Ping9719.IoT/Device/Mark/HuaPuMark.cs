@@ -41,7 +41,7 @@ namespace Ping9719.IoT.Device.Mark
             {18,"找不到指定对象" },
             {19,"当前状态下不能执行此操作" },
             {31,"重码" },
-            {32,"接受错误的消息" },
+            {32,"接收错误的消息" },
         };
         public ClientBase Client { get; private set; }
         public HuaPuMark(ClientBase client)
