@@ -6,8 +6,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<LangVersion>latest</LangVersion>
     <Authors>Ping9719</Authors>
-    <Description>工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议可通过不同的管道（TCP、UDP、MQTT、USB、蓝牙...）简单的交互数据。
-The industrial internet communication library protocol has been implemented, including mainstream PLC, ModBus, CIP, MC, FINS... and other common protocols. Through different channels (TCP, UDP, MQTT, USB, Bluetooth...), data can be simply exchanged.
+    <Description>工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议可通过不同的管道（TCP、UDP、MQTT、USB、蓝牙...）简单的交互数据。（The industrial internet communication library protocol has been implemented, including mainstream PLC, ModBus, CIP, MC, FINS... and other common protocols. Through different channels (TCP, UDP, MQTT, USB, Bluetooth...), data can be simply exchanged.）
 
 https://github.com/ping9719/IoT
 https://gitee.com/ping9719/IoT</Description>
