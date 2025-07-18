@@ -72,13 +72,15 @@ client1.SendReceive("abc", 3000);//发送并接收，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 
-4.客户端和服务端支持消息处理器（进行中）
+4.客户端和服务端支持消息处理器
 > 消息处理器：在发送和接收数据时预先处理数据（比如发送时末尾加换行，接收时末尾去换行），
 也可以自定义消息处理器。
 
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);
-client1.InfoProcessor.Add(InfoProcessor.NewLine());//添加系统自带的换行处理器。发送时末尾加换行，接收时末尾去换行。
+//数据处理器，发送加入换行，接受去掉换行
+client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
 ```
 
 5.返回为“IoTResult”，内置了异常处理等信息
