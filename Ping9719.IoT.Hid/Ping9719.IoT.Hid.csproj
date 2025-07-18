@@ -3,7 +3,17 @@
 	<PropertyGroup>
 		<TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
-		<Version>1.0.0</Version>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Authors>Ping9719</Authors>
+		<Description>对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据，使PLC和设备通信可使用USB或蓝牙   
+The expansion of IoT enables the transmission and reception of data via USB and Bluetooth on Windows, Android, and Apple devices such as mobile phones, tablets, and computers. This allows PLC and devices to communicate using either USB or Bluetooth.
+
+https://github.com/ping9719/IoT
+https://gitee.com/ping9719/IoT</Description>
+		<PackageProjectUrl>https://github.com/ping9719/IoT</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/ping9719/IoT</RepositoryUrl>
+		<Version>0.1.0</Version>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

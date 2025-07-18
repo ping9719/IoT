@@ -13,12 +13,12 @@
 #
 
 ### 项目：  
-| 项目     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）</br>(稳定后发布) | 简介|
+| 项目     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）                  | 简介|
 |----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|-------|
 | IoT      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 | 跨平台的库。主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...） |
 | Hid      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 跨平台管道链接库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据，使PLC和设备通信可使用USB或蓝牙  |
-| WPF      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF             | 界面UI库。只支持在windows平台上快速的调试IoT中的协议和设备   |
-| Avalonia | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia        | 跨平台的界面UI库。支持在windows、安卓、苹果的手机、平板、电脑上快速的调试IoT中的协议和设备 |
+| WPF      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF </br>(暂未发布)   | 界面UI库。只支持在windows平台上快速的调试IoT中的协议和设备   |
+| Avalonia | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia </br>(暂未发布) | 跨平台的界面UI库。支持在windows、安卓、苹果的手机、平板、电脑上快速的调试IoT中的协议和设备 |
 
 #
 

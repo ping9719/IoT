@@ -6,11 +6,14 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	<LangVersion>latest</LangVersion>
     <Authors>Ping9719</Authors>
-    <Description>工业互联网通讯库(Industrial Internet communications library)
-https://github.com/ping9719/IoT</Description>
+    <Description>工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议可通过不同的管道（TCP、UDP、MQTT、USB、蓝牙...）简单的交互数据。
+The industrial internet communication library protocol has been implemented, including mainstream PLC, ModBus, CIP, MC, FINS... and other common protocols. Through different channels (TCP, UDP, MQTT, USB, Bluetooth...), data can be simply exchanged.
+
+https://github.com/ping9719/IoT
+https://gitee.com/ping9719/IoT</Description>
     <PackageProjectUrl>https://github.com/ping9719/IoT</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ping9719/IoT</RepositoryUrl>
-	<Version>1.0.0</Version>
+	<Version>0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
