@@ -122,7 +122,7 @@ namespace Ping9719.IoT.WPF
                 textBoxInfo.AppendText("请选择至少一个卡\r\n");
                 return;
             }
-            var bbb = DeviceData.MarkStart(aaa);
+            var bbb = DeviceData.MarkStart(60000, aaa);
             if (!bbb.IsSucceed)
             {
                 textBoxInfo.AppendText($"{bbb.ErrorText}\r\n");
@@ -146,7 +146,7 @@ namespace Ping9719.IoT.WPF
                 textBoxInfo.AppendText("请选择至少一个卡\r\n");
                 return;
             }
-            var bbb = DeviceData.RedStart(aaa);
+            var bbb = DeviceData.RedStart(60000, aaa);
             if (!bbb.IsSucceed)
             {
                 textBoxInfo.AppendText($"{bbb.ErrorText}\r\n");

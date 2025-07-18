@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
@@ -33,7 +33,7 @@ public partial class DaZhuMarkView : UserControl
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
@@ -49,26 +49,26 @@ public partial class DaZhuMarkView : UserControl
         {
             stackPanel.Children.Add(new CheckBox()
             {
-                Content = $"��{item}",
+                Content = $"卡{item}",
                 Tag = item,
                 Margin = new Thickness(0, 0, 5, 0),
             });
         }
-        textBoxInfo.Text += ($"���سɹ�\r\n");
+        textBoxInfo.Text += ($"加载成功\r\n");
     }
 
     private void jzmb(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
         var aaa = GetSelect();
         if (aaa.Length != 1)
         {
-            textBoxInfo.Text += ("��ѡ��һ����\r\n");
+            textBoxInfo.Text += ("请选择一个卡\r\n");
             return;
         }
         var bbb = DeviceData.Initialize(textBoxMbName.Text, aaa[0], checkBox1.IsChecked == true);
@@ -78,21 +78,21 @@ public partial class DaZhuMarkView : UserControl
             return;
         }
 
-        textBoxInfo.Text += ($"�ɹ�����ģ�壬ģ������{bbb.Value}�����滻�ı�\r\n");
+        textBoxInfo.Text += ($"成功加载模板，模板中有{bbb.Value}个可替换文本\r\n");
     }
 
     private void ksth(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
         var aaa = GetSelect();
         if (aaa.Length != 1)
         {
-            textBoxInfo.Text += ("��ѡ��һ����\r\n");
+            textBoxInfo.Text += ("请选择一个卡\r\n");
             return;
         }
         var bbb = DeviceData.Data(textBoxKey.Text, textBoxName.Text, aaa[0]);
@@ -102,69 +102,69 @@ public partial class DaZhuMarkView : UserControl
             return;
         }
 
-        textBoxInfo.Text += ($"�滻�ɹ�\r\n");
+        textBoxInfo.Text += ($"替换成功\r\n");
     }
 
     private void ksky(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
         var aaa = GetSelect();
         if (aaa.Length == 0)
         {
-            textBoxInfo.Text += ("��ѡ������һ����\r\n");
+            textBoxInfo.Text += ("请选择至少一个卡\r\n");
             return;
         }
-        var bbb = DeviceData.MarkStart(aaa);
+        var bbb = DeviceData.MarkStart(60000, aaa);
         if (!bbb.IsSucceed)
         {
             textBoxInfo.Text += ($"{bbb.ErrorText}\r\n");
             return;
         }
 
-        textBoxInfo.Text += ($"��ӡ��ɣ�ʱ��{bbb.Value}��\r\n");
+        textBoxInfo.Text += ($"打印完成，时间{bbb.Value}秒\r\n");
     }
 
     private void kshg(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
         var aaa = GetSelect();
         if (aaa.Length == 0)
         {
-            textBoxInfo.Text += ("��ѡ������һ����\r\n");
+            textBoxInfo.Text += ("请选择至少一个卡\r\n");
             return;
         }
-        var bbb = DeviceData.RedStart(aaa);
+        var bbb = DeviceData.RedStart(60000, aaa);
         if (!bbb.IsSucceed)
         {
             textBoxInfo.Text += ($"{bbb.ErrorText}\r\n");
             return;
         }
 
-        textBoxInfo.Text += ($"�����ɣ�ʱ��{bbb.Value}��\r\n");
+        textBoxInfo.Text += ($"红光完成，时间{bbb.Value}秒\r\n");
     }
 
     private void cxzt(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
         var aaa = GetSelect();
         if (aaa.Length != 1)
         {
-            textBoxInfo.Text += ("��ѡ��һ����\r\n");
+            textBoxInfo.Text += ("请选择一个卡\r\n");
             return;
         }
         var bbb = DeviceData.State(aaa[0]);
@@ -181,7 +181,7 @@ public partial class DaZhuMarkView : UserControl
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
@@ -192,14 +192,14 @@ public partial class DaZhuMarkView : UserControl
             return;
         }
 
-        textBoxInfo.Text += ($"��ֹͣ����\r\n");
+        textBoxInfo.Text += ($"已停止所有\r\n");
     }
 
     private void cxzt2(object sender, RoutedEventArgs e)
     {
         if (DeviceData == null)
         {
-            textBoxInfo.Text += ("û�г�ʼ���豸\r\n");
+            textBoxInfo.Text += ("没有初始化设备\r\n");
             return;
         }
 
@@ -210,7 +210,7 @@ public partial class DaZhuMarkView : UserControl
             return;
         }
 
-        textBoxInfo.Text+=($"{bbb.Value}\r\n");
+        textBoxInfo.Text += ($"{bbb.Value}\r\n");
     }
 
     public string[] GetSelect()

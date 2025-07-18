@@ -6,6 +6,8 @@
 
 # 目录 
 - [通讯 (Communication)](#Communication)
+    - [数据处理器（IDataProcessor）](#IDataProcessor)
+    - [内置的数据处理器](#IDataProcessorIn)
     - [TcpClient](#TcpClient)
     - TcpServer （待测试） 
     - [SerialPortClient](#SerialPortClient)
@@ -60,13 +62,42 @@
     - 1.如何使用自定义协议
 
 # 通讯 (Communication) <a id="Communication"></a>
+
+## 数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+
+> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
+> 2.在接受数据后可以对数据进行处理后在转发出去  </br>
+> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接受的处理器应该发送的处理器的是倒序）。
+
+#### 自定义数据处理器   
+1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+
+2. 开始使用自定义数据处理器
+```CSharp
+client1.SendDataProcessors.Add(new MyCalss());
+client1.ReceivedDataProcessors.Add(new MyCalss());
+```
+
+## 内置的数据处理器  <a id="IDataProcessorIn"></a>
+
+| 名称| 说明 |
+| ----------- | -------------- |
+| DataEndAddProcessor   | 数据结尾添加处理器，可在数据的结尾添加固定的值。 |
+| DataEndClearProcessor | 数据结尾移除处理器，可在数据的结尾移除固定的值。 |
+
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连，默认手动
-client1.Encoding = Encoding.UTF8;//如何解析字符串
-client1.TimeOut = 3000;//超时时间
+//重要！！！连接模式是非常重要的功能，有3种模式 
+client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
+client1.Encoding = Encoding.UTF8;
+//数据处理器，发送加入换行，接受去掉换行
+client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
+//接受模式
 client1.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
 client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();//时间“Received”的默认方式
 client1.Opening = (a) =>
@@ -98,12 +129,13 @@ client1.Warning = (a, b) =>
 //打开链接，设置所有属性必须在打开前
 client1.Open();
 
+//发送或接收数据 
 client1.Send("abc");//发送
-client1.Receive();//等待并接收
-client1.Receive(ReceiveMode.ParseByteAll(6000));//读取所有，超时为6秒 
-client1.Receive(ReceiveMode.ParseByte(10, 6000));//读取10个字节，超时为6秒 
-client1.Receive(ReceiveMode.ParseToString("\n", 6000));//读取字符串结尾为\n的，超时为6秒 
-client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 6000));//发送并读取字符串结尾为\n的，超时为6秒 
+client1.Receive();//接收
+client1.Receive(3000);//接收，3秒超时
+client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
+client1.SendReceive("abc", 3000);//发送并接收，3秒超时
+client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 
 ## TcpServer

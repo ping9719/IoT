@@ -47,14 +47,19 @@ client1.Client.Open();//打开
 > 注意：所有的客户端都是一样的，包含TcpClient，SerialPortClient，UsbHidClient...
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);//Tcp方式
+            
 //重要！！！连接模式是非常重要的功能，有3种模式 
-client1.ConnectionMode = ConnectionMode.None;//手动。需要自己去打开和关闭，此方式比较灵活。
+client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
+client1.Encoding = Encoding.UTF8;
+//数据处理器，发送加入换行，接受去掉换行
+client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
 //常用的3种事件
-client1.Opened = (a) =>{Log.AddLog("链接成功")};
-client1.Closed = (a,b) =>{Log.AddLog("关闭成功")};
-client1.Received = (a,b) =>{Log.AddLog("收到消息"+b)};
+client1.Opened = (a) => { Console.WriteLine("链接成功。"); };
+client1.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client1.Received = (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 //打开，在打开前处理属性和事件
 client1.Open();
 
@@ -63,7 +68,7 @@ client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
 client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
-client1.SendReceive("abc",3000);//发送并接收，3秒超时
+client1.SendReceive("abc", 3000);//发送并接收，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 

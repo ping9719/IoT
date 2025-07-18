@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Ping9719.IoT.Common;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +18,17 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public abstract class ClientBase
     {
+        protected object obj1 = new object();
+        protected bool IsOpen2 = false;
+        protected bool IsUserClose = false;//是否用户关闭
+        protected bool isSendReceive = false;//是否正在发送和接收中
+
+        protected OpenClientData openData;
+        protected QueueByteFixed dataEri;
+        protected Task task;
+        protected int ReconnectionCount = 0;
+        protected CancellationTokenSource flushCts;
+
         ///// <summary>
         ///// 类的名称
         ///// </summary>
@@ -26,6 +41,14 @@ namespace Ping9719.IoT.Communication
         /// 链接模式
         /// </summary>
         public ConnectionMode ConnectionMode { get; set; }
+        /// <summary>
+        /// 发送数据处理器
+        /// </summary>
+        public List<IDataProcessor> SendDataProcessors { get; set; } = new List<IDataProcessor>();
+        /// <summary>
+        /// 接受数据处理器
+        /// </summary>
+        public List<IDataProcessor> ReceivedDataProcessors { get; set; } = new List<IDataProcessor>();
         /// <summary>
         /// 断线重连，最大重连时间。默认10秒。
         /// </summary>
@@ -69,7 +92,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public Func<ClientBase, bool> Closing;
         /// <summary>
-        /// 断开连接，item2:是否自动断开
+        /// 断开连接，item2:是否手动断开
         /// </summary>
         public Action<ClientBase, bool> Closed;
         /// <summary>
@@ -80,16 +103,78 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 打开
         /// </summary>
-        public abstract IoTResult Open();
+        public virtual IoTResult Open()
+        {
+            var result = new IoTResult();
+            try
+            {
+                lock (obj1)
+                {
+                    var aa = Opening?.Invoke(this);
+                    if (aa == false)
+                        throw new Exception("用户已拒绝链接");
+
+                    openData = Open2();
+
+                    dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+                    IsOpen2 = true;
+                    IsUserClose = false;
+                    ReconnectionCount = 0;
+                    GoRun();
+                    Opened?.Invoke(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+                IsOpen2 = false;
+            }
+            return result.ToEnd();
+        }
         /// <summary>
         /// 关闭
         /// </summary>
-        public abstract IoTResult Close();
+        public virtual IoTResult Close()
+        {
+            var result = new IoTResult();
+            try
+            {
+                var aa = Closing?.Invoke(this);
+                if (aa == false)
+                    throw new Exception("用户已拒绝断开");
+
+                IsUserClose = true;
+                IsOpen2 = false;
+                dataEri = null;
+                Close2();
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            finally
+            {
+                Closed?.Invoke(this, true);
+                task?.Wait();
+            }
+            return result.ToEnd();
+        }
 
         /// <summary>
         /// 清空接收缓存
         /// </summary>
-        public abstract IoTResult DiscardInBuffer();
+        public virtual IoTResult DiscardInBuffer()
+        {
+            try
+            {
+                dataEri?.Clear();
+                return new IoTResult().ToEnd();
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex).ToEnd();
+            }
+        }
 
         /// <summary>
         /// 发送
@@ -98,7 +183,38 @@ namespace Ping9719.IoT.Communication
         /// <param name="offset">开始位置</param>
         /// <param name="count">数量，-1全部</param>
         /// <returns></returns>
-        public abstract IoTResult Send(byte[] data, int offset = 0, int count = -1);
+        public virtual IoTResult Send(byte[] data, int offset = 0, int count = -1)
+        {
+            var result = new IoTResult();
+            var isHmOpen = false;
+            isSendReceive = true;
+            try
+            {
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
+                { result = Open(); isHmOpen = true; }
+                if (!result.IsSucceed)
+                    return result;
+
+                var d2 = DataProcessors(data,true);
+                result.Requests.Add(d2);
+                lock (obj1)
+                {
+                    Send2(d2, offset, count);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            finally
+            {
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                    Close();
+
+                isSendReceive = false;
+            }
+            return result.ToEnd();
+        }
         /// <summary>
         /// 发送字符串
         /// </summary>
@@ -124,7 +240,41 @@ namespace Ping9719.IoT.Communication
         /// 接收
         /// </summary>
         /// <returns></returns>
-        public abstract IoTResult<byte[]> Receive(ReceiveMode receiveMode = null);
+        public virtual IoTResult<byte[]> Receive(ReceiveMode receiveMode = null)
+        {
+            var result = new IoTResult<byte[]>();
+            var isHmOpen = false;
+            isSendReceive = true;
+            try
+            {
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
+                { result = Open().ToVal<byte[]>(); isHmOpen = true; }
+                if (!result.IsSucceed)
+                    return result;
+
+                lock (obj1)
+                {
+                    if (IsAutoDiscard)
+                        DiscardInBuffer();
+
+                    result.Value = DataProcessors( Receive2(receiveMode),false);
+                    result.Responses.Add(result.Value);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            finally
+            {
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                    Close();
+
+                isSendReceive = false;
+            }
+            return result.ToEnd();
+        }
         /// <summary>
         /// 接收
         /// </summary>
@@ -155,7 +305,43 @@ namespace Ping9719.IoT.Communication
         /// <param name="data"></param>
         /// <param name="receiveMode"></param>
         /// <returns></returns>
-        public abstract IoTResult<byte[]> SendReceive(byte[] data, ReceiveMode receiveMode = null);
+        public virtual IoTResult<byte[]> SendReceive(byte[] data, ReceiveMode receiveMode = null)
+        {
+            var result = new IoTResult<byte[]>();
+            var isHmOpen = false;
+            isSendReceive = true;
+            try
+            {
+                if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
+                { result = Open().ToVal<byte[]>(); isHmOpen = true; }
+                if (!result.IsSucceed)
+                    return result;
+
+                lock (obj1)
+                {
+                    if (IsAutoDiscard)
+                        DiscardInBuffer();
+
+                    var d1 = DataProcessors(data, true);
+                    result.Requests.Add(d1);
+                    Send2(d1);
+                    result.Value = DataProcessors(Receive2(receiveMode), false);
+                    result.Responses.Add(result.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(ex);
+            }
+            finally
+            {
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                    Close();
+
+                isSendReceive = false;
+            }
+            return result.ToEnd();
+        }
         /// <summary>
         /// 发送并等待接收为字节
         /// </summary>
@@ -227,6 +413,294 @@ namespace Ping9719.IoT.Communication
                 TimeOutVal = timeOut;
 
             return TimeOutVal < 0 ? false : DateTime.Now - beginTime > TimeSpan.FromMilliseconds(TimeOutVal);
+        }
+
+
+        #region 其他
+        protected virtual void GoRun()
+        {
+            task = Task.Factory.StartNew(async (a) =>
+            {
+                var cc = (ClientBase)a;
+                byte[] data = new byte[ReceiveBufferSize];
+                while (true)
+                {
+                    try
+                    {
+                        if (IsUserClose)
+                        {
+                            break;
+                        }
+                        else if (cc.IsOpen2 && cc.IsOpen)
+                        {
+                            int readLength;
+                            try
+                            {
+                                //var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
+                                //receiveResult1.AsyncWaitHandle.WaitOne();
+                                //readLength = cc.stream.EndRead(receiveResult1);
+                                readLength = await cc.openData.ReadAsync(data, 0, data.Length);
+                            }
+                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
+                            //{
+                            //    //警告：此错误代码（995）可能会更改。
+                            //    //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
+                            //    //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
+
+                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
+                            //    readLength = -1;
+                            //}
+                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
+                            //{
+                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
+                            //    readLength = -1;
+                            //}
+                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
+                            //{
+                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
+                            //    readLength = -2;
+                            //}
+                            catch (Exception ex)
+                            {
+                                //其他原因
+                                readLength = -3;
+                            }
+
+                            //断开
+                            if (readLength <= 0)
+                            {
+                                if (readLength == 0)
+                                {
+                                    //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
+                                }
+
+
+                                if (cc.IsOpen2 && cc.IsOpen)
+                                {
+                                    IsOpen2 = false;
+                                    dataEri = null;
+                                    IsUserClose = false;
+                                    cc.Close2();
+                                    Closed?.Invoke(this, false);
+                                }
+                            }
+                            //收到消息
+                            else
+                            {
+                                cc.dataEri.Enqueue(data, 0, readLength);
+                                if (cc.Received != null && !cc.isSendReceive)
+                                {
+                                    lock (cc.obj1)
+                                    {
+                                        if (cc.ReceiveModeReceived.Type == ReceiveModeEnum.Time)
+                                        {
+                                            // 取消之前的延迟刷新
+                                            flushCts?.Cancel();
+                                            flushCts = new CancellationTokenSource();
+
+                                            var countMax = (int)cc.ReceiveModeReceived.Data;
+                                            Task.Delay(countMax, flushCts.Token).ContinueWith(t =>
+                                            {
+                                                if (t.IsCanceled)
+                                                    return;
+
+                                                var bytes = dataEri.DequeueAll();
+                                                if (bytes != null && bytes.Length > 0)
+                                                    cc.Received?.Invoke(this, DataProcessors(bytes,false));
+                                            }, TaskContinuationOptions.ExecuteSynchronously);
+                                        }
+                                        else
+                                        {
+                                            var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                            if (bytes != null && bytes.Length > 0)
+                                                cc.Received?.Invoke(this, DataProcessors( bytes,false));
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
+                        {
+                            ReconnectionCount++;
+                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime);
+                            System.Threading.Thread.Sleep(tz);
+
+                            if (IsUserClose)
+                                break;
+
+                            openData = cc.Open2();
+                            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+                            IsOpen2 = true;
+                            ReconnectionCount = 0;
+                            Opened?.Invoke(this);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                    finally
+                    {
+
+                    }
+                }
+            }, this);
+
+            //task.Start();
+        }
+
+        protected abstract OpenClientData Open2();
+
+        protected virtual void Close2()
+        {
+            openData.Close();
+        }
+
+        protected virtual void Send2(byte[] data, int offset = 0, int count = -1)
+        {
+            openData.Write(data, offset, count < 0 ? data.Length : count);
+        }
+
+        protected virtual byte[] Receive2(ReceiveMode receiveMode = null, bool isevent = false)
+        {
+            receiveMode ??= ReceiveMode;
+            byte[] value = null;
+            DateTime beginTime = DateTime.Now;
+            if (receiveMode.Type == ReceiveModeEnum.Byte)
+            {
+                var countMax = (int)receiveMode.Data;
+                if (isevent)
+                {
+                    if (dataEri.Count >= countMax)
+                    {
+                        value = dataEri.Dequeue(countMax);
+                    }
+                }
+                else
+                {
+                    while (dataEri.Count < countMax)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.Dequeue(countMax);
+                }
+            }
+            else if (receiveMode.Type == ReceiveModeEnum.ByteAll)
+            {
+                if (isevent)
+                {
+                    value = dataEri.DequeueAll();
+                }
+                else
+                {
+                    while (dataEri.Count == 0)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.DequeueAll();
+                }
+            }
+            else if (receiveMode.Type == ReceiveModeEnum.Char)
+            {
+                var countMax = (int)receiveMode.Data * 2;
+                if (isevent)
+                {
+                    if (dataEri.Count >= countMax)
+                    {
+                        value = dataEri.Dequeue(countMax);
+                    }
+                }
+                else
+                {
+                    while (dataEri.Count < countMax)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.Dequeue(countMax);
+                }
+            }
+            else if (receiveMode.Type == ReceiveModeEnum.Time)
+            {
+                var countMax = (int)receiveMode.Data;
+                if (isevent)
+                {
+                    value = dataEri.DequeueAll();
+                }
+                else
+                {
+                    var tempBufferLength = dataEri.Count;
+                    while (dataEri.Count == 0 || tempBufferLength != dataEri.Count)
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        tempBufferLength = dataEri.Count;
+                        Thread.Sleep(countMax);
+                    }
+                    value = dataEri.DequeueAll();
+                }
+            }
+            else if (receiveMode.Type == ReceiveModeEnum.ToString)
+            {
+                var zfc = Encoding.GetBytes(receiveMode.Data.ToString());
+                if (isevent)
+                {
+                    if (dataEri.ToArray().EndsWith(zfc))
+                    {
+                        value = dataEri.DequeueAll();
+                    }
+                }
+                else
+                {
+
+                    while (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc))
+                    {
+                        if (!IsOpen2)
+                            throw new Exception("链接被断开");
+                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                            throw new TimeoutException("已超时");
+
+                        Thread.Sleep(10);
+                    }
+                    value = dataEri.DequeueAll();
+                }
+            }
+
+            return value;
+        }
+        #endregion
+
+        byte[] DataProcessors(byte[] data, bool isSend)
+        {
+            var pro = isSend ? SendDataProcessors : ReceivedDataProcessors;
+            var data2 = data;
+            foreach (var item in pro)
+            {
+                data2 = item.DataProcess(data2);
+            }
+            return data2;
         }
     }
 
@@ -342,5 +816,55 @@ namespace Ping9719.IoT.Communication
         /// 自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
         /// </summary>
         AutoReconnection,
+    }
+
+    public class OpenClientData
+    {
+        System.IO.Stream stream;
+        System.Net.Sockets.Socket socket;
+
+        public OpenClientData(System.IO.Stream stream) => this.stream = stream;
+
+        public OpenClientData(System.Net.Sockets.Socket socket) => this.socket = socket;
+
+        public Task<int> ReadAsync(byte[] buffer, int offset, int count)
+        {
+            if (stream != null)
+            {
+                return stream.ReadAsync(buffer, offset, count);
+            }
+            else
+            {
+                var receiveResult1 = socket.BeginReceive(buffer, offset, count, SocketFlags.None, null, null);
+                receiveResult1.AsyncWaitHandle.WaitOne();
+                return Task.FromResult<int>(socket.EndReceive(receiveResult1));
+            }
+        }
+
+        public void Write(byte[] buffer, int offset, int count)
+        {
+            if (stream != null)
+            {
+                stream.Write(buffer, offset, count);
+            }
+            else
+            {
+                socket.Send(buffer, offset, count, SocketFlags.None);
+            }
+        }
+
+        public void Close()
+        {
+            if (stream != null)
+            {
+                stream?.Close();
+                stream?.Dispose();
+            }
+            else
+            {
+                socket?.Shutdown(SocketShutdown.Both);
+                socket?.Close();
+            }
+        }
     }
 }
