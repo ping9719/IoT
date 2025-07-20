@@ -54,8 +54,8 @@ client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Op
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 client1.Encoding = Encoding.UTF8;
 //数据处理器，发送加入换行，接受去掉换行
-client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
-client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
+client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 //常用的3种事件
 client1.Opened = (a) => { Console.WriteLine("链接成功。"); };
 client1.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
@@ -79,8 +79,8 @@ client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);
 //数据处理器，发送加入换行，接受去掉换行
-client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
-client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
+client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 ```
 
 5.返回为“IoTResult”，内置了异常处理等信息

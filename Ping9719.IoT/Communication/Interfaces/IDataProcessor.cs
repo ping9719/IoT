@@ -21,16 +21,16 @@ namespace Ping9719.IoT.Communication
     }
 
     /// <summary>
-    /// 数据结尾添加处理器，可在数据的结尾添加固定的值。
+    /// 处理器：向结尾添加固定的值。比如结尾添加回车换行
     /// </summary>
-    public class DataEndAddProcessor : IDataProcessor
+    public class EndAddValueDataProcessor : IDataProcessor
     {
         byte[] _dataEnd = new byte[] { };
         /// <summary>
         /// 数据结尾添加处理器
         /// </summary>
         /// <param name="dataEnd"></param>
-        public DataEndAddProcessor(params byte[] dataEnd)
+        public EndAddValueDataProcessor(params byte[] dataEnd)
         {
             _dataEnd = dataEnd ?? new byte[] { };
         }
@@ -39,7 +39,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         /// <param name="dataEnd"></param>
         /// <param name="encoding"></param>
-        public DataEndAddProcessor(string dataEnd, Encoding encoding)
+        public EndAddValueDataProcessor(string dataEnd, Encoding encoding)
         {
             _dataEnd = string.IsNullOrEmpty(dataEnd) ? new byte[] { } : encoding.GetBytes(dataEnd);
         }
@@ -51,16 +51,16 @@ namespace Ping9719.IoT.Communication
     }
 
     /// <summary>
-    /// 数据结尾移除处理器，可在数据的结尾移除固定的值。
+    /// 处理器：向结尾移除固定的值。比如结尾移除回车换行
     /// </summary>
-    public class DataEndClearProcessor : IDataProcessor
+    public class EndClearValueDataProcessor : IDataProcessor
     {
         byte[] _dataEnd = new byte[] { };
         /// <summary>
         /// 数据结尾移除处理器
         /// </summary>
         /// <param name="dataEnd"></param>
-        public DataEndClearProcessor(params byte[] dataEnd)
+        public EndClearValueDataProcessor(params byte[] dataEnd)
         {
             _dataEnd = dataEnd ?? new byte[] { };
         }
@@ -69,7 +69,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         /// <param name="dataEnd"></param>
         /// <param name="encoding"></param>
-        public DataEndClearProcessor(string dataEnd, Encoding encoding)
+        public EndClearValueDataProcessor(string dataEnd, Encoding encoding)
         {
             _dataEnd = string.IsNullOrEmpty(dataEnd) ? new byte[] { } : encoding.GetBytes(dataEnd);
         }

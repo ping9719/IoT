@@ -82,8 +82,8 @@ client1.ReceivedDataProcessors.Add(new MyCalss());
 
 | 名称| 说明 |
 | ----------- | -------------- |
-| DataEndAddProcessor   | 数据结尾添加处理器，可在数据的结尾添加固定的值。 |
-| DataEndClearProcessor | 数据结尾移除处理器，可在数据的结尾移除固定的值。 |
+| EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
+| EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
 
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
@@ -95,8 +95,8 @@ client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Op
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 client1.Encoding = Encoding.UTF8;
 //数据处理器，发送加入换行，接受去掉换行
-client1.SendDataProcessors.Add(new DataEndAddProcessor("\r\n", client1.Encoding));
-client1.ReceivedDataProcessors.Add(new DataEndClearProcessor("\r\n", client1.Encoding));
+client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
+client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 //接受模式
 client1.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
 client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();//时间“Received”的默认方式
