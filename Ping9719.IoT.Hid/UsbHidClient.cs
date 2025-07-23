@@ -1,4 +1,5 @@
 ﻿using HidSharp;
+using HidSharp.Reports;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using System;
@@ -36,12 +37,33 @@ namespace Ping9719.IoT.Hid
 
         protected override OpenClientData Open2()
         {
-            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+            //dataEri = new QueueByteFixed(ReceiveBufferSize, true);
             hidDevice = DeviceList.Local.GetHidDevices().FirstOrDefault(o => o.DevicePath == devicePath);
             if (hidDevice == null)
                 throw new InvalidOperationException($"无法找到设备[{devicePath}]");
 
             return new OpenClientData(hidDevice.Open());
+        }
+
+        /// <summary>
+        /// 检索并解析 USB 设备的报告描述符
+        /// </summary>
+        /// <param name="name">设备名称</param>
+        /// <returns></returns>
+        public static IoTResult<ReportDescriptor> GetReportDescriptor(string name)
+        {
+            try
+            {
+                var hidDevice1 = DeviceList.Local.GetHidDevices().FirstOrDefault(o => o.DevicePath == name);
+                if (hidDevice1 == null)
+                    throw new InvalidOperationException($"无法找到设备[{name}]");
+
+                return new IoTResult<ReportDescriptor>(hidDevice1.GetReportDescriptor());
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult<ReportDescriptor>().AddError(ex);
+            }
         }
     }
 }
