@@ -32,9 +32,10 @@
 - [机器人 (Robot)](#Robot)
     - 爱普生 (EpsonRobot) （待测试） 
 - [算法 (Algorithm)](#Algorithm)
+    - [平均点位算法（AveragePoint）](#AveragePoint)
     - [CRC](#CRC)
     - LRC
-    - 傅立叶算法(Fourier) （待开发） 
+    - 傅立叶算法（Fourier）（待开发） 
     - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)
     - PID （待开发） 
     - RSA （待开发） 
@@ -296,6 +297,20 @@ client.Pause();
 ```
 
 # 算法 (Algorithm) <a id="Algorithm"></a>
+## 平均点位算法（AveragePoint） <a id="AveragePoint"></a>
+```CSharp
+//输出的结果：
+//0[2, 2.5]
+//1[4, 3]
+//2[6, 3.5]
+//3[8, 4]
+var aaa = AveragePoint.Start("2,2.5", " 8,4", 4);
+var aaa = AveragePoint.Start(new double[] { 2, 2.5 }, new double[] { 8, 4 }, 4);
+
+//结果：[2, 4, 6, 8]
+var aaa = AveragePoint.Start(2, 8, 4);
+```
+
 ## CRC <a id="CRC"></a>
 ```CSharp
 byte[] bytes = new byte[] { 1, 2 };
