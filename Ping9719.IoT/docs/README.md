@@ -7,7 +7,9 @@
 # 目录 
 - [通讯 (Communication)](#Communication)
     - [数据处理器（IDataProcessor）](#IDataProcessor)
-    - [内置的数据处理器](#IDataProcessorIn)
+        - 1.介绍  
+        - 2.自定义数据处理器
+        - [3.内置的数据处理器](#IDataProcessorIn)
     - [TcpClient](#TcpClient)
     - TcpServer （待测试） 
     - [SerialPortClient](#SerialPortClient)
@@ -64,12 +66,12 @@
 # 通讯 (Communication) <a id="Communication"></a>
 
 ## 数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
-
+#### 1.介绍  
 > 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
 > 2.在接受数据后可以对数据进行处理后在转发出去  </br>
 > 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接受的处理器应该发送的处理器的是倒序）。
 
-#### 自定义数据处理器   
+#### 2.自定义数据处理器   
 1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
 
 2. 开始使用自定义数据处理器
@@ -78,12 +80,19 @@ client1.SendDataProcessors.Add(new MyCalss());
 client1.ReceivedDataProcessors.Add(new MyCalss());
 ```
 
-## 内置的数据处理器  <a id="IDataProcessorIn"></a>
+#### 3.内置的数据处理器  <a id="IDataProcessorIn"></a>
 
 | 名称| 说明 |
 | ----------- | -------------- |
 | EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
 | EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
+| PadLeftDataProcessor   | 向左侧（头部）添加固定的值达到指定的长度。 |
+| PadRightDataProcessor | 向右侧（尾部）添加固定的值达到指定的长度。 |
+| StartAddValueDataProcessor   | 向开头添加固定的值 |
+| StartClearValueDataProcessor | 向开头移除固定的值 |
+| TrimDataProcessor   | 移除前后指定的匹配项。 |
+| TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
+| TrimStartDataProcessor | 移除开头指定的匹配项。 |
 
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
