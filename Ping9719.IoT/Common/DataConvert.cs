@@ -24,6 +24,10 @@ namespace Ping9719.IoT.Common
         /// </summary>
         public static bool StartsWith(this byte[] byteArray, byte[] byteArray2)
         {
+            if (byteArray == byteArray2)
+                return true;
+            if (byteArray == null || byteArray2 == null)
+                return false;
             if (byteArray.Length < byteArray2.Length)
                 return false;
             for (int i = 0; i < byteArray2.Length; i++)
@@ -39,6 +43,10 @@ namespace Ping9719.IoT.Common
         /// </summary>
         public static bool EndsWith(this byte[] byteArray, byte[] byteArray2)
         {
+            if (byteArray == byteArray2)
+                return true;
+            if (byteArray == null || byteArray2 == null)
+                return false;
             if (byteArray.Length < byteArray2.Length)
                 return false;
             for (int i = 1; i <= byteArray2.Length; i++)
