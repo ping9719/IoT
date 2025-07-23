@@ -297,7 +297,12 @@ client.Pause();
 ```
 
 # 算法 (Algorithm) <a id="Algorithm"></a>
+
 ## 平均点位算法（AveragePoint） <a id="AveragePoint"></a>
+> 简单的平均算法，假如开头为2，结尾为8，一共4个点，每个点距离相同。如图所示：   
+> 2--[4]--[6]--8   
+> 就可知道中间点位为4和6
+
 ```CSharp
 //输出的结果：
 //0[2, 2.5]
