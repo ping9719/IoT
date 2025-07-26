@@ -50,9 +50,9 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public List<IDataProcessor> ReceivedDataProcessors { get; set; } = new List<IDataProcessor>();
         /// <summary>
-        /// 断线重连，最大重连时间。默认10秒。
+        /// 最大重连时间，单位秒。默认10秒。
         /// </summary>
-        public int MaxReconnectionTime { get; set; } = 10 * 1000;
+        public int MaxReconnectionTime { get; set; } = 10;
         /// <summary>
         /// 接收区，缓冲区大小（默认1024 * 100）
         /// </summary>
@@ -71,11 +71,11 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public virtual int TimeOut { get; set; } = 3000;
         /// <summary>
-        /// 接收数据的方式
+        /// 接收数据的模式
         /// </summary>
         public virtual ReceiveMode ReceiveMode { get; set; } = ReceiveMode.ParseByteAll();
         /// <summary>
-        /// 接收数据的方式，在事件 Received 下。注意 ReceiveModeEnum.Time 模式下时间设置太长或对方一直在发送消息，可能会死锁 ！
+        /// 接收数据的模式，在事件 Received 下。注意 ReceiveModeEnum.Time 模式下时间设置太长或对方一直在发送消息，可能会死锁 ！
         /// </summary>
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
@@ -535,7 +535,7 @@ namespace Ping9719.IoT.Communication
                         else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
                         {
                             ReconnectionCount++;
-                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime);
+                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime * 1000);
                             System.Threading.Thread.Sleep(tz);
 
                             if (IsUserClose)
@@ -676,9 +676,14 @@ namespace Ping9719.IoT.Communication
                     value = dataEri.DequeueAll();
                 }
             }
-            else if (receiveMode.Type == ReceiveModeEnum.ToString)
+            else if (receiveMode.Type == ReceiveModeEnum.ToEnd)
             {
-                var zfc = Encoding.GetBytes(receiveMode.Data.ToString());
+                byte[] zfc;
+                if (receiveMode.Data is string str)
+                    zfc = Encoding.GetBytes(str);
+                else
+                    zfc = (byte[])receiveMode.Data;
+
                 if (isevent)
                 {
                     if (dataEri.ToArray().EndsWith(zfc))
@@ -729,7 +734,7 @@ namespace Ping9719.IoT.Communication
         }
 
         /// <summary>
-        /// 接收数据的方式
+        /// 接收数据的模式
         /// </summary>
         public ReceiveModeEnum Type { get; private set; }
         /// <summary>
@@ -774,7 +779,14 @@ namespace Ping9719.IoT.Communication
         /// <param name="endString">为 null 时为 Environment.NewLine</param>
         /// <param name="timeOut">超时（毫秒，-1永久 -2默认）</param>
         /// <returns></returns>
-        public static ReceiveMode ParseToString(string endString = null, int timeOut = -2) => new ReceiveMode() { Type = ReceiveModeEnum.ToString, Data = endString ?? Environment.NewLine, TimeOut = timeOut };
+        public static ReceiveMode ParseToEnd(string endString = null, int timeOut = -2) => new ReceiveMode() { Type = ReceiveModeEnum.ToEnd, Data = endString ?? Environment.NewLine, TimeOut = timeOut };
+        /// <summary>
+        /// 读取到指定的字节后结束
+        /// </summary>
+        /// <param name="endByte">为 null 或长度为0时为 [0]</param>
+        /// <param name="timeOut">超时（毫秒，-1永久 -2默认）</param>
+        /// <returns></returns>
+        public static ReceiveMode ParseToEnd(byte[] endByte = null, int timeOut = -2) => new ReceiveMode() { Type = ReceiveModeEnum.ToEnd, Data = (endByte == null || endByte.Length == 0) ? new byte[] { 0 } : endByte, TimeOut = timeOut };
 
         /// <summary>
         /// 初始化一个新对象并重新设置超时
@@ -786,7 +798,7 @@ namespace Ping9719.IoT.Communication
     }
 
     /// <summary>
-    /// 接收数据的方式
+    /// 接收数据的模式
     /// </summary>
     public enum ReceiveModeEnum
     {
@@ -807,9 +819,9 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         Time = 30,
         /// <summary>
-        /// 读取到指定的字符串后结束
+        /// 读取到指定的结尾后结束
         /// </summary>
-        ToString = 40,
+        ToEnd = 40,
         //Regex = 50,
     }
 
