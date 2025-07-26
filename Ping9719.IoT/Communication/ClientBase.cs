@@ -561,7 +561,7 @@ namespace Ping9719.IoT.Communication
 
                     }
                 }
-            }, this, ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None);
+            }, this, CancellationToken.None, (ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None), TaskScheduler.Default);
 
             //task.Start();
         }
