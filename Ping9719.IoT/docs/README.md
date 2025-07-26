@@ -6,10 +6,14 @@
 
 # 目录 
 - [通讯 (Communication)](#Communication)
-    - [数据处理器（IDataProcessor）](#IDataProcessor)
-        - 1.介绍  
-        - 2.自定义数据处理器
-        - [3.内置的数据处理器](#IDataProcessorIn)
+    - [客户端基础(ClientBase) 必读！！](#ClientBase)
+        - 1.介绍 
+        - [2.链接模式（ConnectionMode）](#ConnectionMode)
+        - [3.数据处理器（IDataProcessor）](#IDataProcessor)
+            - 3.1.介绍  
+            - 3.2.自定义数据处理器
+            - [3.3.内置的数据处理器](#IDataProcessorIn)
+        - [4.接受模式（ReceiveMode）](#ReceiveMode)
     - [TcpClient](#TcpClient)
     - TcpServer （待测试） 
     - [SerialPortClient](#SerialPortClient)
@@ -65,14 +69,38 @@
     - 1.如何使用自定义协议
 
 # 通讯 (Communication) <a id="Communication"></a>
-
-## 数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+## 客户端基础(ClientBase)  <a id="ClientBase"></a>
 #### 1.介绍  
+> 1. `ClientBase` 是所有客户端的基类 
+
+#### 2.链接模式 <a id="ConnectionMode"></a>    
+
+2.1 三种链接模式：   
+> 1.手动（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
+> 2.自动打开（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
+> 3.自动断线重连（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
+
+2.2 自动断线重连规则：   
+> 1.当断开链接后进行尝试重连，第一次需等待1秒。   
+> 2.如没有成功就继续增加一秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
+> 3.直到重连成功，或用户手动调用关闭(`Close()`)。   
+
+2.3 简要代码：  
+```CSharp
+var client1 = new TcpClient("127.0.0.1", 8080);
+client1.ConnectionMode = ConnectionMode.Manual;//手动。
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
+client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
+```
+
+## 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+#### 3.1.介绍  
 > 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
 > 2.在接受数据后可以对数据进行处理后在转发出去  </br>
 > 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接受的处理器应该发送的处理器的是倒序）。
 
-#### 2.自定义数据处理器   
+#### 3.2.自定义数据处理器   
 1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
 
 2. 开始使用自定义数据处理器
@@ -81,7 +109,7 @@ client1.SendDataProcessors.Add(new MyCalss());
 client1.ReceivedDataProcessors.Add(new MyCalss());
 ```
 
-#### 3.内置的数据处理器  <a id="IDataProcessorIn"></a>
+#### 3.3.内置的数据处理器  <a id="IDataProcessorIn"></a>
 
 | 名称| 说明 |
 | ----------- | -------------- |
@@ -94,6 +122,28 @@ client1.ReceivedDataProcessors.Add(new MyCalss());
 | TrimDataProcessor   | 移除前后指定的匹配项。 |
 | TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
 | TrimStartDataProcessor | 移除开头指定的匹配项。 |
+
+## 4.接受模式（ReceiveMode）  <a id="ReceiveMode"></a>
+#### 4.1.数据接受介绍 
+在客户端中有2处可以接受到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接受到数据了，事件将不会再接受到。
+```CSharp
+//在方法中的默认方式
+client.ReceiveMode = ReceiveMode.ParseByteAll();
+//在事件中的默认方式
+client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
+```
+接受的数据先通过‘接受模式’进行分开每一帧，在经过‘数据处理器’处理数据   
+> 假如对方给你发送字符串“ab\r\n”和“cd\r\n”他们之间间隔了100毫秒。   
+> 这里“ab\r\n”为一帧，“a”为一位的意思。    
+> 假如每一帧之间相距100ms，每一位之间相距1ms。    
+
+| 代码                                 | 结果      | 说明 | 推荐场景 | 
+| ------------------------------------ | --------- |------------ | ------------ | 
+| `ReceiveMode.ParseByte(2)`           | ab        | 读取指定的字节数量 | 在通信协议里面已经指定了一帧是固定长度的情况下或已知道剩余接收的长度的情况下 | 
+| `ReceiveMode.ParseByteAll()`         | a或ab\r\n | 读取所有立即可用的字节 | 需要高效率又什么都不知道的情况下。tcp等协议一般一帧是全部信息，串口一般一帧是一位信息 | 
+| `ReceiveMode.ParseChar(1)`         | a         | 读取指定的字符数量 | 同 `ParseByte()` | 
+| `ReceiveMode.ParseTime(10)`          | ab\r\n    | 读取达到指定的时间间隔后没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
+| `ReceiveMode.ParseToEnd("\r\n") ` | ab\r\n    | 读取到指定的信息后结束 | 知道每一帧的结尾的情况下 | 
 
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
