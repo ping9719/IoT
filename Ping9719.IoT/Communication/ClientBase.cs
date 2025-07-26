@@ -114,14 +114,26 @@ namespace Ping9719.IoT.Communication
                     if (aa == false)
                         throw new Exception("用户已拒绝链接");
 
-                    openData = Open2();
+                    bool isOpenOk = false;
+
+                    try
+                    {
+                        openData = Open2();
+                        isOpenOk = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        result.AddError(ex);
+                    }
 
                     dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-                    IsOpen2 = true;
+                    IsOpen2 = isOpenOk;
                     IsUserClose = false;
                     ReconnectionCount = 0;
-                    GoRun();
-                    Opened?.Invoke(this);
+                    if (isOpenOk || ConnectionMode == ConnectionMode.AutoReconnection)
+                        GoRun();
+                    if (isOpenOk)
+                        Opened?.Invoke(this);
                 }
             }
             catch (Exception ex)
@@ -506,14 +518,14 @@ namespace Ping9719.IoT.Communication
 
                                                 var bytes = dataEri.DequeueAll();
                                                 if (bytes != null && bytes.Length > 0)
-                                                    cc.Received?.Invoke(this, DataProcessors(bytes,false));
+                                                    cc.Received?.Invoke(this, DataProcessors(bytes, false));
                                             }, TaskContinuationOptions.ExecuteSynchronously);
                                         }
                                         else
                                         {
                                             var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
                                             if (bytes != null && bytes.Length > 0)
-                                                cc.Received?.Invoke(this, DataProcessors( bytes,false));
+                                                cc.Received?.Invoke(this, DataProcessors(bytes, false));
                                         }
                                     }
                                 }
@@ -549,7 +561,7 @@ namespace Ping9719.IoT.Communication
 
                     }
                 }
-            }, this);
+            }, this, ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None);
 
             //task.Start();
         }
@@ -563,6 +575,8 @@ namespace Ping9719.IoT.Communication
 
         protected virtual void Send2(byte[] data, int offset = 0, int count = -1)
         {
+            if (openData == null)
+                throw new Exception("未链接");
             openData.Write(data, offset, count < 0 ? data.Length : count);
         }
 

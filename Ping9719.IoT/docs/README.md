@@ -132,10 +132,7 @@ client1.Received = (a, b) =>
 {
     Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
 };
-client1.Warning = (a, b) =>
-{
-    Console.WriteLine("错误" + b.ToString());
-};
+
 //打开链接，设置所有属性必须在打开前
 client1.Open();
 
