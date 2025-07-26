@@ -18,7 +18,7 @@ namespace Ping9719.IoT.Communication
     public class SerialPortClient : ClientBase
     {
         public static string[] GetNames => System.IO.Ports.SerialPort.GetPortNames();
-        public override bool IsOpen => serialPort?.IsOpen ?? false && IsOpen2;
+        public override bool IsOpen => base.IsOpen && (serialPort?.IsOpen ?? false);
         string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One; Handshake handshake = Handshake.None;
         private System.IO.Ports.SerialPort serialPort;
 

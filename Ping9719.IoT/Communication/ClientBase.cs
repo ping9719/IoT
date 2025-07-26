@@ -29,14 +29,10 @@ namespace Ping9719.IoT.Communication
         protected int ReconnectionCount = 0;
         protected CancellationTokenSource flushCts;
 
-        ///// <summary>
-        ///// 类的名称
-        ///// </summary>
-        //public string Name { get => this.GetType().Name; }
         /// <summary>
         /// 是否打开
         /// </summary>
-        public abstract bool IsOpen { get; }
+        public virtual bool IsOpen { get => IsOpen2 && !IsUserClose; }
         /// <summary>
         /// 链接模式
         /// </summary>
@@ -443,7 +439,7 @@ namespace Ping9719.IoT.Communication
                         {
                             break;
                         }
-                        else if (cc.IsOpen2 && cc.IsOpen)
+                        else if (cc.IsOpen)
                         {
                             int readLength;
                             try
@@ -481,13 +477,12 @@ namespace Ping9719.IoT.Communication
                             //断开
                             if (readLength <= 0)
                             {
-                                if (readLength == 0)
-                                {
-                                    //Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
-                                }
+                                //if (readLength == 0)
+                                //{
+                                //    Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
+                                //}
 
-
-                                if (cc.IsOpen2 && cc.IsOpen)
+                                if (cc.IsOpen2 || cc.IsOpen)
                                 {
                                     IsOpen2 = false;
                                     dataEri = null;
@@ -599,7 +594,7 @@ namespace Ping9719.IoT.Communication
                 {
                     while (dataEri.Count < countMax)
                     {
-                        if (!IsOpen2)
+                        if (!IsOpen)
                             throw new Exception("链接被断开");
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
@@ -619,7 +614,7 @@ namespace Ping9719.IoT.Communication
                 {
                     while (dataEri.Count == 0)
                     {
-                        if (!IsOpen2)
+                        if (!IsOpen)
                             throw new Exception("链接被断开");
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
@@ -643,7 +638,7 @@ namespace Ping9719.IoT.Communication
                 {
                     while (dataEri.Count < countMax)
                     {
-                        if (!IsOpen2)
+                        if (!IsOpen)
                             throw new Exception("链接被断开");
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
@@ -665,7 +660,7 @@ namespace Ping9719.IoT.Communication
                     var tempBufferLength = dataEri.Count;
                     while (dataEri.Count == 0 || tempBufferLength != dataEri.Count)
                     {
-                        if (!IsOpen2)
+                        if (!IsOpen)
                             throw new Exception("链接被断开");
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
@@ -696,7 +691,7 @@ namespace Ping9719.IoT.Communication
 
                     while (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc))
                     {
-                        if (!IsOpen2)
+                        if (!IsOpen)
                             throw new Exception("链接被断开");
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");

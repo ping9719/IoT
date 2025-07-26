@@ -20,7 +20,7 @@ namespace Ping9719.IoT.Hid
     public class BleClient : ClientBase
     {
         public static string[] GetNames => DeviceList.Local.GetBleDevices().Select(o => o.DevicePath).ToArray();
-        public override bool IsOpen => IsOpen2;// hidDevice?.IsOpen ?? false && IsOpen2;
+        public override bool IsOpen => base.IsOpen;
         string devicePath;
         private HidSharp.Experimental.BleDevice bleDevice;
 

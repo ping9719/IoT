@@ -17,7 +17,7 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class UdpClient : ClientBase, INetwork
     {
-        public override bool IsOpen => udpClient != null && IsOpen2;
+        public override bool IsOpen => base.IsOpen && udpClient != null;
         public Socket Socket => udpClient?.Client;
 
         string ip; int port;
