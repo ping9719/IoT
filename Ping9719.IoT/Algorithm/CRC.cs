@@ -84,21 +84,22 @@ namespace Ping9719.IoT.Algorithm
         /// <param name="ref_in">输入反转</param>
         /// <param name="ref_out">输出反转</param>
         /// <param name="xor_out">结果异或</param>
+        /// <param name="is_little_endian">小端序</param>
         /// <returns>追加的结果</returns>
-        public static bool CheckCrc16(byte[] data, ushort poly = 0x8005, ushort init = 0xFFFF, bool ref_in = true, bool ref_out = true, ushort xor_out = 0x0000)
+        public static bool CheckCrc16(byte[] data, ushort poly = 0x8005, ushort init = 0xFFFF, bool ref_in = true, bool ref_out = true, ushort xor_out = 0x0000, bool is_little_endian = true)
         {
-            var aa = Crc16Base(data, 0, data.Length - 2, 0, poly, init, ref_in, ref_out, xor_out);
+            var aa = Crc16Base(data, 0, data.Length - 2, 0, poly, init, ref_in, ref_out, xor_out, is_little_endian);
             return aa[data.Length - 1] == data[data.Length - 1] && aa[data.Length - 2] == data[data.Length - 2];
         }
-        public static bool CheckCrc16Ibm(byte[] data) => CheckCrc16(data, 0x8005, 0x0000, true, true, 0x0000);
-        public static bool CheckCrc16Maxim(byte[] data) => CheckCrc16(data, 0x8005, 0x0000, true, true, 0xFFFF);
-        public static bool CheckCrc16Usb(byte[] data) => CheckCrc16(data, 0x8005, 0xFFFF, true, true, 0xFFFF);
-        public static bool CheckCrc16Modbus(byte[] data) => CheckCrc16(data, 0x8005, 0xFFFF, true, true, 0x0000);
-        public static bool CheckCrc16Ccitt(byte[] data) => CheckCrc16(data, 0x1021, 0x0000, true, true, 0x0000);
-        public static bool CheckCrc16CcittFalse(byte[] data) => CheckCrc16(data, 0x1021, 0xFFFF, false, false, 0x0000);
-        public static bool CheckCrc16X25(byte[] data) => CheckCrc16(data, 0x1021, 0xFFFF, true, true, 0xFFFF);
-        public static bool CheckCrc16Ymodem(byte[] data) => CheckCrc16(data, 0x1021, 0x0000, false, false, 0x0000);
-        public static bool CheckCrc16Dnp(byte[] data) => CheckCrc16(data, 0x3d65, 0x0000, true, true, 0xFFFF);
+        public static bool CheckCrc16Ibm(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x8005, 0x0000, true, true, 0x0000, is_little_endian);
+        public static bool CheckCrc16Maxim(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x8005, 0x0000, true, true, 0xFFFF, is_little_endian);
+        public static bool CheckCrc16Usb(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x8005, 0xFFFF, true, true, 0xFFFF, is_little_endian);
+        public static bool CheckCrc16Modbus(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x8005, 0xFFFF, true, true, 0x0000, is_little_endian);
+        public static bool CheckCrc16Ccitt(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x1021, 0x0000, true, true, 0x0000, is_little_endian);
+        public static bool CheckCrc16CcittFalse(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x1021, 0xFFFF, false, false, 0x0000, is_little_endian);
+        public static bool CheckCrc16X25(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x1021, 0xFFFF, true, true, 0xFFFF, is_little_endian);
+        public static bool CheckCrc16Ymodem(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x1021, 0x0000, false, false, 0x0000, is_little_endian);
+        public static bool CheckCrc16Dnp(byte[] data, bool is_little_endian = true) => CheckCrc16(data, 0x3d65, 0x0000, true, true, 0xFFFF, is_little_endian);
         /// <summary>
         /// crc16算法
         /// </summary>
@@ -108,21 +109,22 @@ namespace Ping9719.IoT.Algorithm
         /// <param name="ref_in">输入反转</param>
         /// <param name="ref_out">输出反转</param>
         /// <param name="xor_out">结果异或</param>
+        /// <param name="is_little_endian">小端序</param>
         /// <returns>追加的结果</returns>
-        public static byte[] Crc16(byte[] data, ushort poly = 0x8005, ushort init = 0xFFFF, bool ref_in = true, bool ref_out = true, ushort xor_out = 0x0000)
+        public static byte[] Crc16(byte[] data, ushort poly = 0x8005, ushort init = 0xFFFF, bool ref_in = true, bool ref_out = true, ushort xor_out = 0x0000, bool is_little_endian = true)
         {
-            return Crc16Base(data, 0, data.Length, 0, poly, init, ref_in, ref_out, xor_out);
+            return Crc16Base(data, 0, data.Length, 0, poly, init, ref_in, ref_out, xor_out, is_little_endian);
         }
-        public static byte[] Crc16Ibm(byte[] data) => Crc16(data, 0x8005, 0x0000, true, true, 0x0000);
-        public static byte[] Crc16Maxim(byte[] data) => Crc16(data, 0x8005, 0x0000, true, true, 0xFFFF);
-        public static byte[] Crc16Usb(byte[] data) => Crc16(data, 0x8005, 0xFFFF, true, true, 0xFFFF);
-        public static byte[] Crc16Modbus(byte[] data) => Crc16(data, 0x8005, 0xFFFF, true, true, 0x0000);
-        public static byte[] Crc16Ccitt(byte[] data) => Crc16(data, 0x1021, 0x0000, true, true, 0x0000);
-        public static byte[] Crc16CcittFalse(byte[] data) => Crc16(data, 0x1021, 0xFFFF, false, false, 0x0000);
-        public static byte[] Crc16X25(byte[] data) => Crc16(data, 0x1021, 0xFFFF, true, true, 0xFFFF);
-        public static byte[] Crc16Ymodem(byte[] data) => Crc16(data, 0x1021, 0x0000, false, false, 0x0000);
-        public static byte[] Crc16Dnp(byte[] data) => Crc16(data, 0x3d65, 0x0000, true, true, 0xFFFF);
-        private static byte[] Crc16Base(byte[] data, int start_index, int len, ushort shift, ushort poly, ushort init, bool ref_in, bool ref_out, ushort xor_out)
+        public static byte[] Crc16Ibm(byte[] data, bool is_little_endian = true) => Crc16(data, 0x8005, 0x0000, true, true, 0x0000, is_little_endian);
+        public static byte[] Crc16Maxim(byte[] data, bool is_little_endian = true) => Crc16(data, 0x8005, 0x0000, true, true, 0xFFFF, is_little_endian);
+        public static byte[] Crc16Usb(byte[] data, bool is_little_endian = true) => Crc16(data, 0x8005, 0xFFFF, true, true, 0xFFFF, is_little_endian);
+        public static byte[] Crc16Modbus(byte[] data, bool is_little_endian = true) => Crc16(data, 0x8005, 0xFFFF, true, true, 0x0000, is_little_endian);
+        public static byte[] Crc16Ccitt(byte[] data, bool is_little_endian = true) => Crc16(data, 0x1021, 0x0000, true, true, 0x0000, is_little_endian);
+        public static byte[] Crc16CcittFalse(byte[] data, bool is_little_endian = true) => Crc16(data, 0x1021, 0xFFFF, false, false, 0x0000, is_little_endian);
+        public static byte[] Crc16X25(byte[] data, bool is_little_endian = true) => Crc16(data, 0x1021, 0xFFFF, true, true, 0xFFFF, is_little_endian);
+        public static byte[] Crc16Ymodem(byte[] data, bool is_little_endian = true) => Crc16(data, 0x1021, 0x0000, false, false, 0x0000, is_little_endian);
+        public static byte[] Crc16Dnp(byte[] data, bool is_little_endian = true) => Crc16(data, 0x3d65, 0x0000, true, true, 0xFFFF, is_little_endian);
+        private static byte[] Crc16Base(byte[] data, int start_index, int len, ushort shift, ushort poly, ushort init, bool ref_in, bool ref_out, ushort xor_out, bool is_little_endian)
         {
             ushort crc = (ushort)(init << shift);
             poly = (ushort)(poly << shift);
@@ -146,7 +148,8 @@ namespace Ping9719.IoT.Algorithm
             }
             crc = ref_out ? Reverse16(crc) : (ushort)(crc >> shift);
             var crc16 = (ushort)(crc ^ xor_out);
-            return data.Skip(start_index).Take(len).Concat(BitConverter.GetBytes(crc16)).ToArray();
+            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc16) : BitConverter.GetBytes(crc16).Reverse();
+            return data.Skip(start_index).Take(len).Concat(crc16byte).ToArray();
         }
 
         /// <summary>
@@ -158,15 +161,16 @@ namespace Ping9719.IoT.Algorithm
         /// <param name="ref_in">输入反转</param>
         /// <param name="ref_out">输出反转</param>
         /// <param name="xor_out">结果异或</param>
+        /// <param name="is_little_endian">小端序</param>
         /// <returns>追加的结果</returns>
-        public static bool CheckCrc32(byte[] data, uint poly = 0x04C11DB7, uint init = 0xFFFFFFFF, bool ref_in = true, bool ref_out = true, uint xor_out = 0xFFFFFFFF)
+        public static bool CheckCrc32(byte[] data, uint poly = 0x04C11DB7, uint init = 0xFFFFFFFF, bool ref_in = true, bool ref_out = true, uint xor_out = 0xFFFFFFFF, bool is_little_endian = true)
         {
-            var aa = Crc32Base(data, 0, data.Length - 4, poly, init, ref_in, ref_out, xor_out);
+            var aa = Crc32Base(data, 0, data.Length - 4, poly, init, ref_in, ref_out, xor_out, is_little_endian);
             return aa[data.Length - 1] == data[data.Length - 1] && aa[data.Length - 2] == data[data.Length - 2] && aa[data.Length - 3] == data[data.Length - 3] && aa[data.Length - 4] == data[data.Length - 4];
         }
-        public static bool CheckCrc32Mpeg2(byte[] data) => CheckCrc32(data, 0x04c11db7, 0xFFFFFFFF, false, false, 0x00000000);
-        public static bool CheckCrc32Sata(byte[] data) => CheckCrc32(data, 0x04C11DB7, 0x52325032, false, false, 0x00000000);
-        public static bool CheckCrc32Q(byte[] data) => CheckCrc32(data, 0x814141AB, 0x00000000, false, false, 0x00000000);
+        public static bool CheckCrc32Mpeg2(byte[] data, bool is_little_endian = true) => CheckCrc32(data, 0x04c11db7, 0xFFFFFFFF, false, false, 0x00000000, is_little_endian);
+        public static bool CheckCrc32Sata(byte[] data, bool is_little_endian = true) => CheckCrc32(data, 0x04C11DB7, 0x52325032, false, false, 0x00000000, is_little_endian);
+        public static bool CheckCrc32Q(byte[] data, bool is_little_endian = true) => CheckCrc32(data, 0x814141AB, 0x00000000, false, false, 0x00000000, is_little_endian);
         /// <summary>
         /// crc32算法
         /// </summary>
@@ -176,15 +180,16 @@ namespace Ping9719.IoT.Algorithm
         /// <param name="ref_in">输入反转</param>
         /// <param name="ref_out">输出反转</param>
         /// <param name="xor_out">结果异或</param>
+        /// <param name="is_little_endian">小端序</param>
         /// <returns>追加的结果</returns>
-        public static byte[] Crc32(byte[] data, uint poly = 0x04C11DB7, uint init = 0xFFFFFFFF, bool ref_in = true, bool ref_out = true, uint xor_out = 0xFFFFFFFF)
+        public static byte[] Crc32(byte[] data, uint poly = 0x04C11DB7, uint init = 0xFFFFFFFF, bool ref_in = true, bool ref_out = true, uint xor_out = 0xFFFFFFFF, bool is_little_endian = true)
         {
-            return Crc32Base(data, 0, data.Length, poly, init, ref_in, ref_out, xor_out);
+            return Crc32Base(data, 0, data.Length, poly, init, ref_in, ref_out, xor_out, is_little_endian);
         }
-        public static byte[] Crc32Mpeg2(byte[] data) => Crc32(data, 0x04c11db7, 0xFFFFFFFF, false, false, 0x00000000);
-        public static byte[] Crc32Sata(byte[] data) => Crc32(data, 0x04C11DB7, 0x52325032, false, false, 0x00000000);
-        public static byte[] Crc32Q(byte[] data) => Crc32(data, 0x814141AB, 0x00000000, false, false, 0x00000000);
-        private static byte[] Crc32Base(byte[] data, int start_index, int len, uint poly, uint init, bool ref_in, bool ref_out, uint xor_out)
+        public static byte[] Crc32Mpeg2(byte[] data, bool is_little_endian = true) => Crc32(data, 0x04c11db7, 0xFFFFFFFF, false, false, 0x00000000, is_little_endian);
+        public static byte[] Crc32Sata(byte[] data, bool is_little_endian = true) => Crc32(data, 0x04C11DB7, 0x52325032, false, false, 0x00000000, is_little_endian);
+        public static byte[] Crc32Q(byte[] data, bool is_little_endian = true) => Crc32(data, 0x814141AB, 0x00000000, false, false, 0x00000000,is_little_endian);
+        private static byte[] Crc32Base(byte[] data, int start_index, int len, uint poly, uint init, bool ref_in, bool ref_out, uint xor_out, bool is_little_endian)
         {
             uint crc = init;
             byte data_byte;
@@ -207,7 +212,8 @@ namespace Ping9719.IoT.Algorithm
             }
             crc = ref_out ? Reverse32(crc) : crc;
             var crc32 = crc ^ xor_out;
-            return data.Skip(start_index).Take(len).Concat(BitConverter.GetBytes(crc32)).ToArray();
+            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc32) : BitConverter.GetBytes(crc32).Reverse();
+            return data.Skip(start_index).Take(len).Concat(crc16byte).ToArray();
         }
 
 
