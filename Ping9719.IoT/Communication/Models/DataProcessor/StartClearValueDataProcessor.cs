@@ -33,7 +33,7 @@ namespace Ping9719.IoT.Communication
 
         public byte[] DataProcess(byte[] data)
         {
-            return data.StartsWith(_dataEnd) ? data.Skip(data.Length - _dataEnd.Length).ToArray() : data;
+            return data.StartsWith(_dataEnd) ? data.Skip(_dataEnd.Length).ToArray() : data;
         }
     }
 }
