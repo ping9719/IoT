@@ -203,7 +203,7 @@ namespace Ping9719.IoT.Communication
                 if (!result.IsSucceed)
                     return result;
 
-                var d2 = DataProcessors(data,true);
+                var d2 = DataProcessors(data, true);
                 result.Requests.Add(d2);
                 lock (obj1)
                 {
@@ -265,7 +265,7 @@ namespace Ping9719.IoT.Communication
                     if (IsAutoDiscard)
                         DiscardInBuffer();
 
-                    result.Value = DataProcessors( Receive2(receiveMode),false);
+                    result.Value = DataProcessors(Receive2(receiveMode), false);
                     result.Responses.Add(result.Value);
                 }
 
@@ -556,7 +556,11 @@ namespace Ping9719.IoT.Communication
 
                     }
                 }
-            }, this, CancellationToken.None, (ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None), TaskScheduler.Default);
+            },
+            this,
+            CancellationToken.None,
+            (ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None),
+            TaskScheduler.Default).Unwrap();
 
             //task.Start();
         }
@@ -852,6 +856,7 @@ namespace Ping9719.IoT.Communication
         {
             if (stream != null)
             {
+                stream.ReadTimeout = -1;
                 return stream.ReadAsync(buffer, offset, count);
             }
             else
