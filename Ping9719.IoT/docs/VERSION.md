@@ -2,7 +2,7 @@
 #
 ### 版本记录：[version history]
 ###### *表示部分代码可能与前版本不兼容 [*For some code is incompatible with previous versions]
-## v0.2.0
+## v0.1.1
 *1.更改内置处理器名称     
 2.byte[]开头结尾null判断     
 3.增加7种内置数据处理器   
@@ -13,5 +13,7 @@
 *8.最大重连时间单位s变为ms    
 9.客户端 IsOpen 优化   
 10.CRC 是否小端    
+11.客户端关闭异步等待优化    
+11.客户端异步读取超时为-1，解决usb读取等问题    
 ## v0.1.0
 1.发布
