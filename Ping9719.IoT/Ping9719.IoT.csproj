@@ -12,7 +12,7 @@ https://github.com/ping9719/IoT
 https://gitee.com/ping9719/IoT</Description>
     <PackageProjectUrl>https://github.com/ping9719/IoT</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ping9719/IoT</RepositoryUrl>
-	<Version>0.1.0</Version>
+	<Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
