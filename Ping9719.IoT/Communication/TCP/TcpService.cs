@@ -25,7 +25,7 @@ namespace Ping9719.IoT.Communication
         Task task;
         //客户端+初始化时间
         ConcurrentDictionary<TcpClient, DateTime> clients = new ConcurrentDictionary<TcpClient, DateTime>();
-        public override TcpClient[] Clients => clients.Keys.ToArray();
+        public override ClientBase[] Clients => clients.Keys.ToArray();
 
         public override bool IsOpen => IsOpen2;
 
@@ -94,34 +94,37 @@ namespace Ping9719.IoT.Communication
                 {
                     try
                     {
-                        while (true)
-                        {
-                            System.Net.Sockets.TcpClient tcpClient;
-                            TcpClient tcpClient1;
-                            try
-                            {
-                                tcpClient = await tcpListener.AcceptTcpClientAsync();
-                                tcpClient1 = new TcpClient("", 0).Get(tcpClient, cc);
-                            }
-                            catch (ObjectDisposedException) when (!IsOpen2)
-                            {
-                                //监听停止了
-                                break;
-                            }
 
-                            //客户端链接
-                            Opened?.Invoke(tcpClient1);
-                            clients.TryAdd(tcpClient1, DateTime.Now);
-                            tcpClient1.Closed += (a, b) =>
-                            {
-                                //客户端断开
-                                Closed?.Invoke(a);
-                            };
-                            tcpClient1.Received += (a, b) =>
-                            {
-                                Received?.Invoke(a, b);
-                            };
+                        if (!IsOpen)
+                        {
+                            break;
                         }
+
+                        TcpClient tcpClientMy;
+                        try
+                        {
+                            var tcpClient = await tcpListener.AcceptTcpClientAsync();
+                            tcpClientMy = TcpClient.Get(tcpClient, cc);
+                            cc.clients.TryAdd(tcpClientMy, DateTime.Now);
+                        }
+                        catch (Exception ex)
+                        {
+                            //监听停止了
+                            continue;
+                        }
+
+                        //客户端链接
+                        Opened?.Invoke(tcpClientMy);
+                        tcpClientMy.Closed += (a, b) =>
+                        {
+                            cc.Closed?.Invoke(a);
+                            cc.clients.TryRemove(tcpClientMy, out DateTime dt);
+                        };
+                        tcpClientMy.Received += (a, b) =>
+                        {
+                            cc.Received?.Invoke(a, b);
+                        };
+
                     }
                     catch (Exception ex)
                     {
@@ -132,7 +135,11 @@ namespace Ping9719.IoT.Communication
 
                     }
                 }
-            }, this);
+            },
+            this,
+            CancellationToken.None,
+            TaskCreationOptions.LongRunning,
+            TaskScheduler.Default).Unwrap();
 
             //task.Start();
         }

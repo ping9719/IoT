@@ -67,9 +67,9 @@ client1.Open();
 client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
+client1.Receive(ReceiveMode.ParseToEnd("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", 3000);//发送并接收，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接收 ，超时为5秒 
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 
 4.客户端和服务端支持消息处理器

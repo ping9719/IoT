@@ -15,7 +15,7 @@
             - [3.3.内置的数据处理器](#IDataProcessorIn)
         - [4.接受模式（ReceiveMode）](#ReceiveMode)
     - [TcpClient](#TcpClient)
-    - TcpServer （待测试） 
+    - [TcpServer](#TcpServer)
     - [SerialPortClient](#SerialPortClient)
     - UdpClient （进行中） 
     - UdpServer （待开发） 
@@ -190,20 +190,47 @@ client1.Open();
 client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToString("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
+client1.Receive(ReceiveMode.ParseToEnd("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", 3000);//发送并接收，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToString("\n", 5000));//发送并接收 ，超时为5秒 
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 
-## TcpServer
+## TcpServer   <a id="TcpServer"></a>   
 `TcpServer : ServiceBase`
+> `TcpServer` 只做了简单的基础测试，使用前请自行测试自己需要的功能。
 ```CSharp
-var service = new TcpService("127.0.0.1",8005);
+var service = new TcpService("127.0.0.1", 8005);
+service.Encoding = Encoding.UTF8;
+//接受模式
+service.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
+service.ReceiveModeReceived = ReceiveMode.ParseByteAll();//事件“Received”的默认方式
+service.Opened = (a) =>
+{
+    Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]连接成功");
+};
+service.Closed = (a) =>
+{
+    Console.WriteLine($"客户端关闭成功");
+};
+service.Received = (a, b) =>
+{
+    Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]收到消息：" + a.Encoding.GetString(b));
+};
+
+//打开链接，设置所有属性必须在打开前
+service.Open();
+
+if (service.Clients.Any())
+{
+    //给第一个客户端发送信息，这里和'TcpClient'使用方式一样，不做多余的说明
+    service.Clients[0].Send("123");
+}
 ```
 
 
 ## SerialPortClient <a id="SerialPortClient"></a>
-`SerialPortClient : ClientBase`
+`SerialPortClient : ClientBase`   
+> 串口是点到点传输，所以只有 `SerialPortClient` 没有 `SerialPortService` 。使用2个`SerialPortClient` 即可。
 ```CSharp
 var client1 = new SerialPortClient("COM1", 9600);
 

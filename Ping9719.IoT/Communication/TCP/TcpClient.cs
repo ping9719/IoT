@@ -33,28 +33,29 @@ namespace Ping9719.IoT.Communication
             ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
 
-        internal TcpClient Get(System.Net.Sockets.TcpClient tcpClient, ServiceBase serviceBase)
+        internal static TcpClient Get(System.Net.Sockets.TcpClient tcpClient, ServiceBase serviceBase)
         {
-            ReceiveBufferSize = serviceBase.ReceiveBufferSize;
-            IsAutoDiscard = serviceBase.IsAutoDiscard;
-            Encoding = serviceBase.Encoding;
-            TimeOut = serviceBase.TimeOut;
-            ReceiveMode = serviceBase.ReceiveMode;
-            ReceiveModeReceived = serviceBase.ReceiveModeReceived;
+            TcpClient tcpClient1 = new TcpClient("", 0);
+            tcpClient1.ReceiveBufferSize = serviceBase.ReceiveBufferSize;
+            tcpClient1.IsAutoDiscard = serviceBase.IsAutoDiscard;
+            tcpClient1.Encoding = serviceBase.Encoding;
+            tcpClient1.TimeOut = serviceBase.TimeOut;
+            tcpClient1.ReceiveMode = serviceBase.ReceiveMode;
+            tcpClient1.ReceiveModeReceived = serviceBase.ReceiveModeReceived;
 
-            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-            tcpClient.ReceiveTimeout = TimeOut;
-            tcpClient.SendTimeout = TimeOut;
+            tcpClient1.dataEri = new QueueByteFixed(tcpClient1.ReceiveBufferSize, true);
+            tcpClient.ReceiveTimeout = serviceBase.TimeOut;
+            tcpClient.SendTimeout = serviceBase.TimeOut;
 
-            IsOpen2 = true;
-            this.tcpClient = tcpClient;
-            openData = new OpenClientData(tcpClient.Client);
-            ReconnectionCount = 0;
+            tcpClient1.IsOpen2 = true;
+            tcpClient1.tcpClient = tcpClient;
+            tcpClient1.openData = new OpenClientData(tcpClient.Client);
+            tcpClient1.ReconnectionCount = 0;
 
-            IsUserClose = false;
-            GoRun();
-            Opened?.Invoke(this);
-            return this;
+            tcpClient1.IsUserClose = false;
+            tcpClient1.GoRun();
+            //tcpClient1.Opened?.Invoke(tcpClient1);
+            return tcpClient1;
         }
 
         protected override OpenClientData Open2()

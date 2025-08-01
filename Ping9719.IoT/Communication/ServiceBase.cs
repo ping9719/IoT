@@ -14,10 +14,6 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public abstract class ServiceBase
     {
-        ///// <summary>
-        ///// 类的名称
-        ///// </summary>
-        //public string Name { get => this.GetType().Name; }
         /// <summary>
         /// 是否打开
         /// </summary>
@@ -25,7 +21,7 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 所有的客户端
         /// </summary>
-        public abstract TcpClient[] Clients { get; }
+        public abstract ClientBase[] Clients { get; }
 
         /// <summary>
         /// 接收区，缓冲区大小（默认1024 * 100）
@@ -54,19 +50,11 @@ namespace Ping9719.IoT.Communication
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
         /// <summary>
-        /// 客户端即将链接
-        /// </summary>
-        public Func<ClientBase, bool> Opening;
-        /// <summary>
         /// 客户端成功链接
         /// </summary>
         public Action<ClientBase> Opened;
         /// <summary>
-        /// 客户端正在断开链接。仅主动断开。
-        /// </summary>
-        public Func<ClientBase, bool> Closing;
-        /// <summary>
-        /// 客户端断开链接，item2:是否自动断开
+        /// 客户端断开链接
         /// </summary>
         public Action<ClientBase> Closed;
         /// <summary>
