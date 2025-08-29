@@ -15,7 +15,7 @@ namespace Ping9719.IoT.PLC
     /// https://blog.csdn.net/lishiming0308/article/details/85243041
     /// https://www.cnblogs.com/ChuFeiFan/p/10868241.html
     /// </summary>
-    public class AllenBradleyCipClient : IIoT
+    public class AllenBradleyCipClient : ReadWriteBase, IClientData
     {
         /// <summary>
         /// 插槽
@@ -724,7 +724,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region IIoTBase
-        public IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             var aaa = Read(address, 1);
             try
@@ -740,12 +740,12 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult<string> ReadString(string address, int length, Encoding encoding)
+        public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
             throw new NotImplementedException();
         }
 
-        public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             var aaa = Read(address, number);
             try
@@ -761,7 +761,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             if (value is bool boolv)
             {
@@ -813,12 +813,12 @@ namespace Ping9719.IoT.PLC
                 throw new NotImplementedException("暂不支持的类型");
         }
 
-        public IoTResult WriteString(string address, string value, int length, Encoding encoding)
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
             throw new NotImplementedException();
         }
 
-        public IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             throw new NotImplementedException();
         }

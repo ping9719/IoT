@@ -37,7 +37,7 @@ namespace Ping9719.IoT.Device.Screw
     ///历史力矩值	28672	记录当前工作一轮实时扭力值，每 PA0-67 毫秒保存一次，最大保存 6144点。
     ///历史角度值	35072	记录当前工作一轮实时角度值，每 PA0-67 毫秒保存一次，最大保存 6144点。
     /// </summary>
-    public class MiLeScrew : ModbusRtuClient, IIoT
+    public class MiLeScrew : ModbusRtuClient, IClientData
     {
         public MiLeScrew(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.BADC, byte stationNumber = 1)
             : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)

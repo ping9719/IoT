@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Device.Mark
     /// <summary>
     /// 大族激光刻印
     /// </summary>
-    public class DaZhuMark
+    public class DaZhuMark : IClient
     {
         public ClientBase Client { get; private set; }
         public DaZhuMark(ClientBase client)

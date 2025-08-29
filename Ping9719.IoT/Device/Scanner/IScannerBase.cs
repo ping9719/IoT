@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Device.Scanner
     /// <summary>
     /// 扫码枪
     /// </summary>
-    public interface IScannerBase
+    public interface IScannerBase : IClient
     {
         /// <summary>
         /// 进行一次扫码

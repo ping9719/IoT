@@ -16,7 +16,7 @@ namespace Ping9719.IoT.Device.Screw
     /// 设置IP方式：开机按住屏幕-网络设置
     /// Quick--Modbus TCP智能电批.xls
     /// </summary>
-    public class KuaiKeTcpScrew : ModbusTcpClient, IIoT
+    public class KuaiKeTcpScrew : ModbusTcpClient, IClientData
     {
         public KuaiKeTcpScrew(string ip, int port = 502) : base(ip, port)
         {

@@ -14,7 +14,7 @@ namespace Ping9719.IoT.Device.Scanner
     /// <summary>
     /// 民德扫码器（支持一维码，二维码，主机模式，等...）
     /// </summary>
-    public class MindeoScanner : IScannerBase
+    public class MindeoScanner : IScannerBase,  IClient
     {
         int Ver = 1;
         public ClientBase Client { get; private set; }

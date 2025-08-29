@@ -17,7 +17,7 @@ namespace Ping9719.IoT.Device.TemperatureControl
     /// 378FA通讯协议.docx
     /// 快克_通用串口通讯协议.docx
     /// </summary>
-    public class KuaiKeTemperatureControl
+    public class KuaiKeTemperatureControl : IClient
     {
         protected EndianFormat format;
         private byte stationNumber = 1;

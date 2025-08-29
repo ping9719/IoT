@@ -25,14 +25,14 @@ namespace Ping9719.IoT.WPF
             InitializeComponent();
         }
 
-        public IIoT DeviceData
+        public IReadWrite DeviceData
         {
-            get { return (IIoT)GetValue(DeviceDataProperty); }
+            get { return (IReadWrite)GetValue(DeviceDataProperty); }
             set { SetValue(DeviceDataProperty, value); }
         }
 
         public static readonly DependencyProperty DeviceDataProperty =
-            DependencyProperty.Register("DeviceData", typeof(IIoT), typeof(RfidView), new PropertyMetadata(null));
+            DependencyProperty.Register("DeviceData", typeof(IReadWrite), typeof(RfidView), new PropertyMetadata(null));
 
         /// <summary>
         /// 区域

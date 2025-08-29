@@ -1,19 +1,12 @@
-﻿# Ping9719.IoT
-主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...）
-
-# 语言选择：
+﻿# 语言选择：
 [简体中文](README.md) || [English](README_en-US.md) 
 
 # 目录 
 - [通讯 (Communication)](#Communication)
-    - [客户端基础(ClientBase) 必读！！](#ClientBase)
-        - 1.介绍 
-        - [2.链接模式（ConnectionMode）](#ConnectionMode)
-        - [3.数据处理器（IDataProcessor）](#IDataProcessor)
-            - 3.1.介绍  
-            - 3.2.自定义数据处理器
-            - [3.3.内置的数据处理器](#IDataProcessorIn)
-        - [4.接受模式（ReceiveMode）](#ReceiveMode)
+    - [客户端（ClientBase）](#ClientBase)
+        - [1.连接模式（ConnectionMode）](#ConnectionMode)
+        - [2.数据处理器（IDataProcessor）](#IDataProcessor)
+        - [3.接受模式（ReceiveMode）](#ReceiveMode)
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
     - [SerialPortClient](#SerialPortClient)
@@ -27,7 +20,7 @@
     - ModbusTcpClient
     - ModbusAsciiClient
 - [PLC](#PLC)
-    - [常用plc类型对照表，重要，必读 ！！！](#PlcType)
+    - [类型对照表](#PlcType)
     - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
     - [汇川 (InovanceModbusTcpClient)](#InovanceModbusTcpClient)
     - [三菱 (MitsubishiMcClient)](#MitsubishiMcClient)
@@ -38,7 +31,7 @@
 - [算法 (Algorithm)](#Algorithm)
     - [平均点位算法（AveragePoint）](#AveragePoint)
     - [CRC](#CRC)
-    - LRC
+    - [LRC](#LRC)
     - 傅立叶算法（Fourier）（待开发） 
     - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)
     - PID （待开发） 
@@ -69,23 +62,23 @@
     - 1.如何使用自定义协议
 
 # 通讯 (Communication) <a id="Communication"></a>
-## 客户端基础(ClientBase)  <a id="ClientBase"></a>
-#### 1.介绍  
-> 1. `ClientBase` 是所有客户端的基类 
+使用指定的方式进行交互信息。
+## 客户端(ClientBase)  <a id="ClientBase"></a>
+`TcpClient`或`SerialPortClient`都是实现于`ClientBase`，他们的使用方式都是一样的。
 
-#### 2.链接模式 <a id="ConnectionMode"></a>    
+### 1.链接模式 <a id="ConnectionMode"></a>    
 
-2.1 三种链接模式：   
+三种链接模式：   
 > 1.手动（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
-> 2.自动打开（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
-> 3.自动断线重连（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
+2.自动打开（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
+3.自动断线重连（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
 
-2.2 自动断线重连规则：   
+自动断线重连规则：   
 > 1.当断开链接后进行尝试重连，第一次需等待1秒。   
 > 2.如没有成功就继续增加一秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
 > 3.直到重连成功，或用户手动调用关闭(`Close()`)。   
 
-2.3 简要代码：  
+简要代码：  
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
 client1.ConnectionMode = ConnectionMode.Manual;//手动。
@@ -94,22 +87,13 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-## 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
-#### 3.1.介绍  
+## 2.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+介绍  
 > 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
 > 2.在接受数据后可以对数据进行处理后在转发出去  </br>
 > 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接受的处理器应该发送的处理器的是倒序）。
 
-#### 3.2.自定义数据处理器   
-1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
-
-2. 开始使用自定义数据处理器
-```CSharp
-client1.SendDataProcessors.Add(new MyCalss());
-client1.ReceivedDataProcessors.Add(new MyCalss());
-```
-
-#### 3.3.内置的数据处理器  <a id="IDataProcessorIn"></a>
+内置的数据处理器  <a id="IDataProcessorIn"></a>
 
 | 名称| 说明 |
 | ----------- | -------------- |
@@ -123,8 +107,17 @@ client1.ReceivedDataProcessors.Add(new MyCalss());
 | TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
 | TrimStartDataProcessor | 移除开头指定的匹配项。 |
 
-## 4.接受模式（ReceiveMode）  <a id="ReceiveMode"></a>
-#### 4.1.数据接受介绍 
+自定义数据处理器   
+1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+
+2. 开始使用自定义数据处理器
+```CSharp
+client1.SendDataProcessors.Add(new MyCalss());
+client1.ReceivedDataProcessors.Add(new MyCalss());
+```
+
+## 3.接受模式（ReceiveMode）  <a id="ReceiveMode"></a>
+数据接受介绍 
 在客户端中有2处可以接受到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接受到数据了，事件将不会再接受到。
 ```CSharp
 //在方法中的默认方式
@@ -414,7 +407,7 @@ CRC.CheckCrc32(c7);
 CRC.CheckCrc32Q(c8);
 CRC.CheckCrc32Sata(c9);
 ```
-## LRC
+## LRC <a id="LRC"></a>
 ```CSharp
 LRC.GetLRC(bytes);
 LRC.CheckLRC(bytes);

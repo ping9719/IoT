@@ -1,28 +1,45 @@
-﻿# Ping9719.IoT
+﻿## Ping9719.IoT
+工业互联网通讯库协议实现，包括主流协议：ModBus、S7、CIP、MC、FINS......等常用协议和PLC。可通过不同的方式：TCP、UDP、MQTT、USB、蓝牙...等进行简易方便的交换数据。
 
-### 工业互联网通讯库协议实现，包括主流PLC、ModBus、CIP、MC、FINS......等常用协议可通过不同的管道（TCP、UDP、MQTT、USB、蓝牙...）简单的交互数据。
-##### The industrial internet communication library protocol has been implemented, including mainstream PLC, ModBus, CIP, MC, FINS... and other common protocols. Through different channels (TCP, UDP, MQTT, USB, Bluetooth...), data can be simply exchanged.
-#
-
-### 语言选择：
+## 语言选择：
 [简体中文](README.md) || [English](README_en-US.md) 
 
-### 源代码：
-[Github (主库)](https://github.com/ping9719/IoT)  
-[Gitee (备用库)](https://gitee.com/ping9719/IoT)   
-#
+## 仓库：
+主库（[Github](https://github.com/ping9719/IoT)）；备库（[Gitee](https://gitee.com/ping9719/IoT)） 
+ 
 
-### 项目：  
-| 项目     |  框架                      | 详细文档                                      | 版本文档                                     |依赖                  |包（NuGet）                  | 简介|
-|----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|-------|
-| IoT      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 | 跨平台的库。主要包含通信（TCP，UDP，USB...）协议（ModBus，MC，FINS...）算法（CRC，LRC...）设备（RFID，扫码枪...） |
-| Hid      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 跨平台管道链接库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据，使PLC和设备通信可使用USB或蓝牙  |
-| WPF      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF </br>(暂未发布)   | 界面UI库。只支持在windows平台上快速的调试IoT中的协议和设备   |
-| Avalonia | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia </br>(暂未发布) | 跨平台的界面UI库。支持在windows、安卓、苹果的手机、平板、电脑上快速的调试IoT中的协议和设备 |
+## 项目：
 
-#
+| 项目     |  框架                      | 文档                                      | 版本                                     |依赖                  |包名（NuGet）                  |
+|----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|
+| [Ping9719.IoT](#IoT)      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 |
+| [Ping9719.IoT.Hid](#Hid)      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 
+| [Ping9719.IoT.WPF](#WPF)      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF </br>(暂未发布)   | 
+| [Ping9719.IoT.Avalonia](#Avalonia) | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia </br>(暂未发布) | 
 
-# 必读、前言、亮点
+
+### Ping9719.IoT  <a id="IoT"></a>
+>跨平台的库。   
+基础：接口定义，返回类型定义...   
+通信：TCP，UDP，串口...   
+协议：ModBus，MC，FINS...    
+算法：CRC，LRC...    
+设备：RFID，扫码枪...    
+
+
+### Ping9719.IoT.Hid  <a id="Hid"></a>
+>跨平台链接库。   
+对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据   
+
+### Ping9719.IoT.WPF  <a id="WPF"></a>
+>在windows平台上的界面UI库。   
+提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备
+
+### Ping9719.IoT.Avalonia  <a id="Avalonia"></a>
+>跨平台的界面UI库。   
+提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备
+
+## 前言、亮点
 1.<b>标准</b>协议实现接口“IIoT”，可通过泛型方式进行读写  
 ```CSharp
 client.Read<bool>("abc");//读1个
@@ -92,57 +109,3 @@ if (info.IsSucceed)//应该判断后在取值
 else
 { var err = info.ErrorText; }
 ```
-
-# Ping9719.IoT
-- [通讯 (Communication)](#通讯 (Communication))
-    - TcpClient
-    - TcpServer （待测试） 
-    - SerialPortClient
-    - UdpClient （进行中） 
-    - UdpServer （待开发） 
-    - HttpServer （待开发） 
-    - MqttClient （待开发） 
-    - MqttServer （待开发） 
-- [Modbus](#Modbus)
-    - ModbusRtuClient
-    - ModbusTcpClient
-    - ModbusAsciiClient
-- [PLC](#PLC)
-    - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
-    - 汇川 (InovanceModbusTcpClient)
-    - 三菱 (MitsubishiMcClient)
-    - 欧姆龙 (OmronFinsClient,OmronCipClient)
-    - 西门子 (SiemensS7Client)
-- [机器人 (Robot)](#机器人 (Robot))
-    - 爱普生 (EpsonRobot) （待测试） 
-- [算法 (Algorithm)](#算法 (Algorithm))
-    - CRC
-    - LRC
-    - 傅立叶算法(Fourier) （待开发） 
-    - 稳定婚姻配对算法(GaleShapleyAlgorithm)
-    - PID （待开发） 
-    - RSA （待开发） 
-- [设备和仪器 (Device)](#设备和仪器 (Device))
-    - 气密检测 (Airtight)
-        - 科斯莫气密检测 (CosmoAirtight)
-    - Fct
-        - 盟讯电子 (MengXunFct)
-    - 激光刻印 (Mark)
-        - 大族激光刻印 (DaZhuMark)
-        - 华普激光刻印 (HuaPuMark)
-    - 无线射频 (Rfid)
-        - 倍加福Rfid (BeiJiaFuRfid)
-        - 泰和森Rfid (TaiHeSenRfid)
-        - 万全Rfid (WanQuanRfid)
-    - 扫码枪 (Scanner)
-        - 霍尼韦尔扫码器 (HoneywellScanner)
-        - 民德扫码器 (MindeoScanner)
-    - 螺丝机 (Screw)
-        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)（不推荐） 
-        - 米勒螺丝机 (MiLeScrew)
-    - 温控 (TemperatureControl)
-        - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
-    - 焊接机 (Weld)
-        - 快克焊接机 (KuaiKeWeld)
-- [扩展](#扩展)
-    - [1.如何使用自定义协议](#1.如何使用自定义协议)

@@ -15,7 +15,7 @@ namespace Ping9719.IoT.Device.Screw
     /// 快克螺丝机（新协议）（桌面式）
     /// 螺丝机运动平台通讯协议(对外)-20200106.pdf
     /// </summary>
-    public class KuaiKeDeskScrew : ModbusRtuClient, IIoT
+    public class KuaiKeDeskScrew : ModbusRtuClient, IClientData
     {
         public KuaiKeDeskScrew(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1)
             : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)

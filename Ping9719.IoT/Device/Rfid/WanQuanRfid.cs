@@ -18,7 +18,7 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 万全Rfid
     /// </summary>
-    public class WanQuanRfid : ModbusTcpClient, IIoT
+    public class WanQuanRfid : ModbusTcpClient, IClientData
     {
         WanQuanRfidVer ver;
         public ClientBase Client { get; private set; }

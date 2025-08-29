@@ -13,7 +13,7 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 泰和森
     /// </summary>
-    public class TaiHeSenRfid
+    public class TaiHeSenRfid : IClient
     {
         /// <summary>
         /// 字节格式

@@ -14,7 +14,7 @@ namespace Ping9719.IoT.Device.Fct
     /// <summary>
     /// 盟讯电子协议（v2.0）
     /// </summary>
-    public class MengXunFct
+    public class MengXunFct : IClient
     {
         int version = 2;
 

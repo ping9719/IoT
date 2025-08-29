@@ -14,7 +14,7 @@ namespace Ping9719.IoT.PLC
     /// 西门子客户端（S7协议）
     /// http://www.360doc.cn/mip/763580999.html
     /// </summary>
-    public class SiemensS7Client : IIoT
+    public class SiemensS7Client : ReadWriteBase, IClientData
     {
         /// <summary>
         /// CPU版本
@@ -1030,7 +1030,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region IIoTBase
-        public IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             var info = Read<T>(address, 1);
             if (info.IsSucceed)
@@ -1046,7 +1046,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="length">无效</param>
         /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
         /// <returns></returns>
-        public IoTResult<string> ReadString(string address, int length = 512, Encoding encoding = null)
+        public override IoTResult<string> ReadString(string address, int length = 512, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.BigEndianUnicode;
             var readResut = new IoTResult<byte[]>();
@@ -1074,7 +1074,7 @@ namespace Ping9719.IoT.PLC
             return readResut.ToVal<string>().ToEnd();
         }
 
-        public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             try
             {
@@ -1168,7 +1168,7 @@ namespace Ping9719.IoT.PLC
 
         }
 
-        public IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             return Write<T>(address, new T[] { value });
         }
@@ -1180,7 +1180,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="length">无效</param>
         /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
         /// <returns></returns>
-        public IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
+        public override IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.BigEndianUnicode;
 
@@ -1193,7 +1193,7 @@ namespace Ping9719.IoT.PLC
             return Write(address, bytes, false);
         }
 
-        public IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             try
             {

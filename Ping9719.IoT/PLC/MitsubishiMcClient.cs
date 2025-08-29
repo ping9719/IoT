@@ -14,7 +14,7 @@ namespace Ping9719.IoT.PLC
     /// 已测试单个元素读写：bool,short,int32,float,double,string
     /// 已测试数组元素读写：bool(循环写入速度较慢),short,int32,float,double,string
     /// </summary>
-    public class MitsubishiMcClient : IIoT
+    public class MitsubishiMcClient : ReadWriteBase, IClientData
     {
         /// <summary>
         /// 版本
@@ -806,11 +806,55 @@ namespace Ping9719.IoT.PLC
         //        return address.Substring(0, 1);
         //}
 
+        /// <summary>
+        /// 生成偏移后的PLC地址（如 M101, X1F 等）
+        /// </summary>
+        /// <param name="address">原始地址</param>
+        /// <param name="offset">偏移量</param>
+        /// <returns>偏移后的地址</returns>
+        private string GetOffsetAddress(string address, int offset)
+        {
+            if (string.IsNullOrEmpty(address) || address.Length < 2)
+                throw new ArgumentException("address格式不正确");
+
+            // 处理两位前缀（如ZR、TN、TS、TC、CN、CS、CC）
+            string prefix = address.Substring(0, 1);
+            int startIndex = 1;
+            if (address.Length >= 2 && char.IsLetter(address[1]))
+            {
+                prefix = address.Substring(0, 2);
+                startIndex = 2;
+            }
+            string numPart = address.Substring(startIndex);
+
+            // 判断进制
+            int number = 0;
+            int numberBase = 10;
+            switch (prefix)
+            {
+                case "X":
+                case "Y":
+                case "B":
+                case "W":
+                case "ZR":
+                    numberBase = 16;
+                    break;
+
+                default:
+                    numberBase = 10;
+                    break;
+            }
+            number = Convert.ToInt32(numPart, numberBase);
+            int newNumber = number + offset;
+            string newNumPart = numberBase == 16 ? newNumber.ToString("X") : newNumber.ToString();
+            return prefix + newNumPart;
+        }
+
         #endregion private
 
         #region IIoTBase
 
-        public IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             var tType = typeof(T);
             if (tType == typeof(bool))
@@ -872,7 +916,7 @@ namespace Ping9719.IoT.PLC
             throw new NotImplementedException("暂不支持的类型");
         }
 
-        public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             var tType = typeof(T);
             if (tType == typeof(bool))
@@ -933,13 +977,13 @@ namespace Ping9719.IoT.PLC
             throw new NotImplementedException("暂不支持的类型");
         }
 
-        public IoTResult<string> ReadString(string address, int length, Encoding encoding)
+        public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
             var r = ReadValue(address, length, (b, i) => encoding.GetString(b, i, length));
             return new IoTResult<string>(r, (string)(object)r.Value);
         }
 
-        public IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             if (value is bool boolv)
             {
@@ -996,12 +1040,12 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult WriteString(string address, string value, int length, Encoding encoding)
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
             return WriteValue(address, value, v => encoding.GetBytes(v));
         }
 
-        public IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             if (value == null || value.Length == 0)
                 return new IoTResult() { IsSucceed = false };
@@ -1053,50 +1097,6 @@ namespace Ping9719.IoT.PLC
 
                 return WriteValues(address, value, converter);
             }
-        }
-
-        /// <summary>
-        /// 生成偏移后的PLC地址（如 M101, X1F 等）
-        /// </summary>
-        /// <param name="address">原始地址</param>
-        /// <param name="offset">偏移量</param>
-        /// <returns>偏移后的地址</returns>
-        private string GetOffsetAddress(string address, int offset)
-        {
-            if (string.IsNullOrEmpty(address) || address.Length < 2)
-                throw new ArgumentException("address格式不正确");
-
-            // 处理两位前缀（如ZR、TN、TS、TC、CN、CS、CC）
-            string prefix = address.Substring(0, 1);
-            int startIndex = 1;
-            if (address.Length >= 2 && char.IsLetter(address[1]))
-            {
-                prefix = address.Substring(0, 2);
-                startIndex = 2;
-            }
-            string numPart = address.Substring(startIndex);
-
-            // 判断进制
-            int number = 0;
-            int numberBase = 10;
-            switch (prefix)
-            {
-                case "X":
-                case "Y":
-                case "B":
-                case "W":
-                case "ZR":
-                    numberBase = 16;
-                    break;
-
-                default:
-                    numberBase = 10;
-                    break;
-            }
-            number = Convert.ToInt32(numPart, numberBase);
-            int newNumber = number + offset;
-            string newNumPart = numberBase == 16 ? newNumber.ToString("X") : newNumber.ToString();
-            return prefix + newNumPart;
         }
 
         #endregion IIoTBase

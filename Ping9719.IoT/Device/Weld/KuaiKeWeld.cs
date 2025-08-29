@@ -15,7 +15,7 @@ namespace Ping9719.IoT.Device.Weld
     /// 快克焊接机
     /// PLC与主板通信持续整理.doc
     /// </summary>
-    public class KuaiKeWeld : ModbusRtuClient, IIoT
+    public class KuaiKeWeld : ModbusRtuClient, IClientData
     {
         public KuaiKeWeld(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1)
             : base(portName, baudRate, parity, dataBits, stopBits, format, stationNumber)

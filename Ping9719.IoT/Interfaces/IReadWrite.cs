@@ -1,5 +1,4 @@
-﻿using Ping9719.IoT.Communication;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT
 {
-    public interface IIoT
+    /// <summary>
+    /// 基础的读和写接口
+    /// </summary>
+    public interface IReadWrite
     {
-        /// <summary>
-        /// 客户端
-        /// </summary>
-        ClientBase Client { get; }
-
         /// <summary>
         /// 读取
         /// </summary>
@@ -22,6 +19,13 @@ namespace Ping9719.IoT
         /// <returns>结果</returns>
         IoTResult<T> Read<T>(string address);
         /// <summary>
+        /// 读取
+        /// </summary>
+        /// <param name="type">类型。</param>
+        /// <param name="address">地址</param>
+        /// <returns>结果</returns>
+        IoTResult<object> Read(string type, string address);
+        /// <summary>
         /// 读取多个
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
@@ -29,6 +33,14 @@ namespace Ping9719.IoT
         /// <param name="number">数量</param>
         /// <returns>结果</returns>
         IoTResult<IEnumerable<T>> Read<T>(string address, int number);
+        /// <summary>
+        /// 读取多个
+        /// </summary>
+        /// <param name="type">类型。</param>
+        /// <param name="address">地址</param>
+        /// <param name="number">数量</param>
+        /// <returns>结果</returns>
+        IoTResult<IEnumerable<object>> Read(string type, string address, int number);
         /// <summary>
         /// 读取字符串
         /// </summary>
@@ -48,6 +60,14 @@ namespace Ping9719.IoT
         /// <returns>结果</returns>
         IoTResult Write<T>(string address, T value);
         /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="type">类型。</param>
+        /// <param name="address">地址</param>
+        /// <param name="value">写入的值。</param>
+        /// <returns>结果</returns>
+        IoTResult Write(string type, string address, object value);
+        /// <summary>
         /// 写入多个
         /// </summary>
         /// <typeparam name="T">类型</typeparam>
@@ -55,6 +75,14 @@ namespace Ping9719.IoT
         /// <param name="values">值</param>
         /// <returns>结果</returns>
         IoTResult Write<T>(string address, params T[] values);
+        /// <summary>
+        /// 写入多个
+        /// </summary>
+        /// <param name="type">类型。</param>
+        /// <param name="address">地址</param>
+        /// <param name="values">写入的值。</param>
+        /// <returns>结果</returns>
+        IoTResult Write(string type, string address, params object[] values);
         /// <summary>
         /// 写入字符串
         /// </summary>
@@ -64,6 +92,5 @@ namespace Ping9719.IoT
         /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
         /// <returns></returns>
         IoTResult WriteString(string address, string value, int length, Encoding encoding);
-
     }
 }

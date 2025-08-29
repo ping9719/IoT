@@ -12,7 +12,7 @@ namespace Ping9719.IoT.Device.Airtight
     /// <summary>
     /// 科斯莫气密检测
     /// </summary>
-    public class CosmoAirtight
+    public class CosmoAirtight : IClient
     {
         static byte[] OkByte = new byte[] { 0x06, 0x0d };
         //异常

@@ -13,7 +13,7 @@ namespace Ping9719.IoT.Modbus
     /// <summary>
     /// ModbusRtu协议客户端
     /// </summary>
-    public class ModbusRtuClient : IIoT
+    public class ModbusRtuClient : ReadWriteBase, IClientData
     {
         internal EndianFormat format;
         internal byte stationNumber = 1;
@@ -50,13 +50,13 @@ namespace Ping9719.IoT.Modbus
         /// <param name="stationNumber">站号</param>
         public ModbusRtuClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
             : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), format, stationNumber) { }
-        
-        #region IIoT
+
+        #region IoTBase
         /// <summary>
         /// 读取
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public virtual IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="length">长度</param>
         /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
         /// <returns></returns>
-        public virtual IoTResult<string> ReadString(string address, int length, Encoding encoding)
+        public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
             var result = ModbusInfo.AddressAnalysis(address, stationNumber);
             if (!result.IsSucceed)
@@ -139,7 +139,7 @@ namespace Ping9719.IoT.Modbus
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
         /// <param name="number">读取数量</param>
-        public virtual IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             var result = ModbusInfo.AddressAnalysis(address, stationNumber);
             if (!result.IsSucceed)
@@ -226,7 +226,7 @@ namespace Ping9719.IoT.Modbus
         /// 写入
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public virtual IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             return Write<T>(address, new[] { value });
         }
@@ -239,7 +239,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="length">长度。一般用于补充的长度</param>
         /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
         /// <returns></returns>
-        public virtual IoTResult WriteString(string address, string value, int length, Encoding encoding)
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
             try
             {
@@ -266,7 +266,7 @@ namespace Ping9719.IoT.Modbus
         /// 写入多个
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public virtual IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             var result = ModbusInfo.AddressAnalysis(address, stationNumber);
             if (!result.IsSucceed)

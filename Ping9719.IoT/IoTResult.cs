@@ -165,5 +165,13 @@ namespace Ping9719.IoT
             base.ToEnd(endTime);
             return this;
         }
+
+        /// <summary>
+        /// 转为有值的结果
+        /// </summary>
+        /// <typeparam name="T1">转换的类型</typeparam>
+        /// <param name="func">把原来的值转为新的值</param>
+        /// <returns></returns>
+        public IoTResult<T1> ToVal<T1>(Func<T, T1> func) => new IoTResult<T1>(this, func.Invoke(Value));
     }
 }

@@ -13,7 +13,7 @@ namespace Ping9719.IoT.PLC
     /// 欧姆龙客户端（Fins协议）
     /// https://flat2010.github.io/2020/02/23/Omron-Fins%E5%8D%8F%E8%AE%AE/
     /// </summary>
-    public class OmronFinsClient : IIoT
+    public class OmronFinsClient : ReadWriteBase, IClientData
     {
         private EndianFormat endianFormat;
 
@@ -127,7 +127,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="isBit"></param>
         /// <param name="setEndian">返回值是否设置大小端</param>
         /// <returns></returns>
-        public IoTResult<byte[]> Read(string address, ushort length, bool isBit = false, bool setEndian = true)
+        private IoTResult<byte[]> Read(string address, ushort length, bool isBit = false, bool setEndian = true)
         {
             var result = new IoTResult<byte[]>();
             try
@@ -162,7 +162,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<bool> ReadBoolean(string address)
+        private IoTResult<bool> ReadBoolean(string address)
         {
             var readResut = Read(address, 1, isBit: true);
             var result = new IoTResult<bool>(readResut);
@@ -193,7 +193,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public IoTResult<byte> ReadByte(string address)
+        private IoTResult<byte> ReadByte(string address)
         {
             throw new NotImplementedException();
         }
@@ -203,7 +203,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public IoTResult<short> ReadInt16(string address)
+        private IoTResult<short> ReadInt16(string address)
         {
             var readResut = Read(address, 2);
             var result = new IoTResult<short>(readResut);
@@ -234,7 +234,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<ushort> ReadUInt16(string address)
+        private IoTResult<ushort> ReadUInt16(string address)
         {
             var readResut = Read(address, 2);
             var result = new IoTResult<ushort>(readResut);
@@ -265,7 +265,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<int> ReadInt32(string address)
+        private IoTResult<int> ReadInt32(string address)
         {
             var readResut = Read(address, 4);
             var result = new IoTResult<int>(readResut);
@@ -297,7 +297,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<uint> ReadUInt32(string address)
+        private IoTResult<uint> ReadUInt32(string address)
         {
             var readResut = Read(address, 4);
             var result = new IoTResult<uint>(readResut);
@@ -361,7 +361,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<ulong> ReadUInt64(string address)
+        private IoTResult<ulong> ReadUInt64(string address)
         {
             var readResut = Read(address, 8);
             var result = new IoTResult<ulong>(readResut);
@@ -393,7 +393,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<float> ReadFloat(string address)
+        private IoTResult<float> ReadFloat(string address)
         {
             var readResut = Read(address, 4);
             var result = new IoTResult<float>(readResut);
@@ -402,7 +402,7 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        public IoTResult<float> ReadFloat(int beginAddressInt, int addressInt, byte[] values)
+        private IoTResult<float> ReadFloat(int beginAddressInt, int addressInt, byte[] values)
         {
             try
             {
@@ -425,7 +425,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public IoTResult<double> ReadDouble(string address)
+        private IoTResult<double> ReadDouble(string address)
         {
             var readResut = Read(address, 8);
             var result = new IoTResult<double>(readResut);
@@ -434,7 +434,7 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        public IoTResult<double> ReadDouble(int beginAddressInt, int addressInt, byte[] values)
+        private IoTResult<double> ReadDouble(int beginAddressInt, int addressInt, byte[] values)
         {
             try
             {
@@ -462,7 +462,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="data">值</param>
         /// <param name="isBit">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, byte[] data, bool isBit = false)
+        private IoTResult Write(string address, byte[] data, bool isBit = false)
         {
             IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
             try
@@ -494,7 +494,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="data">值</param>
         /// <param name="isBit">值</param>
         /// <returns></returns>
-        public IoTResult WriteString(string address, byte[] data, bool isBit = false)
+        private IoTResult WriteString(string address, byte[] data, bool isBit = false)
         {
             IoTResult result = new IoTResult();
             try
@@ -518,7 +518,7 @@ namespace Ping9719.IoT.PLC
             return result.ToEnd();
         }
 
-        public IoTResult Write(string address, byte[] data)
+        private IoTResult Write(string address, byte[] data)
         {
             return Write(address, data, false);
         }
@@ -529,7 +529,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, bool value)
+        private IoTResult Write(string address, bool value)
         {
             return Write(address, value ? new byte[] { 0x01 } : new byte[] { 0x00 }, true);
         }
@@ -540,7 +540,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, byte value)
+        private IoTResult Write(string address, byte value)
         {
             throw new NotImplementedException();
         }
@@ -551,7 +551,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, sbyte value)
+        private IoTResult Write(string address, sbyte value)
         {
             throw new NotImplementedException();
         }
@@ -562,7 +562,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, short value)
+        private IoTResult Write(string address, short value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -573,7 +573,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, ushort value)
+        private IoTResult Write(string address, ushort value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -584,7 +584,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, int value)
+        private IoTResult Write(string address, int value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -595,7 +595,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, uint value)
+        private IoTResult Write(string address, uint value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -606,7 +606,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, long value)
+        private IoTResult Write(string address, long value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -617,7 +617,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, ulong value)
+        private IoTResult Write(string address, ulong value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -628,7 +628,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, float value)
+        private IoTResult Write(string address, float value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -639,7 +639,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, double value)
+        private IoTResult Write(string address, double value)
         {
             return Write(address, BitConverter.GetBytes(value));
         }
@@ -983,7 +983,7 @@ namespace Ping9719.IoT.PLC
         }
 
         #region IIoTBase
-        public IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             var tType = typeof(T);
             if (tType == typeof(bool))
@@ -1042,7 +1042,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult<string> ReadString(string address, int length, Encoding encoding = null)
+        public override IoTResult<string> ReadString(string address, int length, Encoding encoding = null)
         {
             try
             {
@@ -1078,7 +1078,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             var tType = typeof(T);
             if (tType == typeof(byte))
@@ -1092,7 +1092,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             if (value is bool boolv)
             {
@@ -1144,7 +1144,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult WriteString(string address, string value, int length, Encoding encoding = null)
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding = null)
         {
             try
             {
@@ -1174,7 +1174,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             if (value is byte[] bytev)
             {

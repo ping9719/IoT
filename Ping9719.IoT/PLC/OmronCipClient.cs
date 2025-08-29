@@ -14,7 +14,7 @@ namespace Ping9719.IoT.PLC
     /// <summary>
     /// 欧姆龙客户端（Cip协议）
     /// </summary>
-    public class OmronCipClient : IIoT
+    public class OmronCipClient : ReadWriteBase, IClientData
     {
         /// <summary>
         /// 插槽
@@ -388,7 +388,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region IIoTBase
-        public IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
             var aaa = Read(address);
             if (!aaa.IsSucceed)
@@ -470,13 +470,13 @@ namespace Ping9719.IoT.PLC
 
         }
 
-        public IoTResult<string> ReadString(string address, int length, Encoding encoding)
+        public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
             var aaa = Read(address, encoding);
             return aaa.IsSucceed ? new IoTResult<string>(aaa, aaa.Value.Cast<string>().FirstOrDefault()) : new IoTResult<string>(aaa);
         }
 
-        public IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             var aaa = Read(address);
             if (!aaa.IsSucceed)
@@ -485,7 +485,7 @@ namespace Ping9719.IoT.PLC
             return number >= 0 ? new IoTResult<IEnumerable<T>>(aaa, aaa.Value.Cast<T>().Take(number)) : new IoTResult<IEnumerable<T>>(aaa, aaa.Value.Cast<T>());
         }
 
-        public IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
             try
             {
@@ -546,12 +546,12 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public IoTResult WriteString(string address, string value, int length, Encoding encoding)
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
             return Write(address, CipVariableType.STRING, GetStringByte(value, encoding), 1, encoding);
         }
 
-        public IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, params T[] value)
         {
             if (value is IEnumerable<bool> boolv)
             {
