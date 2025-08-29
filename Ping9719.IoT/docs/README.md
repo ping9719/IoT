@@ -87,7 +87,7 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-## 2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>
+### 2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>
 数据接收介绍 
 在客户端中有2处可以接收到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接收到数据了，事件将不会再接收到。
 ```CSharp
@@ -108,6 +108,35 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 | `ReceiveMode.ParseChar(1)`         | a         | 读取指定的字符数量 | 同 `ParseByte()` | 
 | `ReceiveMode.ParseTime(10)`          | ab\r\n    | 读取达到指定的时间间隔后没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
 | `ReceiveMode.ParseToEnd("\r\n") ` | ab\r\n    | 读取到指定的信息后结束 | 知道每一帧的结尾的情况下 | 
+
+### 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+介绍  
+> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
+> 2.在接收数据后可以对数据进行处理后在转发出去  </br>
+> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
+
+内置的数据处理器  <a id="IDataProcessorIn"></a>
+
+| 名称| 说明 |
+| ----------- | -------------- |
+| EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
+| EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
+| PadLeftDataProcessor   | 向左侧（头部）添加固定的值达到指定的长度。 |
+| PadRightDataProcessor | 向右侧（尾部）添加固定的值达到指定的长度。 |
+| StartAddValueDataProcessor   | 向开头添加固定的值 |
+| StartClearValueDataProcessor | 向开头移除固定的值 |
+| TrimDataProcessor   | 移除前后指定的匹配项。 |
+| TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
+| TrimStartDataProcessor | 移除开头指定的匹配项。 |
+
+自定义数据处理器   
+1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+
+2. 开始使用自定义数据处理器
+```CSharp
+client1.SendDataProcessors.Add(new MyCalss());
+client1.ReceivedDataProcessors.Add(new MyCalss());
+```
 
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
@@ -157,35 +186,6 @@ client1.Receive(3000);//接收，3秒超时
 client1.Receive(ReceiveMode.ParseToEnd("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
 client1.SendReceive("abc", 3000);//发送并接收，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 5000));//发送并接收 ，超时为5秒 
-```
-
-## 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
-介绍  
-> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
-> 2.在接收数据后可以对数据进行处理后在转发出去  </br>
-> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
-
-内置的数据处理器  <a id="IDataProcessorIn"></a>
-
-| 名称| 说明 |
-| ----------- | -------------- |
-| EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
-| EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
-| PadLeftDataProcessor   | 向左侧（头部）添加固定的值达到指定的长度。 |
-| PadRightDataProcessor | 向右侧（尾部）添加固定的值达到指定的长度。 |
-| StartAddValueDataProcessor   | 向开头添加固定的值 |
-| StartClearValueDataProcessor | 向开头移除固定的值 |
-| TrimDataProcessor   | 移除前后指定的匹配项。 |
-| TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
-| TrimStartDataProcessor | 移除开头指定的匹配项。 |
-
-自定义数据处理器   
-1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
-
-2. 开始使用自定义数据处理器
-```CSharp
-client1.SendDataProcessors.Add(new MyCalss());
-client1.ReceivedDataProcessors.Add(new MyCalss());
 ```
 
 ## TcpServer   <a id="TcpServer"></a>   
