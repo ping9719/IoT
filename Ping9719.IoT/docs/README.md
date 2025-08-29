@@ -5,8 +5,8 @@
 - [通讯 (Communication)](#Communication)
     - [客户端（ClientBase）](#ClientBase)
         - [1.连接模式（ConnectionMode）](#ConnectionMode)
-        - [2.数据处理器（IDataProcessor）](#IDataProcessor)
-        - [3.接受模式（ReceiveMode）](#ReceiveMode)
+        - [2.接收模式（ReceiveMode）](#ReceiveMode)
+        - [3.数据处理器（IDataProcessor）](#IDataProcessor)
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
     - [SerialPortClient](#SerialPortClient)
@@ -87,45 +87,16 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-## 2.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
-介绍  
-> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
-> 2.在接受数据后可以对数据进行处理后在转发出去  </br>
-> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接受的处理器应该发送的处理器的是倒序）。
-
-内置的数据处理器  <a id="IDataProcessorIn"></a>
-
-| 名称| 说明 |
-| ----------- | -------------- |
-| EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
-| EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
-| PadLeftDataProcessor   | 向左侧（头部）添加固定的值达到指定的长度。 |
-| PadRightDataProcessor | 向右侧（尾部）添加固定的值达到指定的长度。 |
-| StartAddValueDataProcessor   | 向开头添加固定的值 |
-| StartClearValueDataProcessor | 向开头移除固定的值 |
-| TrimDataProcessor   | 移除前后指定的匹配项。 |
-| TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
-| TrimStartDataProcessor | 移除开头指定的匹配项。 |
-
-自定义数据处理器   
-1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
-
-2. 开始使用自定义数据处理器
-```CSharp
-client1.SendDataProcessors.Add(new MyCalss());
-client1.ReceivedDataProcessors.Add(new MyCalss());
-```
-
-## 3.接受模式（ReceiveMode）  <a id="ReceiveMode"></a>
-数据接受介绍 
-在客户端中有2处可以接受到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接受到数据了，事件将不会再接受到。
+## 2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>
+数据接收介绍 
+在客户端中有2处可以接收到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接收到数据了，事件将不会再接收到。
 ```CSharp
 //在方法中的默认方式
 client.ReceiveMode = ReceiveMode.ParseByteAll();
 //在事件中的默认方式
 client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 ```
-接受的数据先通过‘接受模式’进行分开每一帧，在经过‘数据处理器’处理数据   
+接收的数据先通过‘接收模式’进行分开每一帧，在经过‘数据处理器’处理数据   
 > 假如对方给你发送字符串“ab\r\n”和“cd\r\n”他们之间间隔了100毫秒。   
 > 这里“ab\r\n”为一帧，“a”为一位的意思。    
 > 假如每一帧之间相距100ms，每一位之间相距1ms。    
@@ -147,10 +118,10 @@ client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开�
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 client1.Encoding = Encoding.UTF8;
-//数据处理器，发送加入换行，接受去掉换行
+//数据处理器，发送加入换行，接收去掉换行
 client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
-//接受模式
+//接收模式
 client1.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
 client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();//时间“Received”的默认方式
 client1.Opening = (a) =>
@@ -188,13 +159,42 @@ client1.SendReceive("abc", 3000);//发送并接收，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 5000));//发送并接收 ，超时为5秒 
 ```
 
+## 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
+介绍  
+> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
+> 2.在接收数据后可以对数据进行处理后在转发出去  </br>
+> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
+
+内置的数据处理器  <a id="IDataProcessorIn"></a>
+
+| 名称| 说明 |
+| ----------- | -------------- |
+| EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
+| EndClearValueDataProcessor | 向结尾移除固定的值。比如结尾移除回车换行 |
+| PadLeftDataProcessor   | 向左侧（头部）添加固定的值达到指定的长度。 |
+| PadRightDataProcessor | 向右侧（尾部）添加固定的值达到指定的长度。 |
+| StartAddValueDataProcessor   | 向开头添加固定的值 |
+| StartClearValueDataProcessor | 向开头移除固定的值 |
+| TrimDataProcessor   | 移除前后指定的匹配项。 |
+| TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
+| TrimStartDataProcessor | 移除开头指定的匹配项。 |
+
+自定义数据处理器   
+1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+
+2. 开始使用自定义数据处理器
+```CSharp
+client1.SendDataProcessors.Add(new MyCalss());
+client1.ReceivedDataProcessors.Add(new MyCalss());
+```
+
 ## TcpServer   <a id="TcpServer"></a>   
 `TcpServer : ServiceBase`
 > `TcpServer` 只做了简单的基础测试，使用前请自行测试自己需要的功能。
 ```CSharp
 var service = new TcpService("127.0.0.1", 8005);
 service.Encoding = Encoding.UTF8;
-//接受模式
+//接收模式
 service.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
 service.ReceiveModeReceived = ReceiveMode.ParseByteAll();//事件“Received”的默认方式
 service.Opened = (a) =>

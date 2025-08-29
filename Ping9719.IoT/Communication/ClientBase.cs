@@ -42,7 +42,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public List<IDataProcessor> SendDataProcessors { get; set; } = new List<IDataProcessor>();
         /// <summary>
-        /// 接受数据处理器
+        /// 接收数据处理器
         /// </summary>
         public List<IDataProcessor> ReceivedDataProcessors { get; set; } = new List<IDataProcessor>();
         /// <summary>
