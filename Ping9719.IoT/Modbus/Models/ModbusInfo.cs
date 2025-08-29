@@ -621,7 +621,7 @@ namespace Ping9719.IoT.Modbus
                     if (isDan == true)
                     {
                         result.AddRange(list1);
-                        result[7] = (byte)functionCode;
+                        result[1] = (byte)functionCode;
                     }
                     else if (isDan == false)
                     {
@@ -629,9 +629,7 @@ namespace Ping9719.IoT.Modbus
                         result.Add(Convert.ToByte(list1.Length));
                         result.AddRange(list1);
                         var sl2 = BitConverter.GetBytes(Convert.ToUInt16(result.Count() - 6));
-                        result[4] = sl2[1];
-                        result[5] = sl2[0];
-                        result[7] = (byte)functionCode;
+                        result[1] = (byte)functionCode;
                     }
                     else
                     {
