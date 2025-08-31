@@ -1,7 +1,7 @@
 ﻿## 版本记录：[version history]
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.3.0（...）
+## v0.3.0（25-08-31）
 *1.[更改]将IIoT更改为IClientData     
 2.[新增]增加ReadWriteBase对字符串类型进行实现   
 3.[新增]tcp和串口增加连接字符串构造函数   
