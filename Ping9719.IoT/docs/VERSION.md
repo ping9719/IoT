@@ -1,4 +1,5 @@
-﻿## 版本记录：[version history]
+﻿
+## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
 ## v0.3.0（25-08-31）
