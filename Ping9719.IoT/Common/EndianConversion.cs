@@ -631,11 +631,11 @@ namespace Ping9719.IoT.Common
         /// <param name="format"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static byte[] ObjToByte<T>(this T[] value, EndianFormat format = EndianFormat.ABCD)
+        public static byte[] ObjToByte<T>(this IEnumerable<T> value, EndianFormat format = EndianFormat.ABCD)
         {
             var sl = WordHelp.OccupyBitNum<T>();
             var tType = typeof(T);
-            List<byte> buffer = new List<byte>(value.Length * sl);
+            List<byte> buffer = new List<byte>(value.Count() * sl);
             if (tType == typeof(bool))
             {
                 foreach (var item in value)

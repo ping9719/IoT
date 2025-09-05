@@ -1193,15 +1193,15 @@ namespace Ping9719.IoT.PLC
             return Write(address, bytes, false);
         }
 
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             try
             {
                 var tType = typeof(T);
                 if (tType == typeof(bool))
                 {
-                    if (value.Length == 1)
-                        return Write(address, new byte[1] { (bool)(object)value[0] ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
+                    if (value.Count() == 1)
+                        return Write(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
                     else
                         throw new NotImplementedException("暂不支持写多个bool类型");
                 }
@@ -1212,7 +1212,7 @@ namespace Ping9719.IoT.PLC
                         return IoTResult.Create().AddError($"字符串长度不能超过{254}");
 
                     List<byte> bytes = new List<byte>(256 * value.Count());
-                    if (value.Length == 1)
+                    if (value.Count() == 1)
                     {
                         bytes.AddRange(new byte[] { 254, Convert.ToByte(valueBytes.FirstOrDefault().Count()) }.Concat(valueBytes.FirstOrDefault()));
                     }

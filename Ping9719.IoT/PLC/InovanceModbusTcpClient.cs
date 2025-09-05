@@ -67,7 +67,7 @@ namespace Ping9719.IoT.PLC
         /// 写入，内部循环，失败了就跳出
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             var nAddress = AddressAnalysis(address);
             return base.Write(nAddress, value);

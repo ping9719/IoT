@@ -142,56 +142,40 @@ client1.ReceivedDataProcessors.Add(new MyCalss());
 ## TcpClient <a id="TcpClient"></a>
 `TcpClient : ClientBase`
 ```CSharp
-var client1 = new TcpClient("127.0.0.1", 8080);
-//重要！！！连接模式是非常重要的功能，有3种模式 
+ClientBase client1 = new TcpClient("127.0.0.1", 502);
+client1.Encoding = Encoding.UTF8;
+
+//1：连接模式。断线重连使用得比较多
 client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
-client1.Encoding = Encoding.UTF8;
-//数据处理器，发送加入换行，接收去掉换行
+
+//2：接收模式。以您以为的最好的方式来处理粘包问题
+client1.ReceiveMode = ReceiveMode.ParseByteAll();
+client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();
+
+//3：数据处理器。可在发送时加入换行，接收时去掉换行，也可自定义
 client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
-//接收模式
-client1.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
-client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();//时间“Received”的默认方式
-client1.Opening = (a) =>
-{
-    Console.WriteLine("连接中");
-    return true;
-};
-client1.Opened = (a) =>
-{
-    Console.WriteLine("连接成功");
-};
-client1.Closing = (a) =>
-{
-    Console.WriteLine("关闭中");
-    return true;
-};
-client1.Closed = (a, b) =>
-{
-    Console.WriteLine("关闭成功" + b);
-};
-client1.Received = (a, b) =>
-{
-    Console.WriteLine("收到消息:" + a.Encoding.GetString(b));
-};
 
-//打开链接，设置所有属性必须在打开前
-client1.Open();
+//4：事件驱动。
+client1.Opened = (a) => { Console.WriteLine("链接成功。"); };
+client1.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client1.Received = (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
-//发送或接收数据 
+client1.Open();//打开，在打开前处理属性和事件
+
+//5：简单的发送、接收和发送等待操作。 
 client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToEnd("\n", 5000));//接收字符串结尾为\n的，超时为5秒 
-client1.SendReceive("abc", 3000);//发送并接收，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 5000));//发送并接收 ，超时为5秒 
+client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收\n字符串结尾的，超时为3秒 
+client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
 ```
 
 ## TcpServer   <a id="TcpServer"></a>   
 `TcpServer : ServiceBase`
-> `TcpServer` 只做了简单的基础测试，使用前请自行测试自己需要的功能。
 ```CSharp
 var service = new TcpService("127.0.0.1", 8005);
 service.Encoding = Encoding.UTF8;
@@ -244,9 +228,9 @@ client1.Open();
 ```
 
 # Modbus <a id="Modbus"></a>
-`ModbusRtuClient : IIoT`   
-`ModbusTcpClient : IIoT`   
-`ModbusAsciiClient : IIoT`
+`ModbusRtuClient : IClientData`   
+`ModbusTcpClient : IClientData`   
+`ModbusAsciiClient : IClientData`
 ```CSharp
 var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
 var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP
@@ -290,6 +274,7 @@ client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0�
 | Char        |Char|||||
 
 ## 罗克韦尔 (AllenBradleyCipClient)
+`AllenBradleyCipClient : IClientData`  
 ```CSharp
 //部分机器可使用OmronCipClient替代 
 AllenBradleyCipClient client = new AllenBradleyCipClient("127.0.0.1");
@@ -298,6 +283,7 @@ client.Write<bool>("abc",true);//写
 ```
 
 ## 汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>
+`InovanceModbusTcpClient : IClientData`  
 ```CSharp
 InovanceModbusTcpClient client = new InovanceModbusTcpClient("127.0.0.1");
 client.Read<bool>("M1");//读
@@ -307,7 +293,7 @@ client.Write<Int16>("D1",12);//写
 ```
 
 ## 三菱 (MitsubishiMcClient) <a id="MitsubishiMcClient"></a>
-
+`MitsubishiMcClient : IClientData`  
 测试覆盖表
 
 | 类型         | 单点读写         | 批量读写（数组）         |
@@ -331,6 +317,7 @@ client.Write<Int16>("W0",10);//写
 ```
 
 ## 欧姆龙 (OmronFinsClient) <a id="OmronFinsClient"></a>
+`OmronFinsClient : IClientData`  
 ```CSharp
 OmronFinsClient client = new OmronFinsClient("127.0.0.1");
 client.Read<Int16>("W0");//读
@@ -338,6 +325,7 @@ client.Write<Int16>("W0",10);//写
 ```
 
 ## 欧姆龙 (OmronCipClient)
+`OmronCipClient : IClientData` 
 ```CSharp
 OmronCipClient client = new OmronCipClient("127.0.0.1");
 client.Read<bool>("abc");//读
@@ -345,6 +333,7 @@ client.Write<bool>("abc",true);//写
 ```
 
 ## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
+`SiemensS7Client : IClientData` 
 ```CSharp
 SiemensS7Client client = new SiemensS7Client("127.0.0.1");
 //读写支持：基础(int,float...),在加额外的：string、DateTime、TimeSpan、Char
@@ -358,6 +347,7 @@ client.ReadString("BD100");//plc的类型必须为WString，支持中文等UTF16
 
 # 机器人 (Robot) <a id="Robot"></a>
 ## 爱普生 (EpsonRobot)
+`EpsonRobot : IClient` 
 ```CSharp
 EpsonRobot client = new EpsonRobot("127.0.0.1");
 client.Client.Open();

@@ -49,7 +49,6 @@
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc", 5);//读5个
 client.Write<bool>("abc", true);//写1个
-client.Write<int>("abc", 10, 20, 30);//写多个
 client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 ```
 
@@ -57,10 +56,14 @@ client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 > 这里以`ModbusRtu`举列，默认只支持串口。但是如果你想实现`ModbusRtuOverTcpClient`（使用TCP的方式走`ModbusRtu`协议）其他的都是同理。 
 
 ```CSharp
-var client0 = new ModbusRtuClient("COM1");//使用串口方式，默认 
-var client1 = new ModbusRtuClient(new TcpClient("127.0.0.1", 502));//使用Tcp方式，ModbusRtuOverTcpClient
-var client2 = new ModbusRtuClient(new UsbHidClient("xxxxx001"));//使用Usb方式，ModbusRtuOverUsbClient
-client1.Client.Open();//打开
+var serialPortClient = new SerialPortClient("COM1", 9600);
+var tcpClient = new TcpClient("127.0.0.1", 502);
+var usbHidClient = new UsbHidClient(UsbHidClient.GetNames[0]);
+
+var client0 = new ModbusRtuClient(serialPortClient);//使用串口方式，默认 
+var client1 = new ModbusRtuClient(tcpClient);//使用Tcp方式，ModbusRtuOverTcpClient
+var client2 = new ModbusRtuClient(usbHidClient);//使用Usb方式，ModbusRtuOverUsbClient
+client0.Client.Open();//打开
 ```
 
 3.客户端`ClientBase`包含丰富的功能，且代码一致性高。   
@@ -75,8 +78,8 @@ client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Op
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 
 //2：接收模式。以您以为的最好的方式来处理粘包问题
-client.ReceiveMode = ReceiveMode.ParseByteAll();
-client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
+client1.ReceiveMode = ReceiveMode.ParseByteAll();
+client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 
 //3：数据处理器。可在发送时加入换行，接收时去掉换行，也可自定义
 client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
@@ -93,9 +96,9 @@ client1.Open();//打开，在打开前处理属性和事件
 client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收字符串结尾为\n的，超时为3秒 
+client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收\n字符串结尾的，超时为3秒 
 client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并等待接收字符串结尾为\n的，超时为3秒 
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
 ```
 
 4.返回类型统一为 `IoTResult`，不需要在单独使用`Try`来处理异常信息。

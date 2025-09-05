@@ -551,7 +551,7 @@ namespace Ping9719.IoT.PLC
             return Write(address, CipVariableType.STRING, GetStringByte(value, encoding), 1, encoding);
         }
 
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             if (value is IEnumerable<bool> boolv)
             {

@@ -2,6 +2,8 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
+## v0.4.0（...）
+*1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
 ## v0.3.0（25-08-31）
 *1.[更改]将IIoT更改为IClientData     
 2.[新增]增加ReadWriteBase对字符串类型进行实现   

@@ -19,7 +19,7 @@ namespace Ping9719.IoT
         /// <returns>结果</returns>
         IoTResult<T> Read<T>(string address);
         /// <summary>
-        /// 读取
+        /// 根据指定的类型读取
         /// </summary>
         /// <param name="type">类型。</param>
         /// <param name="address">地址</param>
@@ -34,7 +34,7 @@ namespace Ping9719.IoT
         /// <returns>结果</returns>
         IoTResult<IEnumerable<T>> Read<T>(string address, int number);
         /// <summary>
-        /// 读取多个
+        /// 根据指定的类型读取多个
         /// </summary>
         /// <param name="type">类型。</param>
         /// <param name="address">地址</param>
@@ -60,7 +60,7 @@ namespace Ping9719.IoT
         /// <returns>结果</returns>
         IoTResult Write<T>(string address, T value);
         /// <summary>
-        /// 写入
+        /// 根据指定的类型写入
         /// </summary>
         /// <param name="type">类型。</param>
         /// <param name="address">地址</param>
@@ -74,15 +74,15 @@ namespace Ping9719.IoT
         /// <param name="address">地址</param>
         /// <param name="values">值</param>
         /// <returns>结果</returns>
-        IoTResult Write<T>(string address, params T[] values);
+        IoTResult Write<T>(string address, IEnumerable<T> values);
         /// <summary>
-        /// 写入多个
+        /// 根据指定的类型写入多个
         /// </summary>
         /// <param name="type">类型。</param>
         /// <param name="address">地址</param>
         /// <param name="values">写入的值。</param>
         /// <returns>结果</returns>
-        IoTResult Write(string type, string address, params object[] values);
+        IoTResult Write(string type, string address, IEnumerable<object> values);
         /// <summary>
         /// 写入字符串
         /// </summary>

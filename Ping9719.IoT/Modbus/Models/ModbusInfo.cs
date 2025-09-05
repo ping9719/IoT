@@ -163,7 +163,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="transactionId">事务标识</param>
         /// <param name="encoding">编码</param>
         /// <returns></returns>
-        public IoTResult<byte[]> GetModbusTcpCommand<T>(UInt16 readCount, T[] Writevalue, UInt16 transactionId, Encoding encoding, EndianFormat format)
+        public IoTResult<byte[]> GetModbusTcpCommand<T>(UInt16 readCount, IEnumerable<T> Writevalue, UInt16 transactionId, Encoding encoding, EndianFormat format)
         {
             IoTResult<byte[]> ioTResult = new IoTResult<byte[]>() { Value = new byte[] { } };
             try
@@ -218,7 +218,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个线圈)
                         {
                             isDan = true;
-                            list1 = (bool)(object)Writevalue[0] == true ? new byte[] { 0xFF, 0x00 } : new byte[] { 0x00, 0x00 };
+                            list1 = (bool)(object)Writevalue.ElementAt(0) == true ? new byte[] { 0xFF, 0x00 } : new byte[] { 0x00, 0x00 };
                         }
                         else if (functionCode == ModbusCode.写多个线圈)
                         {
@@ -363,9 +363,9 @@ namespace Ping9719.IoT.Modbus
                         {
                             isDan = false;
                             if (encoding == null)
-                                list1 = ((string)(object)Writevalue[0]).StringToByteArray();
+                                list1 = ((string)(object)Writevalue.ElementAt(0)).StringToByteArray();
                             else
-                                list1 = encoding.GetBytes((string)(object)Writevalue[0]).ToArray();
+                                list1 = encoding.GetBytes((string)(object)Writevalue.ElementAt(0)).ToArray();
 
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
@@ -412,7 +412,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="Writevalue">写的值</param>
         /// <param name="encoding">编码</param>
         /// <returns>不带2位校验位</returns>
-        public IoTResult<byte[]> GetModbusRtuCommand<T>(UInt16 readCount, T[] Writevalue, Encoding encoding, EndianFormat format)
+        public IoTResult<byte[]> GetModbusRtuCommand<T>(UInt16 readCount, IEnumerable<T> Writevalue, Encoding encoding, EndianFormat format)
         {
             IoTResult<byte[]> ioTResult = new IoTResult<byte[]>() { Value = new byte[] { } };
             try
@@ -463,7 +463,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个线圈)
                         {
                             isDan = true;
-                            list1 = (bool)(object)Writevalue[0] == true ? new byte[] { 0xFF, 0x00 } : new byte[] { 0x00, 0x00 };
+                            list1 = (bool)(object)Writevalue.ElementAt(0) == true ? new byte[] { 0xFF, 0x00 } : new byte[] { 0x00, 0x00 };
                         }
                         else if (functionCode == ModbusCode.写多个线圈)
                         {
@@ -608,9 +608,9 @@ namespace Ping9719.IoT.Modbus
                         {
                             isDan = false;
                             if (encoding == null)
-                                list1 = ((string)(object)Writevalue[0]).StringToByteArray();
+                                list1 = ((string)(object)Writevalue.ElementAt(0)).StringToByteArray();
                             else
-                                list1 = encoding.GetBytes((string)(object)Writevalue[0]).ToArray();
+                                list1 = encoding.GetBytes((string)(object)Writevalue.ElementAt(0)).ToArray();
 
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }

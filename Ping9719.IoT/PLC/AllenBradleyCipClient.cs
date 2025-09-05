@@ -818,7 +818,7 @@ namespace Ping9719.IoT.PLC
             throw new NotImplementedException();
         }
 
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             throw new NotImplementedException();
         }

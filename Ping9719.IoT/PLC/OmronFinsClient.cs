@@ -1174,7 +1174,7 @@ namespace Ping9719.IoT.PLC
             }
         }
 
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             if (value is byte[] bytev)
             {

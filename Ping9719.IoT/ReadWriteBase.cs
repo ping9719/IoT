@@ -1,5 +1,6 @@
 ﻿using Ping9719.IoT.Communication;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Ping9719.IoT
         public abstract IoTResult<IEnumerable<T>> Read<T>(string address, int number);
         public abstract IoTResult<string> ReadString(string address, int length, Encoding encoding);
         public abstract IoTResult Write<T>(string address, T value);
-        public abstract IoTResult Write<T>(string address, params T[] values);
+        public abstract IoTResult Write<T>(string address, IEnumerable<T> values);
         public abstract IoTResult WriteString(string address, string value, int length, Encoding encoding);
         #endregion
 
@@ -164,7 +165,7 @@ namespace Ping9719.IoT
         /// <param name="address">地址</param>
         /// <param name="values">写入的值。大部分进行<see cref="Convert"/>转换</param>
         /// <returns>结果</returns>
-        public virtual IoTResult Write(string type, string address, params object[] values)
+        public virtual IoTResult Write(string type, string address, IEnumerable<object> values)
         {
             var ts = type.Trim().ToLower();
             switch (ts)

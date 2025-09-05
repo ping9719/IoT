@@ -272,7 +272,7 @@ namespace Ping9719.IoT.Modbus
         /// 写入多个
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             var result = ModbusInfo.AddressAnalysis(address, stationNumber);
             if (!result.IsSucceed)

@@ -306,17 +306,17 @@ namespace Ping9719.IoT.PLC
         /// <param name="values"></param>
         /// <param name="converter">类型转字节数组的委托</param>
         /// <returns></returns>
-        private IoTResult WriteValues<T>(string address, T[] values, Func<T, byte[]> converter)
+        private IoTResult WriteValues<T>(string address, IEnumerable<T> values, Func<T, byte[]> converter)
         {
-            if (values == null || values.Length == 0)
+            if (values == null || values.Count() == 0)
                 return new IoTResult() { IsSucceed = false };
 
             // 计算单个元素的字节长度
-            int elementLength = converter(values[0]).Length;
-            byte[] allBytes = new byte[values.Length * elementLength];
-            for (int i = 0; i < values.Length; i++)
+            int elementLength = converter(values.ElementAt(0)).Length;
+            byte[] allBytes = new byte[values.Count() * elementLength];
+            for (int i = 0; i < values.Count(); i++)
             {
-                var bytes = converter(values[i]);
+                var bytes = converter(values.ElementAt(i));
                 Buffer.BlockCopy(bytes, 0, allBytes, i * elementLength, elementLength);
             }
             // 直接调用底层批量写入
@@ -1045,9 +1045,9 @@ namespace Ping9719.IoT.PLC
             return WriteValue(address, value, v => encoding.GetBytes(v));
         }
 
-        public override IoTResult Write<T>(string address, params T[] value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
-            if (value == null || value.Length == 0)
+            if (value == null || value.Count() == 0)
                 return new IoTResult() { IsSucceed = false };
 
             var tType = typeof(T);
