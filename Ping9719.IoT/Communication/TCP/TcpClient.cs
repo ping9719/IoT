@@ -20,22 +20,19 @@ namespace Ping9719.IoT.Communication
     {
         public override bool IsOpen => base.IsOpen && (tcpClient?.Connected ?? false);
         public Socket Socket => tcpClient?.Client;
-        string host; int port;
+        IPAddress[] address; int port;
         private System.Net.Sockets.TcpClient tcpClient;
 
         /// <summary>
-        /// 初始化 串口客户端
+        /// 初始化客户端
         /// </summary>
         /// <param name="connectString">比如：127.0.0.1:502。</param>
         public TcpClient(string connectString)
         {
-            this.host = "127.0.0.1";
+            this.address = new IPAddress[] { IPAddress.Parse("127.0.0.1") };
             this.port = 502;
 
-            ConnectionMode = ConnectionMode.Manual;
-            Encoding = Encoding.ASCII;
-            ReceiveMode = ReceiveMode.ParseByteAll();
-            ReceiveModeReceived = ReceiveMode.ParseByteAll();
+            Ini();
 
             if (string.IsNullOrWhiteSpace(connectString))
                 return;
@@ -45,20 +42,47 @@ namespace Ping9719.IoT.Communication
                 if (int.TryParse(item.ToUpper(), out int intVal))
                     this.port = intVal;
                 else
-                    this.host = item;
+                    this.address = new IPAddress[] { IPAddress.Parse(item) };
             }
         }
 
         /// <summary>
-        /// 初始化 串口客户端
+        /// 初始化客户端
         /// </summary>
         /// <param name="host">主机地址，ip地址</param>
         /// <param name="port">端口</param>
         public TcpClient(string host, int port)
         {
-            this.host = host;
+            this.address = new IPAddress[] { IPAddress.Parse(host) };
             this.port = port;
 
+            Ini();
+        }
+
+        /// <summary>
+        /// 初始化客户端
+        /// </summary>
+        public TcpClient(IPAddress address, int port)
+        {
+            this.address = new IPAddress[] { address };
+            this.port = port;
+
+            Ini();
+        }
+
+        /// <summary>
+        /// 初始化客户端
+        /// </summary>
+        public TcpClient(IPAddress[] addresses, int port)
+        {
+            this.address = addresses;
+            this.port = port;
+
+            Ini();
+        }
+
+        void Ini()
+        {
             ConnectionMode = ConnectionMode.Manual;
             Encoding = Encoding.ASCII;
             ReceiveMode = ReceiveMode.ParseByteAll();
@@ -97,7 +121,7 @@ namespace Ping9719.IoT.Communication
             tcpClient.ReceiveTimeout = TimeOut;
             tcpClient.SendTimeout = TimeOut;
 
-            var connectResult = tcpClient.BeginConnect(host, port, null, null);
+            var connectResult = tcpClient.BeginConnect(address, port, null, null);
             if (!connectResult.AsyncWaitHandle.WaitOne(TimeOut))//阻塞当前线程
                 throw new TimeoutException("连接超时");
             tcpClient.EndConnect(connectResult);

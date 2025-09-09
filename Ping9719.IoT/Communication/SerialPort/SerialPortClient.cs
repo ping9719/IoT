@@ -17,6 +17,9 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class SerialPortClient : ClientBase
     {
+        /// <summary>
+        /// 得到所有的设备
+        /// </summary>
         public static string[] GetNames => System.IO.Ports.SerialPort.GetPortNames();
         public override bool IsOpen => base.IsOpen && (serialPort?.IsOpen ?? false);
         string portName; int baudRate; Parity parity = Parity.None; int dataBits = 8; StopBits stopBits = StopBits.One; Handshake handshake = Handshake.None;
@@ -35,10 +38,7 @@ namespace Ping9719.IoT.Communication
             this.parity = Parity.None;
             this.handshake = Handshake.None;
 
-            ConnectionMode = ConnectionMode.Manual;
-            Encoding = Encoding.ASCII;
-            ReceiveMode = ReceiveMode.ParseTime();
-            ReceiveModeReceived = ReceiveMode.ParseTime();
+            Ini();
 
             if (string.IsNullOrWhiteSpace(connectString))
                 return;
@@ -103,6 +103,11 @@ namespace Ping9719.IoT.Communication
             this.parity = parity;
             this.handshake = handshake;
 
+            Ini();
+        }
+
+        void Ini()
+        {
             ConnectionMode = ConnectionMode.Manual;
             Encoding = Encoding.ASCII;
             ReceiveMode = ReceiveMode.ParseTime();

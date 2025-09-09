@@ -12,9 +12,12 @@ using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Communication
 {
+    /// <summary>
+    /// TCP服务端
+    /// </summary>
     public class TcpService : ServiceBase, INetwork
     {
-        string ip; int port;
+        IPAddress localaddr; int port;
         bool IsOpen2 = false;
 
         private System.Net.Sockets.TcpListener tcpListener;
@@ -29,9 +32,30 @@ namespace Ping9719.IoT.Communication
 
         public override bool IsOpen => IsOpen2;
 
+        /// <summary>
+        /// 初始化TCP服务端。监听所有的ip
+        /// </summary>
+        public TcpService(int port)
+        {
+            this.localaddr = IPAddress.Any;
+            this.port = port;
+        }
+
+        /// <summary>
+        /// 初始化TCP服务端
+        /// </summary>
         public TcpService(string ip, int port)
         {
-            this.ip = ip;
+            this.localaddr = IPAddress.Parse(ip);
+            this.port = port;
+        }
+
+        /// <summary>
+        /// 初始化TCP服务端
+        /// </summary>
+        public TcpService(IPAddress localaddr, int port)
+        {
+            this.localaddr = localaddr;
             this.port = port;
         }
 
@@ -40,7 +64,7 @@ namespace Ping9719.IoT.Communication
             var result = new IoTResult();
             try
             {
-                tcpListener = new TcpListener(IPAddress.Parse(ip), port);
+                tcpListener = new TcpListener(localaddr, port);
                 //tcpListener.Server.DualMode = true;
                 tcpListener.Start();
 
