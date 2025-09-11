@@ -84,7 +84,7 @@ namespace Ping9719.IoT.Communication
         void Ini()
         {
             ConnectionMode = ConnectionMode.Manual;
-            Encoding = Encoding.ASCII;
+            Encoding = Encoding.UTF8;
             ReceiveMode = ReceiveMode.ParseByteAll();
             ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
