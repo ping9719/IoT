@@ -236,7 +236,8 @@ var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
 var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP
 var client = new ModbusTcpClient("127.0.0.1", 502, format: EndianFormat.ABCD);
 var client = new ModbusTcpClient(new SerialPortClient("COM1", 9600), format: EndianFormat.ABCD);//ModbusTcp协议走串口
-client.Client.Open();
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连。tcp推荐断线重连，串口推荐另外两种
+client.Client.Open();//打开
 
 client.Read<Int16>("100");//读寄存器
 client.Read<Int16>("100.1");//读寄存器中的位，读位只支持单个读，最好是uint16,int16
@@ -278,6 +279,9 @@ client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0�
 ```CSharp
 //部分机器可使用OmronCipClient替代 
 AllenBradleyCipClient client = new AllenBradleyCipClient("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 ```
@@ -285,7 +289,10 @@ client.Write<bool>("abc",true);//写
 ## 汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>
 `InovanceModbusTcpClient : IClientData`  
 ```CSharp
-InovanceModbusTcpClient client = new InovanceModbusTcpClient("127.0.0.1");
+var client = new InovanceModbusTcpClient("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Read<bool>("M1");//读
 client.Read<Int16>("D1");//读
 client.Write<bool>("M1",true);//写
@@ -296,14 +303,14 @@ client.Write<Int16>("D1",12);//写
 `MitsubishiMcClient : IClientData`  
 测试覆盖表
 
-| 类型         | 单点读写         | 批量读写（数组）         |
-|--------------|------------------|-------------------------|
-| bool         | ✔️               | ✔️（循环单点写入，较慢） |
-| short        | ✔️               | ✔️                      |
-| int32        | ✔️               | ✔️                      |
-| float        | ✔️               | ✔️                      |
-| double       | ✔️               | ✔️                      |
-| string       | ✔️               | ✔️                      |
+| 类型         | 单点读写         | 批量读写      |
+|--------------|------------------|---------------|
+| bool         | ✔️               | ✔️（内部循环） |
+| short        | ✔️               | ✔️            |
+| int32        | ✔️               | ✔️            |
+| float        | ✔️               | ✔️            |
+| double       | ✔️               | ✔️            |
+| string       | ✔️               | ✔️            |
 
 > 注：bool数组批量写入采用循环单点写入方式，速度相对较慢。
 >
@@ -311,7 +318,10 @@ client.Write<Int16>("D1",12);//写
 
 
 ```CSharp
-MitsubishiMcClient client = new MitsubishiMcClient("127.0.0.1");
+var client = new MitsubishiMcClient(MitsubishiVersion.Qna_3E, "127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Read<Int16>("W0");//读
 client.Write<Int16>("W0",10);//写
 ```
@@ -320,6 +330,9 @@ client.Write<Int16>("W0",10);//写
 `OmronFinsClient : IClientData`  
 ```CSharp
 OmronFinsClient client = new OmronFinsClient("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Read<Int16>("W0");//读
 client.Write<Int16>("W0",10);//写
 ```
@@ -328,6 +341,9 @@ client.Write<Int16>("W0",10);//写
 `OmronCipClient : IClientData` 
 ```CSharp
 OmronCipClient client = new OmronCipClient("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 ```
@@ -335,7 +351,10 @@ client.Write<bool>("abc",true);//写
 ## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
 `SiemensS7Client : IClientData` 
 ```CSharp
-SiemensS7Client client = new SiemensS7Client("127.0.0.1");
+var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 //读写支持：基础(int,float...),在加额外的：string、DateTime、TimeSpan、Char
 client.Read<Int16>("BD100");//读
 client.Write<Int16>("BD100",10);//写
@@ -350,7 +369,9 @@ client.ReadString("BD100");//plc的类型必须为WString，支持中文等UTF16
 `EpsonRobot : IClient` 
 ```CSharp
 EpsonRobot client = new EpsonRobot("127.0.0.1");
-client.Client.Open();
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
 client.Start();
 client.Pause();
 ```

@@ -4,7 +4,9 @@
 
 ## v0.4.0（...）
 *1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
-1.[新增]tcp支持更多的初始化方式   
+2.[新增]tcp支持更多的初始化方式    
+*3.[更改]TCP默认编码为UTF8   
+*4.[更改]协议中去掉默认的`ConnectionMode`   
 ## v0.3.0（25-08-31）
 *1.[更改]将IIoT更改为IClientData     
 2.[新增]增加ReadWriteBase对字符串类型进行实现   

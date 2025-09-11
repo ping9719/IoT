@@ -27,7 +27,7 @@ namespace Ping9719.IoT.Device.Scanner
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             //Client.TimeOut = timeout;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
         public HoneywellScanner(string ip, int port = 55256) : this(new TcpClient(ip, port)) { }
         public HoneywellScanner(string portName, int baudRate = 115200, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits)) { }

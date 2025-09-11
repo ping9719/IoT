@@ -38,7 +38,7 @@ namespace Ping9719.IoT.PLC
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseByteAll();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            //Client.ConnectionMode = ConnectionMode.AutoReconnection;
 
             this.Version = version;
         }

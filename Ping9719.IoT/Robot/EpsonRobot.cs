@@ -21,7 +21,7 @@ namespace Ping9719.IoT.Robot
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.Manual;
+            //Client.ConnectionMode = ConnectionMode.Manual;
             Client.IsAutoDiscard = true;
         }
         public EpsonRobot(string ip, int port = 5000) : this(new TcpClient(ip, port)) { }

@@ -50,7 +50,7 @@ namespace Ping9719.IoT.Device.Mark
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
             //Client.TimeOut = timeout;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
         public HuaPuMark(string ip, int port = 2000) : this(new TcpClient(ip, port)) { }

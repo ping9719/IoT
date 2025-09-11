@@ -28,7 +28,7 @@ namespace Ping9719.IoT.Device.Rfid
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.ver = ver;
         }

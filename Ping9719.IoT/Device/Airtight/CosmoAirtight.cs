@@ -25,7 +25,7 @@ namespace Ping9719.IoT.Device.Airtight
             Client = client;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
         }
 
         public CosmoAirtight(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake = Handshake.RequestToSend) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits, handshake)) { }

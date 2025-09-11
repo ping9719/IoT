@@ -44,7 +44,7 @@ namespace Ping9719.IoT.Modbus
             //Client.TimeOut = 1500;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            Client.ConnectionMode = ConnectionMode.AutoOpen;
+            //Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.format = format;
             this.stationNumber = stationNumber;
