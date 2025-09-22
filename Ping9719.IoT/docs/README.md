@@ -59,8 +59,8 @@
         - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - [焊接机 (Weld)](#Weld)
         - 快克焊接机 (KuaiKeWeld)
-- [扩展](#Ext)
-    - 1.如何使用自定义协议
+- [常见问题](#Issue)
+    - 1.如何使用自定义协议？
 
 # 通讯 (Communication) <a id="Communication"></a>
 使用指定的方式进行交互信息。
@@ -82,7 +82,7 @@
 简要代码：  
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
-client1.ConnectionMode = ConnectionMode.Manual;//手动。
+client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
@@ -146,7 +146,7 @@ ClientBase client1 = new TcpClient("127.0.0.1", 502);
 client1.Encoding = Encoding.UTF8;
 
 //1：连接模式。断线重连使用得比较多
-client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
+client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。需要自己去打开和关闭，此方式比较灵活。
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 
@@ -230,7 +230,11 @@ client1.Open();
 # Modbus <a id="Modbus"></a>
 `ModbusRtuClient : IClientData`   
 `ModbusTcpClient : IClientData`   
-`ModbusAsciiClient : IClientData`
+`ModbusAsciiClient : IClientData`   
+
+Modbus Rtu : `站号` + `功能码` + `地址` + `长度` + `校验码`   
+Modbus Tcp : `消息号` + `0x0000` + `后续字节长度` + `站号` + `功能码` + `地址` + `长度`   
+
 ```CSharp
 var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
 var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP
@@ -502,8 +506,8 @@ MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 KuaiKeWeld dev1 = new KuaiKeWeld("COM1");
 ```
 
-# 扩展 <a id="Ext"></a>
-## 1.如何使用自定义协议
+# 常见问题 <a id="Issue"></a>
+## 1.如何使用自定义协议？
 ```CSharp
 //XXX协议实现
 public class XXX
@@ -515,7 +519,7 @@ public class XXX
         Client = client;
         //Client.ReceiveMode = ReceiveMode.ParseTime();
         Client.Encoding = Encoding.ASCII;
-        Client.ConnectionMode = ConnectionMode.AutoOpen;
+        //Client.ConnectionMode = ConnectionMode.AutoOpen;
     }
 
     //默认使用TcpClient
@@ -541,6 +545,9 @@ public class XXX
 
 //使用
 var client = new XXX("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();
+
 var info = client.ReadXXX();
 ```
+
