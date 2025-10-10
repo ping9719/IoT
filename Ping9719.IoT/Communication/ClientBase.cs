@@ -26,6 +26,7 @@ namespace Ping9719.IoT.Communication
         protected OpenClientData openData;
         protected QueueByteFixed dataEri;
         protected Task task;
+        protected Task task2;
         protected int ReconnectionCount = 0;
         protected CancellationTokenSource flushCts;
 
@@ -53,6 +54,10 @@ namespace Ping9719.IoT.Communication
         /// 接收区，缓冲区大小（默认1024 * 100）
         /// </summary>
         public int ReceiveBufferSize { get; set; } = 1024 * 100;
+        /// <summary>
+        /// 每次心跳的间隔（毫秒）。在<see cref="ConnectionMode.AutoOpen"/>下不生效。默认为0不开启。
+        /// </summary>
+        public int HeartbeatTime { get; set; } = 0;
 
         /// <summary>
         /// 是否在发送和接收时丢弃来自缓冲区的数据（默认false）
@@ -95,9 +100,13 @@ namespace Ping9719.IoT.Communication
         /// 接收到信息
         /// </summary>
         public Action<ClientBase, byte[]> Received;
+        /// <summary>
+        /// 每次心跳执行的内容，返回true成功，false会关闭连接。在<see cref="ConnectionMode.AutoOpen"/>下不会触发此事件
+        /// </summary>
+        public Func<ClientBase, bool> Heartbeat;
 
         /// <summary>
-        /// 打开
+        /// 打开，先断开在打开
         /// </summary>
         public virtual IoTResult Open()
         {
@@ -106,6 +115,11 @@ namespace Ping9719.IoT.Communication
             {
                 lock (obj1)
                 {
+                    //先断开在打开
+                    var aClose = Close();
+                    if (!aClose.IsSucceed)
+                        return result;
+
                     var aa = Opening?.Invoke(this);
                     if (aa == false)
                         throw new Exception("用户已拒绝链接");
@@ -164,6 +178,7 @@ namespace Ping9719.IoT.Communication
             {
                 Closed?.Invoke(this, true);
                 task?.Wait();
+                task2?.Wait();
             }
             return result.ToEnd();
         }
@@ -563,6 +578,45 @@ namespace Ping9719.IoT.Communication
             TaskScheduler.Default).Unwrap();
 
             //task.Start();
+
+            //心跳线程
+            if (ConnectionMode != ConnectionMode.AutoOpen && HeartbeatTime > 0 && Heartbeat != null)
+            {
+                task2 = Task.Factory.StartNew(async (a) =>
+                {
+                    var cc = (ClientBase)a;
+                    var dt = DateTime.Now;
+                    while (true)
+                    {
+                        try
+                        {
+                            System.Threading.Thread.Sleep(100);
+
+                            if (cc.task.IsCompleted || cc.task.IsFaulted || cc.task.IsCanceled || cc.Heartbeat == null)
+                                break;
+
+                            if ((DateTime.Now - dt).TotalMilliseconds >= cc.HeartbeatTime)
+                            {
+                                IsOpen2 = cc.Heartbeat.Invoke(cc);
+                                dt = DateTime.Now;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                        finally
+                        {
+
+                        }
+                    }
+                },
+                this,
+                CancellationToken.None,
+                (ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None),
+                TaskScheduler.Default).Unwrap();
+            }
+
         }
 
         protected abstract OpenClientData Open2();

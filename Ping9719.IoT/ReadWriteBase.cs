@@ -125,7 +125,7 @@ namespace Ping9719.IoT
             {
                 return IoTResult.Create<IEnumerable<object>>().AddError(ex);
             }
-
+            
         }
 
         /// <summary>
@@ -179,7 +179,6 @@ namespace Ping9719.IoT
             {
                 return IoTResult.Create().AddError(ex);
             }
-
         }
         /// <summary>
         /// 写入多个

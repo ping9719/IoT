@@ -8,6 +8,7 @@
         - [1.连接模式（ConnectionMode）](#ConnectionMode)
         - [2.接收模式（ReceiveMode）](#ReceiveMode)
         - [3.数据处理器（IDataProcessor）](#IDataProcessor)
+        - [4.心跳（Heartbeat）](#Heartbeat)
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
     - [SerialPortClient](#SerialPortClient)
@@ -137,6 +138,21 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 ```CSharp
 client1.SendDataProcessors.Add(new MyCalss());
 client1.ReceivedDataProcessors.Add(new MyCalss());
+```
+### 4.心跳（Heartbeat） <a id="Heartbeat"></a>
+自定义每隔多少的间隔操作指定的方法。   
+注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
+```CSharp
+//间隔3秒
+client1.HeartbeatTime = 3000;
+//每次发送“1”并告知心跳结果。如果失败了
+client1.Heartbeat = (a) =>
+{
+    var aa = a.Send("1");
+    return aa.IsSucceed;
+};
+
+client1.Open();//打开，在打开前处理属性和事件
 ```
 
 ## TcpClient <a id="TcpClient"></a>
