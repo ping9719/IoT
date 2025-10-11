@@ -55,9 +55,9 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public int ReceiveBufferSize { get; set; } = 1024 * 100;
         /// <summary>
-        /// 每次心跳的间隔（毫秒）。在<see cref="ConnectionMode.AutoOpen"/>下不生效。默认为0不开启。
+        /// 每次心跳的间隔（毫秒）。默认为5000。小于等于0不生效。在<see cref="ConnectionMode.AutoOpen"/>下不生效。
         /// </summary>
-        public int HeartbeatTime { get; set; } = 0;
+        public int HeartbeatTime { get; set; } = 5000;
 
         /// <summary>
         /// 是否在发送和接收时丢弃来自缓冲区的数据（默认false）
@@ -101,7 +101,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public Action<ClientBase, byte[]> Received;
         /// <summary>
-        /// 每次心跳执行的内容，返回true成功，false会关闭连接。在<see cref="ConnectionMode.AutoOpen"/>下不会触发此事件
+        /// 每次心跳执行的内容，返回true成功，false会关闭连接。跳动时间需要设置属性 <see cref="HeartbeatTime"/>
         /// </summary>
         public Func<ClientBase, bool> Heartbeat;
 
@@ -580,7 +580,7 @@ namespace Ping9719.IoT.Communication
             //task.Start();
 
             //心跳线程
-            if (ConnectionMode != ConnectionMode.AutoOpen && HeartbeatTime > 0 && Heartbeat != null)
+            if (ConnectionMode != ConnectionMode.AutoOpen && Heartbeat != null)
             {
                 task2 = Task.Factory.StartNew(async (a) =>
                 {
@@ -594,6 +594,8 @@ namespace Ping9719.IoT.Communication
 
                             if (cc.task.IsCompleted || cc.task.IsFaulted || cc.task.IsCanceled || cc.Heartbeat == null)
                                 break;
+                            if (cc.HeartbeatTime <= 0)
+                                continue;
 
                             if ((DateTime.Now - dt).TotalMilliseconds >= cc.HeartbeatTime)
                             {
