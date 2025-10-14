@@ -115,10 +115,12 @@ namespace Ping9719.IoT.Communication
             {
                 lock (obj1)
                 {
-                    //先断开在打开
-                    var aClose = Close();
-                    if (!aClose.IsSucceed)
-                        return result;
+                    if ((task != null && !task.IsCompleted) || (task2 != null && !task2.IsCompleted))
+                    {
+                        var aClose = Close();
+                        if (!aClose.IsSucceed)
+                            return result;
+                    }
 
                     var aa = Opening?.Invoke(this);
                     if (aa == false)
@@ -442,6 +444,7 @@ namespace Ping9719.IoT.Communication
         #region 其他
         protected virtual void GoRun()
         {
+            //接受数据、断开重连线程
             task = Task.Factory.StartNew(async (a) =>
             {
                 var cc = (ClientBase)a;
@@ -592,7 +595,7 @@ namespace Ping9719.IoT.Communication
                         {
                             System.Threading.Thread.Sleep(100);
 
-                            if (cc.task.IsCompleted || cc.task.IsFaulted || cc.task.IsCanceled || cc.Heartbeat == null)
+                            if (cc.task.IsCompleted || cc.Heartbeat == null)
                                 break;
                             if (cc.HeartbeatTime <= 0)
                                 continue;
@@ -652,7 +655,7 @@ namespace Ping9719.IoT.Communication
                 }
                 else
                 {
-                    while (dataEri.Count < countMax)
+                    while (dataEri != null && dataEri.Count < countMax)
                     {
                         if (!IsOpen)
                             throw new Exception("链接被断开");
@@ -661,7 +664,7 @@ namespace Ping9719.IoT.Communication
 
                         Thread.Sleep(10);
                     }
-                    value = dataEri.Dequeue(countMax);
+                    value = dataEri?.Dequeue(countMax);
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.ByteAll)
@@ -672,7 +675,7 @@ namespace Ping9719.IoT.Communication
                 }
                 else
                 {
-                    while (dataEri.Count == 0)
+                    while (dataEri != null && dataEri.Count == 0)
                     {
                         if (!IsOpen)
                             throw new Exception("链接被断开");
@@ -681,7 +684,7 @@ namespace Ping9719.IoT.Communication
 
                         Thread.Sleep(10);
                     }
-                    value = dataEri.DequeueAll();
+                    value = dataEri?.DequeueAll();
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Char)
@@ -696,7 +699,7 @@ namespace Ping9719.IoT.Communication
                 }
                 else
                 {
-                    while (dataEri.Count < countMax)
+                    while (dataEri != null && dataEri.Count < countMax)
                     {
                         if (!IsOpen)
                             throw new Exception("链接被断开");
@@ -705,7 +708,7 @@ namespace Ping9719.IoT.Communication
 
                         Thread.Sleep(10);
                     }
-                    value = dataEri.Dequeue(countMax);
+                    value = dataEri?.Dequeue(countMax);
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Time)
@@ -718,7 +721,7 @@ namespace Ping9719.IoT.Communication
                 else
                 {
                     var tempBufferLength = dataEri.Count;
-                    while (dataEri.Count == 0 || tempBufferLength != dataEri.Count)
+                    while (dataEri != null && (dataEri.Count == 0 || tempBufferLength != dataEri.Count))
                     {
                         if (!IsOpen)
                             throw new Exception("链接被断开");
@@ -728,7 +731,7 @@ namespace Ping9719.IoT.Communication
                         tempBufferLength = dataEri.Count;
                         Thread.Sleep(countMax);
                     }
-                    value = dataEri.DequeueAll();
+                    value = dataEri?.DequeueAll();
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.ToEnd)
@@ -749,7 +752,7 @@ namespace Ping9719.IoT.Communication
                 else
                 {
 
-                    while (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc))
+                    while (dataEri != null && (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc)))
                     {
                         if (!IsOpen)
                             throw new Exception("链接被断开");
@@ -758,7 +761,7 @@ namespace Ping9719.IoT.Communication
 
                         Thread.Sleep(10);
                     }
-                    value = dataEri.DequeueAll();
+                    value = dataEri?.DequeueAll();
                 }
             }
 
@@ -772,6 +775,9 @@ namespace Ping9719.IoT.Communication
             var data2 = data;
             foreach (var item in pro)
             {
+                if (data2 == null)
+                    continue;
+
                 data2 = item.DataProcess(data2);
             }
             return data2;

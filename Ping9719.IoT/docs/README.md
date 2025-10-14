@@ -143,9 +143,9 @@ client1.ReceivedDataProcessors.Add(new MyCalss());
 自定义每隔多少的间隔操作指定的方法。   
 注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
 ```CSharp
-//间隔3秒
-client1.HeartbeatTime = 3000;
-//每次发送“1”并告知心跳结果。如果失败了
+//心跳间隔。默认为5秒。设置为0可以暂停发送心跳
+client1.HeartbeatTime = 5000;
+//每次发送“1”并告知心跳结果。
 client1.Heartbeat = (a) =>
 {
     var aa = a.Send("1");
