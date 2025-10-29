@@ -11,7 +11,9 @@
         - [4.心跳（Heartbeat）](#Heartbeat)
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
-    - [SerialPortClient](#SerialPortClient)
+    - [SerialPortClient (串口)](#SerialPortClient)
+    - [UsbHidClient (USB)](#UsbHidClient)
+    - [BleClient (蓝牙)](#BleClient)
     - UdpClient （进行中） 
     - UdpServer （待开发） 
     - HttpServer （待开发） 
@@ -241,6 +243,40 @@ client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的�
 client1.Open();
 
 //所有发送和接收和TcpClient一样，这里不在重复
+```
+## UsbHidClient (USB) <a id="UsbHidClient"></a>
+`UsbHidClient : ClientBase`   
+
+1.需要安装扩展包 `Ping9719.IoT.Hid` 才能使用。   
+2.获取报告信息 `UsbHidClient.GetReportDescriptor(UsbHidClient.GetNames[0])`    
+> 1.报告类型：Input, Output, Feature   
+> 2.报告ID：一般在帧头，默认值为 `0x00`。可以使用“消息处理器”来处理。    
+> 3.报告长度：要求的固定长度，不足一般末尾添加`0x00`补齐（低速默认8，全速64，高速1024）。可以使用“消息处理器”来处理。    
+
+```CSharp
+var names = UsbHidClient.GetNames;//获取所有Usb设备
+var client = new UsbHidClient(names[0]);//访问第一个设备
+
+//使用消息处理器来处理报告
+{
+    //加入报告ID（实际需要看文档）
+    client.SendDataProcessors.Add(new StartAddValueDataProcessor(0));
+    //加入报告长度补齐（实际需要看文档）
+    client.SendDataProcessors.Add(new PadRightDataProcessor(64));
+    //清除报告ID（实际需要看文档）
+    client.ReceivedDataProcessors.Add(new StartClearValueDataProcessor(0));
+    //清除报告长度补齐（实际需要看文档）
+    client.ReceivedDataProcessors.Add(new TrimEndDataProcessor(0));
+}
+```
+
+## BleClient (蓝牙) <a id="BleClient"></a>
+`UsbHidClient : ClientBase`  
+
+1.需要安装扩展包 `Ping9719.IoT.Hid` 才能使用。 
+```CSharp
+var names = BleClient.GetNames;//获取所有蓝牙设备
+var client = new BleClient(names[0]);//访问第一个设备
 ```
 
 # Modbus <a id="Modbus"></a>

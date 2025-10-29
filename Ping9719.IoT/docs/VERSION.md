@@ -2,7 +2,9 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.4.0（...）
+## v0.5.0（...）
+
+## v0.4.0（25-10-29）
 *1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
 2.[新增]tcp支持更多的初始化方式    
 *3.[更改]TCP默认编码为UTF8   

@@ -1,21 +1,8 @@
-﻿# Ping9719.IoT.Hid
-An extension for IoT that supports sending and receiving data via USB and Bluetooth on Windows, Android, iOS devices, tablets, and computers, enabling PLC and device communication through USB or Bluetooth
+﻿# Ping9719.IoT.Hid  
+An extension for IoT that enables USB and Bluetooth data transmission and reception on Windows, Android, and Apple devices—including smartphones, tablets, and computers—allowing PLCs and devices to communicate via USB or Bluetooth.
 
-# Language Selection:
-[简体中文](README.md) || [English](README_en-US.md) 
+# Language Selection:  
+[简体中文](README.md) || [English](README_en-US.md)
 
-## UsbHidClient
-> It has been observed that USB header and trailer frames have fixed `0x00` values, which can be handled using a "IDataProcessor"
-
-`UsbHidClient : ClientBase`
-```CSharp
-var names = UsbHidClient.GetNames();
-var client = new UsbHidClient(names[0]);
-```
-
-## BleClient
-`BleClient : ClientBase`
-```CSharp
-var names = BleClient.GetNames();
-var client = new BleClient(names[0]);
-```
+This documentation is updated alongside the main IoT documentation. Click [here to view the IoT documentation](../../Ping9719.IoT/docs/README.md).  
+Refer specifically to the `UsbHidClient` and `BleClient` sections.
