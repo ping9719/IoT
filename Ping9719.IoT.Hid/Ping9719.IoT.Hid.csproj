@@ -16,7 +16,7 @@ https://gitee.com/ping9719/IoT</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HidSharp" Version="2.1.0" />
+		<PackageReference Include="HidSharp" Version="2.6.4" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net45" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
