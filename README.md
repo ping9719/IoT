@@ -9,41 +9,34 @@
 主库（[Github](https://github.com/ping9719/IoT)）；备库（[Gitee](https://gitee.com/ping9719/IoT)） 
  
 
-## 项目：
+## 项目引导 <a id="Project"></a>  
 
-| 项目     |  支持                      | 文档                                      | 版本                                     |依赖                  |包名（NuGet）                  |
+文档引导：
+
+| 项目     |  框架                      | 文档                                      | 版本                                     |依赖                  |包名（NuGet）                  |
 |----------|----------------------------|-----------------------------------------------|----------------------------------------------|----------------------|-----------------------------|
-| [Ping9719.IoT](#IoT)      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 |
-| [Ping9719.IoT.Hid](#Hid)      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 
-| [Ping9719.IoT.WPF](#WPF)      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF </br>(暂未发布)   | 
-| [Ping9719.IoT.Avalonia](#Avalonia) | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia </br>(暂未发布) | 
+| Ping9719.IoT      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT/docs/README.md)           |[文档](Ping9719.IoT/docs/VERSION.md)          | System.IO.Ports      |Ping9719.IoT                 |
+| Ping9719.IoT.Hid      | net45;</br>netstandard2.0  | [文档](Ping9719.IoT.Hid/docs/README.md)       |[文档](Ping9719.IoT.Hid/docs/VERSION.md)      | IoT;</br>HidSharp    |Ping9719.IoT.Hid             | 
+| Ping9719.IoT.WPF      | net45;</br>net8.0-windows  | [文档](Ping9719.IoT.WPF/docs/README.md)       |[文档](Ping9719.IoT.WPF/docs/VERSION.md)      | IoT;                 |Ping9719.IoT.WPF </br>(暂未发布)   | 
+| Ping9719.IoT.Avalonia | net8.0;</br>netstandard2.0 | [文档](Ping9719.IoT.Avalonia/docs/README.md)  |[文档](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia    |Ping9719.IoT.Avalonia </br>(暂未发布) | 
 
+介绍引导：
 
-### Ping9719.IoT  <a id="IoT"></a>
->跨平台的库。   
-基础：接口定义，返回类型定义...   
-通信：TCP，UDP，串口...   
-协议：ModBus，MC，FINS...    
-算法：CRC，LRC...    
-设备：RFID，扫码枪...    
+| 项目     |  介绍                      | 
+|----------|----------------------------|
+| Ping9719.IoT      | 跨平台的库。包含基础、通信(TCP，UDP，串口... )、协议(ModBus，MC，FINS... )、算法(CRC，LRC...)、设备控制|
+| Ping9719.IoT.Hid      |跨平台库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据 |
+| Ping9719.IoT.WPF      |在windows平台上的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备|
+| Ping9719.IoT.Avalonia |跨平台的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备 |
 
+安装引导：
 
-### Ping9719.IoT.Hid  <a id="Hid"></a>
->跨平台链接库。   
-对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据   
-
-### Ping9719.IoT.WPF  <a id="WPF"></a>
->在windows平台上的界面UI库。   
-提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备
-
-### Ping9719.IoT.Avalonia  <a id="Avalonia"></a>
->跨平台的界面UI库。   
-提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备
-
-## 如何安装包
 ![](img/bao.png)
 
-## 前言、入门、亮点
+## 项目亮点介绍 
+> 这里是亮点项目介绍，不是详细文档！！！详细文档在上面的“项目引导”中。   
+> 假如你还是找不到，你可以点击：（[跳转到项目引导](#Project)）（[跳转到IoT详细文档](Ping9719.IoT/docs/README.md)）
+
 1.<b>常用协议</b>实现 `IReadWrite`，可通过泛型方式进行读或写。  
 ```CSharp
 client.Read<bool>("abc");//读1个
@@ -67,7 +60,7 @@ client0.Client.Open();//打开
 ```
 
 3.客户端`ClientBase`包含丰富的功能，且代码一致性高。   
-【提示】以下代码所有通用，包含 `TcpClient`、`SerialPortClient`、`UsbHidClient` 等...
+>以下代码所有通用，包含 `TcpClient`、`SerialPortClient`、`UsbHidClient` 等...
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);//Tcp方式
 client1.Encoding = Encoding.UTF8;

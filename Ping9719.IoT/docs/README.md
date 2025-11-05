@@ -350,9 +350,9 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
 client.Read<bool>("M1");//读
-client.Read<Int16>("D1");//读
+client.Read<Int16>("D1",5);//读取5个
 client.Write<bool>("M1",true);//写
-client.Write<Int16>("D1",12);//写
+client.Write<Int16>("D1",new Int16[]{1,2});//写多个
 ```
 
 ## 三菱 (MitsubishiMcClient) <a id="MitsubishiMcClient"></a>
@@ -379,7 +379,9 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
 client.Read<Int16>("W0");//读
+client.Read<Int16>("W0",5);//读取5个
 client.Write<Int16>("W0",10);//写
+client.Write<Int16>("W0",new Int16[]{1,2});//写多个
 ```
 
 ## 欧姆龙 (OmronFinsClient) <a id="OmronFinsClient"></a>
@@ -390,7 +392,9 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
 client.Read<Int16>("W0");//读
+client.Read<Int16>("W0",5);//读取5个
 client.Write<Int16>("W0",10);//写
+client.Write<Int16>("W0",new Int16[]{1,2});//写多个
 ```
 
 ## 欧姆龙 (OmronCipClient)
@@ -400,8 +404,14 @@ OmronCipClient client = new OmronCipClient("127.0.0.1");
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
+//读写
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
+
+//读写多个
+client.Read<bool[]>("abc");//读
+client.Read<bool[]>("abc",5);//读多个，并截取前5个
+client.Write<bool[]>("abc",new bool[]{true,false});//写
 ```
 
 ## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
@@ -411,13 +421,21 @@ var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
-//读写支持：基础(int,float...),在加额外的：string、DateTime、TimeSpan、Char
-client.Read<Int16>("BD100");//读
-client.Write<Int16>("BD100",10);//写
+//支持常用类型(int,float...)
+client.Read<Int16>("BD100.0.0");//读
+client.Write<Int16>("BD100.0.0",10);//写
 
-//字符串
-client.Read<string>("BD100");//plc的类型必须为string，只支持字母数字等ASCII编码
-client.ReadString("BD100");//plc的类型必须为WString，支持中文等UTF16编码，
+//支持特殊类型(string、DateTime、TimeSpan、Char)
+client.Read<DateTime>("BD100.0.0");//读
+client.Write<DateTime>("BD100.0.0",DateTime.Now);//写
+
+//支持超长的读和写
+client.Read<Int16>("BD100.0.0",9999);//连续读9999个数据，大概只需百毫秒
+client.Write<Int16>("BD100.0.0",new Int16[]{1,2,3});//连续写9999个数据，大概只需百毫秒
+
+//字符串说明
+client.Read<string>("BD100.0.0");//plc的类型必须为string，只支持字母数字等ASCII编码
+client.ReadString("BD100.0.0");//plc的类型必须为WString，支持中文等UTF16编码，
 ```
 
 # 机器人 (Robot) <a id="Robot"></a>
