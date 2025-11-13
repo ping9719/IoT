@@ -20,18 +20,18 @@
     - MqttClient （待开发） 
     - MqttServer （待开发） 
 - [Modbus](#Modbus)
-    - ModbusRtuClient
-    - ModbusTcpClient
-    - ModbusAsciiClient
+    - [ModbusRtuClient](#Modbus)
+    - [ModbusTcpClient](#Modbus)
+    - [ModbusAsciiClient](#Modbus)
 - [PLC](#PLC)
     - [类型对照表](#PlcType)
-    - 罗克韦尔 (AllenBradleyCipClient) （待测试）   
+    - [罗克韦尔 (AllenBradleyCipClient)](#AllenBradleyCipClient)   
     - [汇川 (InovanceModbusTcpClient)](#InovanceModbusTcpClient)
     - [三菱 (MitsubishiMcClient)](#MitsubishiMcClient)
     - [欧姆龙 (OmronFinsClient,OmronCipClient)](#OmronFinsClient)
     - [西门子 (SiemensS7Client)](#SiemensS7Client)
 - [机器人 (Robot)](#Robot)
-    - 爱普生 (EpsonRobot) （待测试） 
+    - [爱普生 (EpsonRobot)](#Robot) 
 - [算法 (Algorithm)](#Algorithm)
     - [平均点位算法（AveragePoint）](#AveragePoint)
     - [CRC](#CRC)
@@ -330,10 +330,12 @@ client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0�
 | TimeSpan    |Time|||||
 | Char        |Char|||||
 
-## 罗克韦尔 (AllenBradleyCipClient)
+## 罗克韦尔 (AllenBradleyCipClient) <a id="AllenBradleyCipClient"></a>
 `AllenBradleyCipClient : IClientData`  
+
+此协议目前测试较少，请测试后在用于生产环境使用。    
+发现部分型号也可使用`OmronCipClient`来替代。
 ```CSharp
-//部分机器可使用OmronCipClient替代 
 AllenBradleyCipClient client = new AllenBradleyCipClient("127.0.0.1");
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
@@ -453,6 +455,10 @@ client.Pause();
 # 算法 (Algorithm) <a id="Algorithm"></a>
 
 ## 平均点位算法（AveragePoint） <a id="AveragePoint"></a>
+使用场景：   
+1.机器人均匀的放/取场景   
+2.伺服均匀的移动场景
+
 > 简单的平均算法，假如开头为2，结尾为8，一共4个点，每个点距离相同。如图所示：   
 > 2--[4]--[6]--8   
 > 就可知道中间点位为4和6
@@ -471,6 +477,9 @@ var aaa = AveragePoint.Start(2, 8, 4);
 ```
 
 ## CRC <a id="CRC"></a>
+使用场景：   
+1.协议校验正确性场景   
+
 ```CSharp
 byte[] bytes = new byte[] { 1, 2 };
 //CRC 算法
@@ -495,11 +504,17 @@ CRC.CheckCrc32Q(c8);
 CRC.CheckCrc32Sata(c9);
 ```
 ## LRC <a id="LRC"></a>
+使用场景：   
+1.协议校验正确性场景   
+
 ```CSharp
 LRC.GetLRC(bytes);
 LRC.CheckLRC(bytes);
 ```
 ## 稳定婚姻配对算法(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>
+使用场景：   
+1.将相似的物品进行配对的场景   
+
 >假如偏好关系如下（越喜欢的越靠前）：<br/>
 M0❤W1,W0<br/>M1❤W0,W1<br/>M2❤W0,W1,W2,W3,W4<br/>M3❤W3<br/>M4❤W3
 
