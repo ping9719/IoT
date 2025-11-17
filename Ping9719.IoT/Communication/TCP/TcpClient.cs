@@ -24,6 +24,11 @@ namespace Ping9719.IoT.Communication
         private System.Net.Sockets.TcpClient tcpClient;
 
         /// <summary>
+        /// 打开超时（毫秒），默认8000
+        /// </summary>
+        public int OpenTimeOut { get; set; } = 8000;
+
+        /// <summary>
         /// 初始化客户端
         /// </summary>
         /// <param name="connectString">比如：127.0.0.1:502。</param>
@@ -122,7 +127,7 @@ namespace Ping9719.IoT.Communication
             tcpClient.SendTimeout = TimeOut;
 
             var connectResult = tcpClient.BeginConnect(address, port, null, null);
-            if (!connectResult.AsyncWaitHandle.WaitOne(TimeOut))//阻塞当前线程
+            if (!connectResult.AsyncWaitHandle.WaitOne(Math.Max(100, OpenTimeOut)))//阻塞当前线程
                 throw new TimeoutException("连接超时");
             tcpClient.EndConnect(connectResult);
 

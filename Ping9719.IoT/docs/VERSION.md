@@ -2,8 +2,8 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.5.0（...）
-1.升级包
+## v0.5.0（...） 
+1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率
 ## v0.4.0（25-10-29）
 *1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
 2.[新增]tcp支持更多的初始化方式    
@@ -30,6 +30,6 @@
 10.[新增]CRC 是否小端    
 11.[修复]客户端关闭异步等待优化    
 12.[修复]客户端异步读取超时为-1，解决usb读取等问题    
-13.[新增]TcpServer
+13.[新增]`TcpServer`
 ## v0.1.0（25-07-18）
 1.发布
