@@ -17,6 +17,19 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class TcpService : ServiceBase, INetwork
     {
+        /// <summary>
+        /// 客户端成功链接
+        /// </summary>
+        public Action<ClientBase> Opened;
+        /// <summary>
+        /// 客户端断开链接
+        /// </summary>
+        public Action<ClientBase> Closed;
+        /// <summary>
+        /// 接收到信息
+        /// </summary>
+        public Action<ClientBase, byte[]> Received;
+
         IPAddress localaddr; int port;
         bool IsOpen2 = false;
 

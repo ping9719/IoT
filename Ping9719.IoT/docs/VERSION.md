@@ -3,7 +3,8 @@
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
 ## v0.5.0（...） 
-1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率
+1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
+2.[新增]`HttpService`
 ## v0.4.0（25-10-29）
 *1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
 2.[新增]tcp支持更多的初始化方式    

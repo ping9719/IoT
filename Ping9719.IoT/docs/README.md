@@ -16,7 +16,7 @@
     - [BleClient (蓝牙)](#BleClient)
     - UdpClient （进行中） 
     - UdpServer （待开发） 
-    - HttpServer （待开发） 
+    - [HttpServer](#HttpServer)
     - MqttClient （待开发） 
     - MqttServer （待开发） 
 - [Modbus](#Modbus)
@@ -244,6 +244,51 @@ client1.Open();
 
 //所有发送和接收和TcpClient一样，这里不在重复
 ```
+## HttpServer <a id="HttpServer"></a>
+`HttpServer : ServiceBase`   
+
+1.某些情况下需要管理员权限运行。   
+
+```CSharp
+HttpService service = new HttpService(8090);
+//错误处理 (Received中的错误会在这里)
+service.ReceivedException = (request, response, err) =>
+{
+    return "{\"info\":\"" + err.Message + "\"}";
+};
+//处理客户端数据
+service.Received = (request, response, data) =>
+{
+    //请求
+    var method = request.HttpMethod;
+    var urlAbs = request.Url?.AbsolutePath;
+    var urlQue = request.Url?.Query;
+    //响应
+    response.ContentType = "application/json";
+
+    if (method == HttpMethod.Get.Method)
+    {
+        //主页
+        if (urlAbs == "/")
+        {
+            return "{\"info\":\"欢迎 welcome\"}";
+        }
+        else if (urlAbs == "/a/b/c")
+        {
+            return "{\"info\":\"ok\"}";
+        }
+    }
+    else if (method == HttpMethod.Post.Method)
+    {
+
+    }
+
+    response.StatusCode = (int)HttpStatusCode.NotFound;
+    return "{\"info\":\"没有找到 Not Found\"}";
+};
+service.Open();
+```
+
 ## UsbHidClient (USB) <a id="UsbHidClient"></a>
 `UsbHidClient : ClientBase`   
 

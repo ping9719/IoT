@@ -50,19 +50,6 @@ namespace Ping9719.IoT.Communication
         public virtual ReceiveMode ReceiveModeReceived { get; set; } = ReceiveMode.ParseByteAll();
 
         /// <summary>
-        /// 客户端成功链接
-        /// </summary>
-        public Action<ClientBase> Opened;
-        /// <summary>
-        /// 客户端断开链接
-        /// </summary>
-        public Action<ClientBase> Closed;
-        /// <summary>
-        /// 接收到信息
-        /// </summary>
-        public Action<ClientBase, byte[]> Received;
-
-        /// <summary>
         /// 打开
         /// </summary>
         public abstract IoTResult Open();
