@@ -37,7 +37,8 @@
     - [CRC](#CRC)
     - [LRC](#LRC)
     - 傅立叶算法（Fourier）（待开发） 
-    - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)
+    - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)   
+    - [线性回归(LinearRegression)](#LinearRegression)
     - PID （待开发） 
     - RSA （待开发） 
 - [设备和仪器 (Device)](#Device)
@@ -504,21 +505,20 @@ client.Pause();
 1.机器人均匀的放/取场景   
 2.伺服均匀的移动场景
 
-> 简单的平均算法，假如开头为2，结尾为8，一共4个点，每个点距离相同。如图所示：   
+> 假如：已知开头为2；结尾为8；共4个点    
+> 2--[?]--[?]--8    
 > 2--[4]--[6]--8   
-> 就可知道中间点位为4和6
+> 目测可知，第二个为4，第三个为6
 
 ```CSharp
-//输出的结果：
-//0[2, 2.5]
-//1[4, 3]
-//2[6, 3.5]
-//3[8, 4]
-var aaa = AveragePoint.Start("2,2.5", " 8,4", 4);
-var aaa = AveragePoint.Start(new double[] { 2, 2.5 }, new double[] { 8, 4 }, 4);
+//单组
+//2,4,6,8
+var aaa1 = AveragePoint.Start(2, 8, 4);
 
-//结果：[2, 4, 6, 8]
-var aaa = AveragePoint.Start(2, 8, 4);
+//多组
+//1,2,3,4
+//2,4,6,8
+var aaa2 = AveragePoint.Start("1,2", "4,8", 4);
 ```
 
 ## CRC <a id="CRC"></a>
@@ -586,6 +586,24 @@ foreach (var item in msi)
     Console.Write($"{item.Item}❤{(item.Match?.Item) ?? "null"}   ");
 }
 ```
+
+
+## 线性回归(LinearRegression) <a id="LinearRegression"></a>
+使用场景：   
+1.传感器（温度、压力、流量）输出值与真实值的转换   
+>温度传感器：电压值(mV) → 温度(°C)   
+  实测数据：10mV→25°C, 30mV→75°C, 50mV→125°C  
+ 
+2.根据历史数据预测未来销售额     
+3.产品价格变化对销量的影响   
+4.健康指标与疾病风险的关系  
+等....
+
+```CSharp
+var regression = LinearRegression.Fit("4,8,12", "10,20,30");
+double result = regression.Project(10);//25
+```
+
 
 # 设备和仪器 (Device) <a id="Device"></a>
 
