@@ -33,19 +33,17 @@
 - [机器人 (Robot)](#Robot)
     - [爱普生 (EpsonRobot)](#Robot) 
 - [算法 (Algorithm)](#Algorithm)
-    - [平均点位算法（AveragePoint）](#AveragePoint)
+    - [平均点位（AveragePoint）](#AveragePoint)
     - [CRC](#CRC)
     - [LRC](#LRC)
-    - 傅立叶算法（Fourier）（待开发） 
-    - [稳定婚姻配对算法(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)   
+    - [傅立叶滤波(FFTFilter)](#FFTFilter) 
+    - [稳定婚姻配对(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)   
     - [线性回归(LinearRegression)](#LinearRegression)
     - PID （待开发） 
     - RSA （待开发） 
 - [设备和仪器 (Device)](#Device)
     - [气密检测 (Airtight)](#Airtight)
         - 科斯莫气密检测 (CosmoAirtight)
-    - Fct
-        - 盟讯电子 (MengXunFct)
     - [激光刻印 (Mark)](#Mark)
         - 大族激光刻印 (DaZhuMark)
         - 华普激光刻印 (HuaPuMark)
@@ -500,7 +498,7 @@ client.Pause();
 
 # 算法 (Algorithm) <a id="Algorithm"></a>
 
-## 平均点位算法（AveragePoint） <a id="AveragePoint"></a>
+## 平均点位（AveragePoint） <a id="AveragePoint"></a>
 使用场景：   
 1.机器人均匀的放/取场景   
 2.伺服均匀的移动场景
@@ -556,7 +554,16 @@ CRC.CheckCrc32Sata(c9);
 LRC.GetLRC(bytes);
 LRC.CheckLRC(bytes);
 ```
-## 稳定婚姻配对算法(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>
+
+## 傅立叶滤波(FFTFilter) <a id="FFTFilter"></a>
+```CSharp
+//高性能 傅立叶滤波 100W个点耗时400ms 
+var aaa = Enumerable.Range(1, 1000_000).Select(o => (double)o).ToArray();
+var regression1122 = FFTFilter.FilterFFT(aaa, 0.0001);
+```
+
+
+## 稳定婚姻配对(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>
 使用场景：   
 1.将相似的物品进行配对的场景   
 
@@ -592,7 +599,8 @@ foreach (var item in msi)
 使用场景：   
 1.传感器（温度、压力、流量）输出值与真实值的转换   
 >温度传感器：电压值(mV) → 温度(°C)   
-  实测数据：10mV→25°C, 30mV→75°C, 50mV→125°C  
+ 实测数据：10mV→25°C, 30mV→75°C, 50mV→125°C  
+ 推测数据：20mV→50°C    
  
 2.根据历史数据预测未来销售额     
 3.产品价格变化对销量的影响   
@@ -600,8 +608,8 @@ foreach (var item in msi)
 等....
 
 ```CSharp
-var regression = LinearRegression.Fit("4,8,12", "10,20,30");
-double result = regression.Project(10);//25
+var regression = LinearRegression.Fit("10,30,50", "25,75,125");
+double result = regression.Project(20);//50
 ```
 
 
@@ -616,10 +624,6 @@ double result = regression.Project(10);//25
 CosmoAirtight dev1 = new CosmoAirtight("COM1");//科斯莫
 ```
 
-## Fct
-```CSharp
-MengXunFct dev1 = new MengXunFct("127.0.0.1");//盟讯电子
-```
 ## 激光刻印 (Mark) <a id="Mark"></a>
 ```CSharp
 DaZhuMark dev1 = new DaZhuMark("127.0.0.1");//大族
