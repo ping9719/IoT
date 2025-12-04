@@ -556,10 +556,11 @@ LRC.CheckLRC(bytes);
 ```
 
 ## 傅立叶滤波(FFTFilter) <a id="FFTFilter"></a>
+傅立叶滤波（自动并行） 100W个点耗时430ms 
 ```CSharp
-//高性能 傅立叶滤波 100W个点耗时400ms 
-var aaa = Enumerable.Range(1, 1000_000).Select(o => (double)o).ToArray();
-var regression1122 = FFTFilter.FilterFFT(aaa, 0.0001);
+double[] result1 = FFTFilterOptimized.FilterFFT(data, 0.005);    //使用默认并行数6
+double[] result2 = FFTFilterOptimized.FilterFFT(data, 0.005, 8); //使用8个并行任务
+double[] result3 = FFTFilterOptimized.FilterFFT(data, 0.005, 1); //禁用并行计算
 ```
 
 
