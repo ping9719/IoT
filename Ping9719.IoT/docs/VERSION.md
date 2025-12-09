@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.5.0（...） 
+## v0.5.0（25-12-09） 
 1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
 2.[新增]`HttpService`   
 3.[新增]算法：线性回归   

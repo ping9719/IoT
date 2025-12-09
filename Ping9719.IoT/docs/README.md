@@ -15,7 +15,6 @@
     - [UsbHidClient (USB)](#UsbHidClient)
     - [BleClient (蓝牙)](#BleClient)
     - UdpClient （进行中） 
-    - UdpServer （待开发） 
     - [HttpServer](#HttpServer)
     - MqttClient （待开发） 
     - MqttServer （待开发） 
@@ -34,13 +33,11 @@
     - [爱普生 (EpsonRobot)](#Robot) 
 - [算法 (Algorithm)](#Algorithm)
     - [平均点位（AveragePoint）](#AveragePoint)
-    - [CRC](#CRC)
-    - [LRC](#LRC)
+    - [CRC校验](#CRC)
+    - [LRC校验](#LRC)
     - [傅立叶滤波(FFTFilter)](#FFTFilter) 
     - [稳定婚姻配对(GaleShapleyAlgorithm)](#GaleShapleyAlgorithm)   
     - [线性回归(LinearRegression)](#LinearRegression)
-    - PID （待开发） 
-    - RSA （待开发） 
 - [设备和仪器 (Device)](#Device)
     - [气密检测 (Airtight)](#Airtight)
         - 科斯莫气密检测 (CosmoAirtight)
