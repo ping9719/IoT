@@ -1,41 +1,34 @@
-﻿
-## Ping9719.IoT   
+﻿## Ping9719.IoT   
 工业互联网通讯库协议实现，包括主流协议：ModBus、S7、CIP、MC、FINS......等常用协议和PLC。可通过不同的方式：TCP、UDP、MQTT、USB、蓝牙...等进行简易方便的交换数据。
 
-语言选择：   
+### 语言选择：
 [简体中文](README.md) || [English](README_en-US.md)    
 
-开源源代码：   
+### 开源源代码：
 主库：[Github](https://github.com/ping9719/IoT)   
 备库：[Gitee](https://gitee.com/ping9719/IoT)    
 
-项目框架图：   
+### 文档入口：<a id="DocMain"></a>
+从这里进入到详细文档：[点我进入文档](Ping9719.IoT/docs/README.md) || [点我进入版本文档](Ping9719.IoT/docs/VERSION.md)
+
+### 项目框架图：
 ![](img/frame.png)
 
-## 安装&NuGet
+## 如何安装？
 ![](img/bao.png)
-环境、包名：
 
-| 项目                  |  环境                   |包名（NuGet）         |
-|-----------------------|-------------------------|----------------------|
-| Ping9719.IoT          | net45 ; netstandard2.0  |Ping9719.IoT          |
-| Ping9719.IoT.Hid      | net45 ; netstandard2.0  |Ping9719.IoT.Hid      | 
-| Ping9719.IoT.WPF      | net45 ; net8.0-windows  |Ping9719.IoT.WPF </br>(暂未发布)   | 
-| Ping9719.IoT.Avalonia | net8.0 ; netstandard2.0 |Ping9719.IoT.Avalonia </br>(暂未发布) | 
+## 包名&介绍：
 
+| 包名（NuGet）         |  环境                            		|  介绍                      | 
+|-----------------------|-------------------------				|----------------------------|
+| Ping9719.IoT          | net45 ; netstandard2.0            	|跨平台的库。包含基础、通信(TCP，UDP，串口... )、协议(ModBus，MC，FINS... )、算法(CRC，LRC...)、设备控制|
+| Ping9719.IoT.Hid      | net45 ; netstandard2.0        		|跨平台库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据 |
+| Ping9719.IoT.WPF</br>(暂未发布)      | net45 ; net8.0-windows |在windows平台上的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备|
+| Ping9719.IoT.Avalonia</br>(暂未发布) | net8.0 ; netstandard2.0|跨平台的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备 | 
 
-## 文档&介绍：<a id="Project"></a>  
-
-| 项目                  | 文档                                              | 版本                                         |  介绍                      | 
-|-----------------------|---------------------------------------------------|----------------------------------------------|----------------------------|
-| Ping9719.IoT          | [详细文档](Ping9719.IoT/docs/README.md)           |[版本文档](Ping9719.IoT/docs/VERSION.md)          | 跨平台的库。包含基础、通信(TCP，UDP，串口... )、协议(ModBus，MC，FINS... )、算法(CRC，LRC...)、设备控制|
-| Ping9719.IoT.Hid      | [详细文档](Ping9719.IoT.Hid/docs/README.md)       |[版本文档](Ping9719.IoT.Hid/docs/VERSION.md)      |跨平台库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据 |
-| Ping9719.IoT.WPF      | [详细文档](Ping9719.IoT.WPF/docs/README.md)       |[版本文档](Ping9719.IoT.WPF/docs/VERSION.md)      |在windows平台上的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备|
-| Ping9719.IoT.Avalonia | [详细文档](Ping9719.IoT.Avalonia/docs/README.md)  |[版本文档](Ping9719.IoT.Avalonia/docs/VERSION.md) |跨平台的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备 |
-
-## 项目亮点介绍：
-> 这里是亮点项目介绍，不是详细文档！！！详细文档在上面的“文档&介绍”中。   
-> 假如你还是找不到，你可以点击：（[跳转到文档&介绍](#Project)）（[跳转到IoT详细文档](Ping9719.IoT/docs/README.md)）
+## 亮点介绍：
+> 这里是项目亮点介绍，不是详细文档！！！详细文档在上面的“文档入口”中。   
+> 假如你找不到，你可以点击：（[跳转到文档入口](#DocMain)）（[跳转到IoT文档](Ping9719.IoT/docs/README.md)）
 
 1.<b>常用协议</b>实现 `IReadWrite`，可通过泛型方式进行读或写。  
 ```CSharp

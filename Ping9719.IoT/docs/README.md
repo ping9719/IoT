@@ -52,12 +52,10 @@
         - 霍尼韦尔扫码器 (HoneywellScanner)
         - 民德扫码器 (MindeoScanner)
     - [螺丝机 (Screw)](#Screw)
-        - 快克螺丝机 (KuaiKeDeskScrew,KuaiKeScrew,KuaiKeTcpScrew)（不推荐） 
         - 米勒螺丝机 (MiLeScrew)
-    - [温控 (TemperatureControl)](#TemperatureControl)
-        - 快克温控 (KuaiKeTemperatureControl)（不推荐） 
     - [焊接机 (Weld)](#Weld)
         - 快克焊接机 (KuaiKeWeld)
+    - [其他列表](#EstsList)
 - [常见问题](#Issue)
     - 1.如何使用自定义协议？
 
@@ -288,11 +286,11 @@ service.Open();
 ## UsbHidClient (USB) <a id="UsbHidClient"></a>
 `UsbHidClient : ClientBase`   
 
-1.需要安装扩展包 `Ping9719.IoT.Hid` 才能使用。   
-2.获取报告信息 `UsbHidClient.GetReportDescriptor(UsbHidClient.GetNames[0])`    
-> 1.报告类型：Input, Output, Feature   
-> 2.报告ID：一般在帧头，默认值为 `0x00`。可以使用“消息处理器”来处理。    
-> 3.报告长度：要求的固定长度，不足一般末尾添加`0x00`补齐（低速默认8，全速64，高速1024）。可以使用“消息处理器”来处理。    
+> 需要安装包 `Ping9719.IoT.Hid`    
+> 获取报告信息 `UsbHidClient.GetReportDescriptor(UsbHidClient.GetNames[0])`    
+>> 1.报告类型：Input, Output, Feature   
+>> 2.报告ID：一般在帧头，默认值为 `0x00`。可以使用“消息处理器”来处理。    
+>> 3.报告长度：要求的固定长度，不足一般末尾添加`0x00`补齐（低速8，全速64，高速1024）。可以使用“消息处理器”来处理。    
 
 ```CSharp
 var names = UsbHidClient.GetNames;//获取所有Usb设备
@@ -314,7 +312,7 @@ var client = new UsbHidClient(names[0]);//访问第一个设备
 ## BleClient (蓝牙) <a id="BleClient"></a>
 `UsbHidClient : ClientBase`  
 
-1.需要安装扩展包 `Ping9719.IoT.Hid` 才能使用。 
+> 需要安装包 `Ping9719.IoT.Hid` 
 ```CSharp
 var names = BleClient.GetNames;//获取所有蓝牙设备
 var client = new BleClient(names[0]);//访问第一个设备
@@ -628,6 +626,9 @@ DaZhuMark dev1 = new DaZhuMark("127.0.0.1");//大族
 HuaPuMark dev2 = new HuaPuMark("127.0.0.1");//华普
 ```
 ## 无线射频 (Rfid) <a id="Rfid"></a>
+<details><summary style="padding:10px;border:1px solid silver;border-radius:4px;">🚀 C#</summary>
+<div style="padding:5px;margin-top:8px;border:1px solid silver;border-radius:4px;">
+
 ```CSharp
 BeiJiaFuRfid rfid1 = new BeiJiaFuRfid("127.0.0.1");//倍加福
 DongJiRfid rfid2 = new DongJiRfid("127.0.0.1");//东集
@@ -638,6 +639,22 @@ WanQuanRfid rfid4 = new WanQuanRfid("127.0.0.1");//万全
 rfid4.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
 rfid4.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
 ```
+
+</div></details>
+
+<details><summary style="padding:10px;border:1px solid silver;border-radius:4px;">🖥️ WPF</summary>
+<div style="padding:5px;margin-top:8px;border:1px solid silver;border-radius:4px;">
+
+```CSharp
+//名称空间
+xmlns:piIoT="https://github.com/ping9719/IoT"
+//假如是Rfid，则为：RfidView
+<piIoT:RfidView DeviceData="{Binding Dev1}" Area="ISO15693" IsReadPara="True" Encoding="ASCII" ReadCount="2" WriteVal="A001"/>
+```
+![](img/RfidView.png)
+
+</div></details>
+
 ## 扫码枪 (Scanner) <a id="Scanner"></a>
 ```CSharp
 HoneywellScanner dev1 = new HoneywellScanner("127.0.0.1");//霍尼韦尔
@@ -647,14 +664,16 @@ MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
 ```CSharp
 MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 ```
-## 温控 (TemperatureControl) <a id="TemperatureControl"></a>
-```CSharp
-//快克温控不推荐
-```
-## 焊接机 (Weld) <a id="Weld"></a>
-```CSharp
-KuaiKeWeld dev1 = new KuaiKeWeld("COM1");
-```
+
+## 其他列表 <a id="EstsList"></a>
+
+| 对象名 | 功能 | 推荐(1-5) | WPF |Avalonia | |
+| ----------- | ---------------------- | ----------------------- | ------------------------ | --------------------- | ---------------- |
+| KuaiKeDeskScrew |快克螺丝机桌面式|2||||
+| KuaiKeScrew        |快克螺丝机|2||||
+| KuaiKeTcpScrew     |快克螺丝机电批|2||||
+| KuaiKeTemperatureControl    |快克温控|2||||
+| KuaiKeWeld    |快克焊接|3||||
 
 # 常见问题 <a id="Issue"></a>
 ## 1.如何使用自定义协议？
