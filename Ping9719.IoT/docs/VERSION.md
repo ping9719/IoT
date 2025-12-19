@@ -2,6 +2,9 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
+## v0.6.0（...） 
+1.[新增]支持西门子中的`String[num]`类型   
+2.[新增]`net8.0`   
 ## v0.5.0（25-12-09） 
 1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
 2.[新增]`HttpService`   

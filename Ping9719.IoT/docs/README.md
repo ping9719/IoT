@@ -477,6 +477,9 @@ client.Write<Int16>("BD100.0.0",new Int16[]{1,2,3});//连续写9999个数据，�
 //字符串说明
 client.Read<string>("BD100.0.0");//plc的类型必须为string，只支持字母数字等ASCII编码
 client.ReadString("BD100.0.0");//plc的类型必须为WString，支持中文等UTF16编码，
+//特殊PLC类型：String[3]
+client.ReadString("BD100.0.0", 3, Encoding.ASCII);
+client.WriteString("BD100.0.0", "abc", 3, Encoding.ASCII);
 ```
 
 # 机器人 (Robot) <a id="Robot"></a>

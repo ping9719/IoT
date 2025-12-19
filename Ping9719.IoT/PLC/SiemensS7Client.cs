@@ -1056,10 +1056,19 @@ namespace Ping9719.IoT.PLC
                 readResut = Read(address, (UInt16)length, false);
                 if (readResut.IsSucceed)
                 {
-                    var sl = BitConverter.ToUInt16(new byte[] { readResut.Value[3], readResut.Value[2] }, 0) * 2;
-                    var strData = readResut.Value.Skip(4).Take(sl).ToArray();
-                    var nr = encoding.GetString(strData);
-
+                    string nr = string.Empty;
+                    if (length == 512 && encoding == Encoding.BigEndianUnicode)
+                    {
+                        var sl = BitConverter.ToUInt16(new byte[] { readResut.Value[3], readResut.Value[2] }, 0) * 2;
+                        var strData = readResut.Value.Skip(4).Take(sl).ToArray();
+                        nr = encoding.GetString(strData);
+                    }
+                    else
+                    {
+                        var sl = BitConverter.ToUInt16(new byte[] { readResut.Value[1], readResut.Value[0] }, 0);
+                        var strData = readResut.Value.Skip(2).Take(sl).ToArray();
+                        nr = encoding.GetString(strData);
+                    }
                     return readResut.ToVal<string>(nr);
                 }
                 else
@@ -1177,7 +1186,7 @@ namespace Ping9719.IoT.PLC
         /// 针对与PLC中类型“WString”的写
         /// </summary>
         /// <param name="address">地址</param>
-        /// <param name="length">无效</param>
+        /// <param name="length">-1，自动检测长度，>0 PLC里面的长度比如 Sring[3] 这里填写3</param>
         /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
         /// <returns></returns>
         public override IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
@@ -1187,10 +1196,21 @@ namespace Ping9719.IoT.PLC
             var valueBytes = encoding.GetBytes(value);
             if (valueBytes.Length > 508)
                 return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
+            if (length > 0 && valueBytes.Length > length)
+                return IoTResult.Create().AddError($"字符串长度{valueBytes.Length}超过设定长度{length}");
 
-            var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
-            var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
-            return Write(address, bytes, false);
+            if (length == -1 && encoding == Encoding.BigEndianUnicode)
+            {
+                var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
+                var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                return Write(address, bytes, false);
+            }
+            else
+            {
+                var sl = BitConverter.GetBytes((UInt16)valueBytes.Length);
+                var bytes = new byte[] { sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                return Write(address, bytes, false);
+            }
         }
 
         public override IoTResult Write<T>(string address, IEnumerable<T> value)
