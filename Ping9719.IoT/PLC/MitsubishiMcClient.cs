@@ -992,11 +992,11 @@ namespace Ping9719.IoT.PLC
             }
             else if (value is byte bytev)
             {
-                return WriteValue(address, bytev, v => BitConverter.GetBytes(v));
+                return WriteValue(address, bytev, v => BitConverter.GetBytes((short)v));
             }
             else if (value is sbyte sbytev)
             {
-                return WriteValue(address, sbytev, v => BitConverter.GetBytes(v));
+                return WriteValue(address, sbytev, v => BitConverter.GetBytes((short)v));
             }
             else if (value is float floatv)
             {
@@ -1073,9 +1073,9 @@ namespace Ping9719.IoT.PLC
                 // ...existing code...
                 Func<T, byte[]> converter = null;
                 if (tType == typeof(byte))
-                    converter = v => BitConverter.GetBytes((byte)(object)v);
+                    converter = v => BitConverter.GetBytes((short)(byte)(object)v);
                 else if (tType == typeof(sbyte))
-                    converter = v => BitConverter.GetBytes((sbyte)(object)v);
+                    converter = v => BitConverter.GetBytes((short)(sbyte)(object)v);
                 else if (tType == typeof(short))
                     converter = v => BitConverter.GetBytes((short)(object)v);
                 else if (tType == typeof(ushort))
