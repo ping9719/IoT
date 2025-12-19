@@ -1186,6 +1186,7 @@ namespace Ping9719.IoT.PLC
         /// 针对与PLC中类型“WString”的写
         /// </summary>
         /// <param name="address">地址</param>
+        /// <param name="value">写入的值</param>
         /// <param name="length">-1，自动检测长度，>0 PLC里面的长度比如 Sring[3] 这里填写3</param>
         /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
         /// <returns></returns>
