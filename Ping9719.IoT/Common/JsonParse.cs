@@ -50,7 +50,7 @@ namespace Ping9719.IoT.Common
             }
         }
 
-        protected internal string SerializeObject(object obj)
+        protected internal static string SerializeObject(object obj)
         {
             if (UseJsonParse != null)
                 return UseJsonParse.SerializeObject(obj);
