@@ -462,9 +462,6 @@ namespace Ping9719.IoT.Communication
                             int readLength;
                             try
                             {
-                                //var receiveResult1 = cc.stream.BeginRead(data, 0, data.Length, null, null);
-                                //receiveResult1.AsyncWaitHandle.WaitOne();
-                                //readLength = cc.stream.EndRead(receiveResult1);
                                 readLength = await cc.openData.ReadAsync(data, 0, data.Length);
                             }
                             //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
@@ -495,11 +492,6 @@ namespace Ping9719.IoT.Communication
                             //断开
                             if (readLength <= 0)
                             {
-                                //if (readLength == 0)
-                                //{
-                                //    Message?.Invoke(this, new AsyncTcpEventArgs("远程关闭连接"));
-                                //}
-
                                 if (cc.IsOpen2 || cc.IsOpen)
                                 {
                                     IsOpen2 = false;
@@ -579,8 +571,6 @@ namespace Ping9719.IoT.Communication
             CancellationToken.None,
             (ConnectionMode == ConnectionMode.AutoReconnection ? TaskCreationOptions.LongRunning : TaskCreationOptions.None),
             TaskScheduler.Default).Unwrap();
-
-            //task.Start();
 
             //心跳线程
             if (ConnectionMode != ConnectionMode.AutoOpen && Heartbeat != null)
