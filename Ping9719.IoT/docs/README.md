@@ -32,6 +32,7 @@
 - [机器人 (Robot)](#Robot)
     - [爱普生 (EpsonRobot)](#Robot) 
 - [算法 (Algorithm)](#Algorithm)
+    - [仿射变换（AffineTransform）](#AffineTransform)
     - [平均点位（AveragePoint）](#AveragePoint)
     - [CRC校验](#CRC)
     - [LRC校验](#LRC)
@@ -496,6 +497,21 @@ client.Pause();
 ```
 
 # 算法 (Algorithm) <a id="Algorithm"></a>
+## 仿射变换（AffineTransform） <a id="AffineTransform"></a>
+仿射变换坐标转换器，可用于相机坐标和机器人坐标之间的双向转换
+```CSharp
+var converter = new AffineTransform();
+// 添加标定坐标对（相机坐标xy + 机器人坐标xy）
+converter.AddCalibration(100, 150, 50, 75);
+converter.AddCalibration(200, 250, 100, 125);
+converter.AddCalibration(300, 350, 150, 175);
+converter.AddCalibration(400, 450, 200, 225);
+var isok = converter.Calibrate();
+//转换（相机坐标=》机器人坐标）
+var p1 = converter.Transform(250, 300);
+//逆转换（机器人坐标=》相机坐标）
+var p2 = converter.TransformInverse(125, 150);                  
+```
 
 ## 平均点位（AveragePoint） <a id="AveragePoint"></a>
 使用场景：   
