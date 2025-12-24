@@ -57,7 +57,8 @@
         - 快克焊接机 (KuaiKeWeld)
     - [其他列表](#EstsList)
 - [常见问题](#Issue)
-    - 1.如何使用自定义协议？
+    - [1.如何使用自定义协议？](#UserProtocol)
+    - [2.如何自定义Json解析？](#UserJson)
 
 # 通讯 (Communication) <a id="Communication"></a>
 使用指定的方式进行交互信息。
@@ -679,7 +680,7 @@ MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 | KuaiKeWeld    |快克焊接|3||||
 
 # 常见问题 <a id="Issue"></a>
-## 1.如何使用自定义协议？
+## 1.如何使用自定义协议？ <a id="UserProtocol"></a>
 ```CSharp
 //XXX协议实现
 public class XXX
@@ -721,5 +722,23 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();
 
 var info = client.ReadXXX();
+```
+
+## 2.如何自定义Json解析？ <a id="UserJson"></a>
+1.Json解析优先采用用户自定义的   
+2.在`NET8`中采用`System.Text.Json`   
+3.非`NET8`中采用`System.Runtime.Serialization.Json`  
+
+所以在非`NET8`中推荐自定义Json解析：
+```CSharp
+//自定义Json解析
+public class MyJsonParse : IJsonParse
+{
+    public T DeserializeObject<T>(string json) => Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+    public string SerializeObject(object obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+}
+
+//使用自定义Json解析，写在Main方法中
+JsonParse.UseJsonParse = new MyJsonParse();
 ```
 

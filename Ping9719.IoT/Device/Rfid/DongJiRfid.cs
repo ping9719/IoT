@@ -37,7 +37,7 @@ namespace Ping9719.IoT.Device.Rfid
             try
             {
                 //开始寻卡
-                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 1 } }) + "$");
+                var sendInfo = Client.Encoding.GetBytes(JsonParse.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 1 } }) + "$");
                 var retValue_Send = Client.Send(sendInfo);
                 if (!retValue_Send.IsSucceed)
                 {
@@ -62,7 +62,7 @@ namespace Ping9719.IoT.Device.Rfid
             try
             {
                 //开始寻卡
-                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
+                var sendInfo = Client.Encoding.GetBytes(JsonParse.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
                 var retValue_Send = Client.Send(sendInfo);
                 if (!retValue_Send.IsSucceed)
                 {
@@ -87,13 +87,13 @@ namespace Ping9719.IoT.Device.Rfid
             try
             {
                 //停止寻卡
-                var sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
+                var sendInfo = Client.Encoding.GetBytes(JsonParse.SerializeObject(new DongJiRfidModel { code = 1011 }) + "$");
                 var retValue_Send = Client.SendReceive(sendInfo);
                 //if (!retValue_Send.IsSucceed)
                 //    return new Result<string>(retValue_Send).EndTime();
 
                 //开始寻卡
-                sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 0 } }) + "$");
+                sendInfo = Client.Encoding.GetBytes(JsonParse.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 0 } }) + "$");
                 retValue_Send = Client.SendReceive(sendInfo);
                 if (!retValue_Send.IsSucceed)
                 {
@@ -108,7 +108,7 @@ namespace Ping9719.IoT.Device.Rfid
                     return result;
                 }
                 var newval = data.Split('$').Where(o => !string.IsNullOrEmpty(o)).LastOrDefault();
-                var datajson = JsonUtil.DeserializeObject<DongJiRfidModel<List<DongJiRfidLogBaseEpcInfo>>>(newval);
+                var datajson = JsonParse.DeserializeObject<DongJiRfidModel<List<DongJiRfidLogBaseEpcInfo>>>(newval);
                 if (datajson.code != 0)
                 {
                     return result.AddError(datajson.rtMsg);
@@ -153,14 +153,14 @@ namespace Ping9719.IoT.Device.Rfid
             try
             {
                 //停止寻卡
-                var aaaa = JsonUtil.SerializeObject(new DongJiRfidModel { code = 1011 });
+                var aaaa = JsonParse.SerializeObject(new DongJiRfidModel { code = 1011 });
                 var sendInfo = Client.Encoding.GetBytes(aaaa + "$");
                 var retValue_Send = Client.SendReceive(sendInfo);
                 //if (!retValue_Send.IsSucceed)
                 //    return new Result<string>(retValue_Send).EndTime();
 
                 //开始寻卡
-                sendInfo = Client.Encoding.GetBytes(JsonUtil.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 0 } }) + "$");
+                sendInfo = Client.Encoding.GetBytes(JsonParse.SerializeObject(new DongJiRfidModel<DongJiRfidParamEpcFilter> { code = 1018, data = new DongJiRfidParamEpcFilter { antennaEnable = 1, inventoryMode = 0 } }) + "$");
                 retValue_Send = Client.SendReceive(sendInfo);
                 if (!retValue_Send.IsSucceed)
                 {
@@ -176,7 +176,7 @@ namespace Ping9719.IoT.Device.Rfid
                 }
 
                 var newval = data.Split('$').Where(o => !string.IsNullOrEmpty(o)).LastOrDefault();
-                var datajson = JsonUtil.DeserializeObject<DongJiRfidModel<List<DongJiRfidLogBaseEpcInfo>>>(newval);
+                var datajson = JsonParse.DeserializeObject<DongJiRfidModel<List<DongJiRfidLogBaseEpcInfo>>>(newval);
                 //var datajson = JsonUtil.DeserializeObject<DongJiRfidModel<List<DongJiRfidLogBaseEpcInfo>>>(data.Substring(0, data.Length - 1));
 
                 if (datajson.code == 1000)
