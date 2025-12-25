@@ -11,10 +11,10 @@
         - [4.心跳（Heartbeat）](#Heartbeat)
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
+    - [UdpClient](#UdpClient)
     - [SerialPortClient (串口)](#SerialPortClient)
     - [UsbHidClient (USB)](#UsbHidClient)
     - [BleClient (蓝牙)](#BleClient)
-    - UdpClient （进行中） 
     - [HttpServer](#HttpServer)
     - MqttClient （待开发） 
     - MqttServer （待开发） 
@@ -219,6 +219,30 @@ if (service.Clients.Any())
 }
 ```
 
+## UdpClient   <a id="UdpClient"></a>   
+`UdpClient : ClientBase`
+```CSharp
+//远程发送为：10.10.1.69:8001
+//本地监听为：10.10.1.69:8002
+var client = new UdpClient("10.10.1.69", 8001, 8002);
+client.Encoding = Encoding.UTF8;
+client.ConnectionMode = ConnectionMode.Manual;//Udp不要使用断线重连模式（AutoReconnection）
+
+client.Opened = (a) => { Console.WriteLine("链接成功。"); };
+client.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client.Received = (a, b) =>
+{
+    Console.WriteLine($"收到[{(a as INetwork)?.Socket?.RemoteEndPoint}]消息：{a.Encoding.GetString(b)}");
+};
+
+client.Open();//打开，在打开前处理属性和事件
+
+client.Send("abc");
+var info1 = client.Receive(3000);//接收，3秒超时
+var info2 = client.SendReceive("abc");//发送并等待接收
+
+client.Close();
+```
 
 ## SerialPortClient <a id="SerialPortClient"></a>
 `SerialPortClient : ClientBase`   

@@ -20,21 +20,47 @@ namespace Ping9719.IoT.Communication
         public override bool IsOpen => base.IsOpen && udpClient != null;
         public Socket Socket => udpClient?.Client;
 
-        string ip; int port;
+        IPAddress ip; int port; int listeningPort;
 
         private System.Net.Sockets.UdpClient udpClient;
-
-        public UdpClient(string ip, int port)
+        /// <summary>
+        /// Udp客户端
+        /// </summary>
+        /// <param name="ip">远程和本地的ip</param>
+        /// <param name="port">远端的端口</param>
+        /// <param name="listeningPort">监听的本机端口</param>
+        public UdpClient(string ip, int port, int listeningPort)
+        {
+            this.ip = IPAddress.Parse(ip);
+            this.port = port;
+            this.listeningPort = listeningPort;
+            Ini();
+        }
+        /// <summary>
+        /// Udp客户端
+        /// </summary>
+        /// <param name="ip">远程和本地的ip</param>
+        /// <param name="port">远端的端口</param>
+        /// <param name="listeningPort">监听的本机端口</param>
+        public UdpClient(IPAddress ip, int port, int listeningPort)
         {
             this.ip = ip;
             this.port = port;
+            this.listeningPort = listeningPort;
+            Ini();
+        }
+
+        void Ini()
+        {
+            ConnectionMode = ConnectionMode.Manual;
+            Encoding = Encoding.UTF8;
+            ReceiveMode = ReceiveMode.ParseByteAll();
+            ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
 
         protected override OpenClientData Open2()
         {
-            udpClient = new System.Net.Sockets.UdpClient(AddressFamily.InterNetworkV6);
-            udpClient.Client.DualMode = true;
-
+            udpClient = new System.Net.Sockets.UdpClient(listeningPort);
             udpClient.Connect(ip, port);
 
             return new OpenClientData(udpClient.Client);
