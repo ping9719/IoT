@@ -155,7 +155,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 添加错误
         /// </summary>
-        public new IoTResult<T> AddError(string error, bool? isSucceed = false) => AddError(new Exception(error), isSucceed);
+        public new IoTResult<T> AddError(string error, bool? isSucceed = false) => string.IsNullOrEmpty(error) ? this : AddError(new Exception(error), isSucceed);
 
         /// <summary>
         /// 标记为结束
