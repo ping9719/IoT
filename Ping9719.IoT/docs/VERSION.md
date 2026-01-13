@@ -7,7 +7,10 @@
 2.[新增]`net8.0`   
 3.[新增]可自定义Json解析   
 4.[新增]仿射变换   
-5.[新增]UdpClient
+5.[新增]UdpClient   
+6.[优化]忽略空错误   
+7.[优化]OmronFins错误和结束符处理   
+8.[新增]OmronFins支持批量连续读写   
 ## v0.5.0（25-12-09） 
 1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
 2.[新增]`HttpService`   
