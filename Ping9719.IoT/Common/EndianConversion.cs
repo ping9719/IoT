@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Common
     public static class EndianConversion
     {
         /// <summary>
-        /// 字节格式转换
+        /// 字节格式转换,应该淘汰使用 <see cref="EndianIotToNet"/> 和 <see cref="EndianNetToIot"/>
         /// </summary>
         /// <param name="value"></param>
         /// <param name="format"></param>
@@ -144,7 +144,7 @@ namespace Ping9719.IoT.Common
         }
 
         /// <summary>
-        /// 字节格式转换
+        /// 字节格式转换,应该淘汰使用 <see cref="EndianIotToNet"/> 和 <see cref="EndianNetToIot"/>
         /// </summary>
         /// <param name="value"></param>
         /// <param name="format"></param>
@@ -516,9 +516,10 @@ namespace Ping9719.IoT.Common
         /// <param name="format"></param>
         /// <param name="boolConv8"></param>
         /// <param name="boolConv8Reverse"></param>
+        /// <param name="endianAction">转换字节 调用的方法 默认为 <see cref="ToByteFormat"/></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static T[] ByteToObj<T>(this byte[] value, EndianFormat format = EndianFormat.ABCD, bool boolConv8 = false, bool boolConv8Reverse = true)
+        public static T[] ByteToObj<T>(this byte[] value, EndianFormat format = EndianFormat.ABCD, bool boolConv8 = false, bool boolConv8Reverse = true, Func<byte[], byte[]> endianAction = null)
         {
             var sl = WordHelp.OccupyBitNum<T>();
             if (value.Length % sl != 0)
@@ -540,7 +541,8 @@ namespace Ping9719.IoT.Common
                 {
                     for (var i = 0; i < value.Length; i = i + sl)
                     {
-                        var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                        var qu = value.Skip(i).Take(sl).ToArray();
+                        qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                         buffer.Add((T)(object)BitConverter.ToBoolean(qu, 0));
                     }
                 }
@@ -556,7 +558,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToSingle(qu, 0));
                 }
             }
@@ -564,7 +567,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToDouble(qu, 0));
                 }
             }
@@ -572,7 +576,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToInt16(qu, 0));
                 }
             }
@@ -580,7 +585,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToInt32(qu, 0));
                 }
             }
@@ -588,7 +594,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToInt64(qu, 0));
                 }
             }
@@ -596,7 +603,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToUInt16(qu, 0));
                 }
             }
@@ -604,7 +612,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToUInt32(qu, 0));
                 }
             }
@@ -612,7 +621,8 @@ namespace Ping9719.IoT.Common
             {
                 for (var i = 0; i < value.Length; i = i + sl)
                 {
-                    var qu = value.Skip(i).Take(sl).ToArray().ToByteFormat(format);
+                    var qu = value.Skip(i).Take(sl).ToArray();
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
                     buffer.Add((T)(object)BitConverter.ToUInt64(qu, 0));
                 }
             }
@@ -629,9 +639,10 @@ namespace Ping9719.IoT.Common
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
         /// <param name="format"></param>
+        /// <param name="endianAction">转换字节 调用的方法 默认为 <see cref="ToByteFormat"/></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static byte[] ObjToByte<T>(this IEnumerable<T> value, EndianFormat format = EndianFormat.ABCD)
+        public static byte[] ObjToByte<T>(this IEnumerable<T> value, EndianFormat format = EndianFormat.ABCD, Func<byte[], byte[]> endianAction = null)
         {
             var sl = WordHelp.OccupyBitNum<T>();
             var tType = typeof(T);
@@ -656,7 +667,10 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (float)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(double))
@@ -664,7 +678,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (double)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(short))
@@ -672,7 +688,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (short)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(int))
@@ -680,7 +698,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (int)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(long))
@@ -688,7 +708,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (long)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(ushort))
@@ -696,7 +718,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (ushort)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(uint))
@@ -704,7 +728,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (uint)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else if (tType == typeof(ulong))
@@ -712,7 +738,9 @@ namespace Ping9719.IoT.Common
                 foreach (var item in value)
                 {
                     var iv = (ulong)(object)item;
-                    buffer.AddRange(BitConverter.GetBytes(iv).ToByteFormat(format));
+                    var qu = BitConverter.GetBytes(iv);
+                    qu = endianAction == null ? ToByteFormat(qu, format) : endianAction.Invoke(qu);
+                    buffer.AddRange(qu);
                 }
             }
             else
