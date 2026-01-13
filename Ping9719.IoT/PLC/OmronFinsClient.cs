@@ -132,19 +132,16 @@ namespace Ping9719.IoT.PLC
             var result = new IoTResult<byte[]>();
             try
             {
-                //发送读取信息
                 var arg = ConvertArg(address, isBit: isBit);
                 byte[] command = GetReadCommand(arg, length);
-                result.Requests.Add(command);
-                //发送命令 并获取响应报文
-                var sendResult = Client.SendReceive(command);
-                if (!sendResult.IsSucceed)
-                    return sendResult;
-                var dataPackage = sendResult.Value;
+
+                result = Client.SendReceive(command);
+                result = IsResponseOk(result);
+                if (!result.IsSucceed)
+                    return result;
 
                 byte[] responseData = new byte[length];
-                Array.Copy(dataPackage, dataPackage.Length - length, responseData, 0, length);
-                result.Responses.Add(dataPackage);
+                Array.Copy(result.Value, result.Value.Length - length, responseData, 0, length);
                 if (setEndian)
                     result.Value = responseData.ToArray().ByteFormatting(endianFormat, false);
                 else
@@ -469,16 +466,9 @@ namespace Ping9719.IoT.PLC
             {
                 data = data.Reverse().ToArray().ByteFormatting(endianFormat);
                 var arg = ConvertArg(address, isBit: isBit);
+
                 byte[] command = GetWriteCommand(arg, data);
-
-                sendResult = Client.SendReceive(command);
-                if (!sendResult.IsSucceed)
-                    return sendResult;
-
-                if (sendResult.Value.Length <= 0)
-                {
-
-                }
+                sendResult = IsResponseOk(Client.SendReceive(command));
             }
             catch (Exception ex)
             {
@@ -499,17 +489,11 @@ namespace Ping9719.IoT.PLC
             IoTResult result = new IoTResult();
             try
             {
-                //data = data.Reverse.ToArray().ByteFormatting2(endianFormat);
                 //发送写入信息
                 var arg = ConvertArg(address, isBit: isBit);
                 byte[] command = GetWriteCommand(arg, data);
 
-                var sendResult = Client.SendReceive(command);
-                if (!sendResult.IsSucceed)
-                    return sendResult;
-
-                var dataPackage = sendResult.Value;
-
+                return IsResponseOk(Client.SendReceive(command));
             }
             catch (Exception ex)
             {
@@ -982,6 +966,50 @@ namespace Ping9719.IoT.PLC
             throw new NotImplementedException();
         }
 
+        public IoTResult<byte[]> IsResponseOk(IoTResult<byte[]> data)
+        {
+            if (!data.IsSucceed || data.Value == null || data.Value.Length < 30)
+            {
+                data.IsSucceed = false;
+                return data;
+            }
+            //注入错误信息
+            UInt32 errCode = BitConverter.ToUInt32(data.Value.Skip(12).Take(4).Reverse().ToArray(),0);
+            if (errCode == 0x00)
+                data.AddError(string.Empty, true);
+            else if (errCode == 0x01)
+                data.AddError("数据头不是FINS格式或ASCII格式 The header is not 'FINS' (ASCII code)", true);
+            else if (errCode == 0x02)
+                data.AddError("数据长度过长 The data length is too long", true);
+            else if (errCode == 0x03)
+                data.AddError("命令不被支持或命令错误 The command is not supported", true);
+            else if (errCode == 0x20)
+                data.AddError("所有连接都被占用 All connections are in use", true);
+            else if (errCode == 0x21)
+                data.AddError("尝试从未指定IP地址访问受保护的节点 The specified node is already connected", true);
+            else if (errCode == 0x22)
+                data.AddError("尝试从未指定IP地址访问受保护的节点 Attempt to access a protected node from an unspecified IP address", true);
+            else if (errCode == 0x23)
+                data.AddError("客户端FINS节点地址超出范围 The client FINS node address is out of range", true);
+            else if (errCode == 0x24)
+                data.AddError("客户端和服务器使用了相同的FINS节点地址 The same FINS node address is being used by the client and server", true);
+            else if (errCode == 0x25)
+                data.AddError("所有可用于分配的节点地址已被使用 All the node addresses available for allocation have been used", true);
+            else if (errCode == 0x25)
+                data.AddError($"PLC错误，错误代码：{errCode}", true);
+
+            //判断是否结束
+            UInt16 endCode = BitConverter.ToUInt16(data.Value.Skip(28).Take(2).Reverse().ToArray(), 0);
+            if (endCode == 0x00)
+                data.IsSucceed = true;
+            //else if (endCode == 0x40)//部分plc才有？？？
+            //    data.AddError("PLC中产生了报警，可屏蔽64报警或清除plc错误", true);
+            else
+                data.AddError($"PLC错误，错误结束码：{endCode}");
+
+            return data;
+        }
+
         #region IIoTBase
         public override IoTResult<T> Read<T>(string address)
         {
@@ -1008,8 +1036,8 @@ namespace Ping9719.IoT.PLC
             }
             else if (tType == typeof(short))
             {
-                var readResut = ReadInt16(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+                var readResut = Read(address, 2);
+                return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value, 0)) : readResut.ToVal<T>();
             }
             else if (tType == typeof(int))
             {
