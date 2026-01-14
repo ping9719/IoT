@@ -1192,25 +1192,32 @@ namespace Ping9719.IoT.PLC
         /// <returns></returns>
         public override IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
         {
-            encoding = encoding ?? Encoding.BigEndianUnicode;
-
-            var valueBytes = encoding.GetBytes(value);
-            if (valueBytes.Length > 508)
-                return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
-            if (length > 0 && valueBytes.Length > length)
-                return IoTResult.Create().AddError($"字符串长度{valueBytes.Length}超过设定长度{length}");
-
-            if (length == -1 && encoding == Encoding.BigEndianUnicode)
+            try
             {
-                var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
-                var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
-                return Write(address, bytes, false);
+                encoding = encoding ?? Encoding.BigEndianUnicode;
+
+                var valueBytes = encoding.GetBytes(value);
+                if (valueBytes.Length > 508)
+                    return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
+                if (length > 0 && valueBytes.Length > length)
+                    return IoTResult.Create().AddError($"字符串长度{valueBytes.Length}超过设定长度{length}");
+
+                if (length == -1 && encoding == Encoding.BigEndianUnicode)
+                {
+                    var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
+                    var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                    return Write(address, bytes, false);
+                }
+                else
+                {
+                    var sl = BitConverter.GetBytes((UInt16)valueBytes.Length);
+                    var bytes = new byte[] { sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                    return Write(address, bytes, false);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var sl = BitConverter.GetBytes((UInt16)valueBytes.Length);
-                var bytes = new byte[] { sl[1], sl[0] }.Concat(valueBytes).ToArray();
-                return Write(address, bytes, false);
+                return IoTResult.Create().AddError(ex);
             }
         }
 
@@ -1249,7 +1256,7 @@ namespace Ping9719.IoT.PLC
                 }
                 else if (tType == typeof(DateTime))
                 {
-                    var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).Reverse()).SelectMany(o=>o).ToArray();
+                    var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).Reverse()).SelectMany(o => o).ToArray();
                     return Write(address, data2, false);
                 }
                 else if (tType == typeof(TimeSpan))

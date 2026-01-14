@@ -763,54 +763,62 @@ namespace Ping9719.IoT.PLC
 
         public override IoTResult Write<T>(string address, T value)
         {
-            if (value is bool boolv)
+            try
             {
-                return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                if (value is bool boolv)
+                {
+                    return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                }
+                else if (value is byte bytev)
+                {
+                    return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                }
+                else if (value is float Singlev)
+                {
+                    return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
+                }
+                else if (value is double doublev)
+                {
+                    return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
+                }
+                else if (value is short Int16v)
+                {
+                    return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
+                }
+                else if (value is int Int32v)
+                {
+                    return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
+                }
+                else if (value is long Int64v)
+                {
+                    return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
+                }
+                else if (value is ushort UInt16v)
+                {
+                    return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
+                }
+                else if (value is uint UInt32v)
+                {
+                    return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
+                }
+                else if (value is ulong UInt64v)
+                {
+                    return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
+                }
+                else if (value is string stringv)
+                {
+                    var valueBytes = Encoding.GetBytes(stringv);
+                    var data = BitConverter.GetBytes((ushort)valueBytes.Length).Concat(valueBytes).ToArray();
+                    return Write(address, CipVariableType.STRING, data);
+                }
+                else
+                    throw new NotImplementedException("暂不支持的类型");
             }
-            else if (value is byte bytev)
+            catch (Exception ex)
             {
-                return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                return new IoTResult().AddError(ex);
             }
-            else if (value is float Singlev)
-            {
-                return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
-            }
-            else if (value is double doublev)
-            {
-                return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
-            }
-            else if (value is short Int16v)
-            {
-                return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
-            }
-            else if (value is int Int32v)
-            {
-                return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
-            }
-            else if (value is long Int64v)
-            {
-                return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
-            }
-            else if (value is ushort UInt16v)
-            {
-                return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
-            }
-            else if (value is uint UInt32v)
-            {
-                return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
-            }
-            else if (value is ulong UInt64v)
-            {
-                return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
-            }
-            else if (value is string stringv)
-            {
-                var valueBytes = Encoding.GetBytes(stringv);
-                var data = BitConverter.GetBytes((ushort)valueBytes.Length).Concat(valueBytes).ToArray();
-                return Write(address, CipVariableType.STRING, data);
-            }
-            else
-                throw new NotImplementedException("暂不支持的类型");
+
         }
 
         public override IoTResult WriteString(string address, string value, int length, Encoding encoding)

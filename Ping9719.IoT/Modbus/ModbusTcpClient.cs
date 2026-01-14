@@ -113,12 +113,12 @@ namespace Ping9719.IoT.Modbus
         /// <returns></returns>
         public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
-            var result = ModbusInfo.AddressAnalysis(address, stationNumber);
-            if (!result.IsSucceed)
-                return result.ToVal<string>();
-
             try
             {
+                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                if (!result.IsSucceed)
+                    return result.ToVal<string>();
+
                 var comm = result.Value.GetModbusTcpCommand<string>(Convert.ToUInt16(length), null, TransactionId, Client.Encoding, format);
                 if (!comm.IsSucceed)
                     return comm.ToVal<string>();
@@ -157,12 +157,12 @@ namespace Ping9719.IoT.Modbus
         /// <param name="number">读取数量</param>
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            var result = ModbusInfo.AddressAnalysis(address, stationNumber);
-            if (!result.IsSucceed)
-                return result.ToVal<IEnumerable<T>>();
-
             try
             {
+                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                if (!result.IsSucceed)
+                    return result.ToVal<IEnumerable<T>>();
+
                 var comm = result.Value.GetModbusTcpCommand<T>(Convert.ToUInt16(number), null, TransactionId, Client.Encoding, format);
                 if (!comm.IsSucceed)
                     return comm.ToVal<IEnumerable<T>>();
@@ -282,12 +282,12 @@ namespace Ping9719.IoT.Modbus
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
         public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
-            var result = ModbusInfo.AddressAnalysis(address, stationNumber);
-            if (!result.IsSucceed)
-                return result;
-
             try
             {
+                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                if (!result.IsSucceed)
+                    return result;
+
                 var comm = result.Value.GetModbusTcpCommand<T>(0, value, TransactionId, Client.Encoding, format);
                 if (!comm.IsSucceed)
                     return comm;

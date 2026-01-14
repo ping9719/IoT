@@ -38,8 +38,16 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
         public override IoTResult<T> Read<T>(string address)
         {
-            var nAddress = AddressAnalysis(address);
-            return base.Read<T>(nAddress);
+            try
+            {
+                var nAddress = AddressAnalysis(address);
+                return base.Read<T>(nAddress);
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult<T>().AddError(ex);
+            }
+
         }
 
         /// <summary>
@@ -49,8 +57,16 @@ namespace Ping9719.IoT.PLC
         /// <param name="number">读取数量</param>
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            var nAddress = AddressAnalysis(address);
-            return base.Read<T>(nAddress, number);
+            try
+            {
+                var nAddress = AddressAnalysis(address);
+                return base.Read<T>(nAddress, number);
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult<IEnumerable<T>>().AddError(ex);
+            }
+
         }
 
         /// <summary>
@@ -59,8 +75,16 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
         public override IoTResult Write<T>(string address, T value)
         {
-            var nAddress = AddressAnalysis(address);
-            return base.Write(nAddress, value);
+            try
+            {
+                var nAddress = AddressAnalysis(address);
+                return base.Write(nAddress, value);
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex);
+            }
+
         }
 
         /// <summary>
@@ -69,8 +93,16 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
         public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
-            var nAddress = AddressAnalysis(address);
-            return base.Write(nAddress, value);
+            try
+            {
+                var nAddress = AddressAnalysis(address);
+                return base.Write(nAddress, value);
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex);
+            }
+
         }
         #endregion
 

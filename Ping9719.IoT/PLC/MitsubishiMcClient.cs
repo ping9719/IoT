@@ -856,188 +856,221 @@ namespace Ping9719.IoT.PLC
 
         public override IoTResult<T> Read<T>(string address)
         {
-            var tType = typeof(T);
-            if (tType == typeof(bool))
+            try
             {
-                var readResut = ReadBoolean(address);
-                return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+                var tType = typeof(T);
+                if (tType == typeof(bool))
+                {
+                    var readResut = ReadBoolean(address);
+                    return new IoTResult<T>(readResut, (T)(object)readResut.Value);
+                }
+                else if (tType == typeof(byte))
+                {
+                    var r = ReadValue(address, 1, (b, i) => b[i]);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(sbyte))
+                {
+                    var r = ReadValue(address, 1, (b, i) => (sbyte)b[i]);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(short))
+                {
+                    var r = ReadValue(address, 2, BitConverter.ToInt16);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(ushort))
+                {
+                    var r = ReadValue(address, 2, BitConverter.ToUInt16);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(int))
+                {
+                    var r = ReadValue(address, 4, BitConverter.ToInt32);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(uint))
+                {
+                    var r = ReadValue(address, 4, BitConverter.ToUInt32);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(long))
+                {
+                    var r = ReadValue(address, 8, BitConverter.ToInt64);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(ulong))
+                {
+                    var r = ReadValue(address, 8, BitConverter.ToUInt64);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(float))
+                {
+                    var r = ReadValue(address, 4, BitConverter.ToSingle);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+                else if (tType == typeof(double))
+                {
+                    var r = ReadValue(address, 8, BitConverter.ToDouble);
+                    return new IoTResult<T>(r, (T)(object)r.Value);
+                }
+
+                throw new NotImplementedException("暂不支持的类型");
             }
-            else if (tType == typeof(byte))
+            catch (Exception ex)
             {
-                var r = ReadValue(address, 1, (b, i) => b[i]);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(sbyte))
-            {
-                var r = ReadValue(address, 1, (b, i) => (sbyte)b[i]);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(short))
-            {
-                var r = ReadValue(address, 2, BitConverter.ToInt16);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(ushort))
-            {
-                var r = ReadValue(address, 2, BitConverter.ToUInt16);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(int))
-            {
-                var r = ReadValue(address, 4, BitConverter.ToInt32);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(uint))
-            {
-                var r = ReadValue(address, 4, BitConverter.ToUInt32);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(long))
-            {
-                var r = ReadValue(address, 8, BitConverter.ToInt64);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(ulong))
-            {
-                var r = ReadValue(address, 8, BitConverter.ToUInt64);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(float))
-            {
-                var r = ReadValue(address, 4, BitConverter.ToSingle);
-                return new IoTResult<T>(r, (T)(object)r.Value);
-            }
-            else if (tType == typeof(double))
-            {
-                var r = ReadValue(address, 8, BitConverter.ToDouble);
-                return new IoTResult<T>(r, (T)(object)r.Value);
+                return IoTResult.Create<T>().AddError(ex);
             }
 
-            throw new NotImplementedException("暂不支持的类型");
         }
 
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            var tType = typeof(T);
-            if (tType == typeof(bool))
+            try
             {
-                var readResut = ReadBoolean(address, (ushort)number);
-                return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+                var tType = typeof(T);
+                if (tType == typeof(bool))
+                {
+                    var readResut = ReadBoolean(address, (ushort)number);
+                    return new IoTResult<IEnumerable<T>>(readResut, (IEnumerable<T>)(object)readResut.Value);
+                }
+                else if (tType == typeof(byte))
+                {
+                    var r = ReadValues(address, (ushort)number, 1, (b, i) => b[i]);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(sbyte))
+                {
+                    var r = ReadValues(address, (ushort)number, 1, (b, i) => (sbyte)b[i]);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(short))
+                {
+                    var r = ReadValues(address, (ushort)number, 2, BitConverter.ToInt16);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(ushort))
+                {
+                    var r = ReadValues(address, (ushort)number, 2, BitConverter.ToUInt16);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(int))
+                {
+                    var r = ReadValues(address, (ushort)number, 4, BitConverter.ToInt32);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(uint))
+                {
+                    var r = ReadValues(address, (ushort)number, 4, BitConverter.ToUInt32);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(long))
+                {
+                    var r = ReadValues(address, (ushort)number, 8, BitConverter.ToInt64);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(ulong))
+                {
+                    var r = ReadValues(address, (ushort)number, 8, BitConverter.ToUInt64);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(float))
+                {
+                    var r = ReadValues(address, (ushort)number, 4, BitConverter.ToSingle);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else if (tType == typeof(double))
+                {
+                    var r = ReadValues(address, (ushort)number, 8, BitConverter.ToDouble);
+                    return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                }
+                else
+                    throw new NotImplementedException("暂不支持的类型");
             }
-            if (tType == typeof(byte))
+            catch (Exception ex)
             {
-                var r = ReadValues(address, (ushort)number, 1, (b, i) => b[i]);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
+                return IoTResult.Create<IEnumerable<T>>().AddError(ex);
             }
-            if (tType == typeof(sbyte))
-            {
-                var r = ReadValues(address, (ushort)number, 1, (b, i) => (sbyte)b[i]);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(short))
-            {
-                var r = ReadValues(address, (ushort)number, 2, BitConverter.ToInt16);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(ushort))
-            {
-                var r = ReadValues(address, (ushort)number, 2, BitConverter.ToUInt16);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(int))
-            {
-                var r = ReadValues(address, (ushort)number, 4, BitConverter.ToInt32);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(uint))
-            {
-                var r = ReadValues(address, (ushort)number, 4, BitConverter.ToUInt32);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(long))
-            {
-                var r = ReadValues(address, (ushort)number, 8, BitConverter.ToInt64);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(ulong))
-            {
-                var r = ReadValues(address, (ushort)number, 8, BitConverter.ToUInt64);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(float))
-            {
-                var r = ReadValues(address, (ushort)number, 4, BitConverter.ToSingle);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            if (tType == typeof(double))
-            {
-                var r = ReadValues(address, (ushort)number, 8, BitConverter.ToDouble);
-                return new IoTResult<IEnumerable<T>>(r, (IEnumerable<T>)(object)r.Value);
-            }
-            throw new NotImplementedException("暂不支持的类型");
+
         }
 
         public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
         {
-            var r = ReadValue(address, length, (b, i) => encoding.GetString(b, i, length));
-            return new IoTResult<string>(r, (string)(object)r.Value);
+            try
+            {
+                var r = ReadValue(address, length, (b, i) => encoding.GetString(b, i, length));
+                return new IoTResult<string>(r, (string)(object)r.Value);
+            }
+            catch (Exception ex)
+            {
+                return IoTResult.Create<string>().AddError(ex);
+            }
+
         }
 
         public override IoTResult Write<T>(string address, T value)
         {
-            if (value is bool boolv)
+            try
             {
-                // bool 类型有特殊 bit 写法，单独处理
-                return Write(address, boolv);
+                if (value is bool boolv)
+                {
+                    // bool 类型有特殊 bit 写法，单独处理
+                    return Write(address, boolv);
+                }
+                else if (value is byte bytev)
+                {
+                    return WriteValue(address, bytev, v => BitConverter.GetBytes((short)v));
+                }
+                else if (value is sbyte sbytev)
+                {
+                    return WriteValue(address, sbytev, v => BitConverter.GetBytes((short)v));
+                }
+                else if (value is float floatv)
+                {
+                    return WriteValue(address, floatv, v => BitConverter.GetBytes(v));
+                }
+                else if (value is double doublev)
+                {
+                    return WriteValue(address, doublev, BitConverter.GetBytes);
+                }
+                else if (value is short Int16v)
+                {
+                    return WriteValue(address, Int16v, BitConverter.GetBytes);
+                }
+                else if (value is int Int32v)
+                {
+                    return WriteValue(address, Int32v, BitConverter.GetBytes);
+                }
+                else if (value is long Int64v)
+                {
+                    return WriteValue(address, Int64v, BitConverter.GetBytes);
+                }
+                else if (value is ushort UInt16v)
+                {
+                    return WriteValue(address, UInt16v, BitConverter.GetBytes);
+                }
+                else if (value is uint UInt32v)
+                {
+                    return WriteValue(address, UInt32v, BitConverter.GetBytes);
+                }
+                else if (value is ulong UInt64v)
+                {
+                    return WriteValue(address, UInt64v, BitConverter.GetBytes);
+                }
+                else if (value is string Stringv)
+                {
+                    return WriteValue(address, Stringv, v => Encoding.GetBytes(v));
+                }
+                else
+                {
+                    throw new NotImplementedException("暂不支持的类型");
+                }
             }
-            else if (value is byte bytev)
+            catch (Exception ex)
             {
-                return WriteValue(address, bytev, v => BitConverter.GetBytes((short)v));
+                return IoTResult.Create().AddError(ex);
             }
-            else if (value is sbyte sbytev)
-            {
-                return WriteValue(address, sbytev, v => BitConverter.GetBytes((short)v));
-            }
-            else if (value is float floatv)
-            {
-                return WriteValue(address, floatv, v => BitConverter.GetBytes(v));
-            }
-            else if (value is double doublev)
-            {
-                return WriteValue(address, doublev, BitConverter.GetBytes);
-            }
-            else if (value is short Int16v)
-            {
-                return WriteValue(address, Int16v, BitConverter.GetBytes);
-            }
-            else if (value is int Int32v)
-            {
-                return WriteValue(address, Int32v, BitConverter.GetBytes);
-            }
-            else if (value is long Int64v)
-            {
-                return WriteValue(address, Int64v, BitConverter.GetBytes);
-            }
-            else if (value is ushort UInt16v)
-            {
-                return WriteValue(address, UInt16v, BitConverter.GetBytes);
-            }
-            else if (value is uint UInt32v)
-            {
-                return WriteValue(address, UInt32v, BitConverter.GetBytes);
-            }
-            else if (value is ulong UInt64v)
-            {
-                return WriteValue(address, UInt64v, BitConverter.GetBytes);
-            }
-            else if (value is string Stringv)
-            {
-                return WriteValue(address, Stringv, v => Encoding.GetBytes(v));
-            }
-            else
-            {
-                throw new NotImplementedException("暂不支持的类型");
-            }
+            
         }
 
         public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
@@ -1047,56 +1080,64 @@ namespace Ping9719.IoT.PLC
 
         public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
-            if (value == null || value.Count() == 0)
-                return new IoTResult() { IsSucceed = false };
-
-            var tType = typeof(T);
-
-            if (tType == typeof(bool))
+            try
             {
-                var boolArray = value as bool[];
-                if (boolArray == null)
+                if (value == null || value.Count() == 0)
                     return new IoTResult() { IsSucceed = false };
 
-                IoTResult lastResult = null;
-                for (int i = 0; i < boolArray.Length; i++)
-                {
-                    string nextAddress = GetOffsetAddress(address, i);
-                    lastResult = Write(nextAddress, boolArray[i]);
-                    if (!lastResult.IsSucceed)
-                        return lastResult;
-                }
-                return lastResult ?? new IoTResult() { IsSucceed = false };
-            }
-            else
-            {
-                // ...existing code...
-                Func<T, byte[]> converter = null;
-                if (tType == typeof(byte))
-                    converter = v => BitConverter.GetBytes((short)(byte)(object)v);
-                else if (tType == typeof(sbyte))
-                    converter = v => BitConverter.GetBytes((short)(sbyte)(object)v);
-                else if (tType == typeof(short))
-                    converter = v => BitConverter.GetBytes((short)(object)v);
-                else if (tType == typeof(ushort))
-                    converter = v => BitConverter.GetBytes((ushort)(object)v);
-                else if (tType == typeof(int))
-                    converter = v => BitConverter.GetBytes((int)(object)v);
-                else if (tType == typeof(uint))
-                    converter = v => BitConverter.GetBytes((uint)(object)v);
-                else if (tType == typeof(long))
-                    converter = v => BitConverter.GetBytes((long)(object)v);
-                else if (tType == typeof(ulong))
-                    converter = v => BitConverter.GetBytes((ulong)(object)v);
-                else if (tType == typeof(float))
-                    converter = v => BitConverter.GetBytes((float)(object)v);
-                else if (tType == typeof(double))
-                    converter = v => BitConverter.GetBytes((double)(object)v);
-                else
-                    throw new NotImplementedException("暂不支持的类型");
+                var tType = typeof(T);
 
-                return WriteValues(address, value, converter);
+                if (tType == typeof(bool))
+                {
+                    var boolArray = value as bool[];
+                    if (boolArray == null)
+                        return new IoTResult() { IsSucceed = false };
+
+                    IoTResult lastResult = null;
+                    for (int i = 0; i < boolArray.Length; i++)
+                    {
+                        string nextAddress = GetOffsetAddress(address, i);
+                        lastResult = Write(nextAddress, boolArray[i]);
+                        if (!lastResult.IsSucceed)
+                            return lastResult;
+                    }
+                    return lastResult ?? new IoTResult() { IsSucceed = false };
+                }
+                else
+                {
+                    // ...existing code...
+                    Func<T, byte[]> converter = null;
+                    if (tType == typeof(byte))
+                        converter = v => BitConverter.GetBytes((short)(byte)(object)v);
+                    else if (tType == typeof(sbyte))
+                        converter = v => BitConverter.GetBytes((short)(sbyte)(object)v);
+                    else if (tType == typeof(short))
+                        converter = v => BitConverter.GetBytes((short)(object)v);
+                    else if (tType == typeof(ushort))
+                        converter = v => BitConverter.GetBytes((ushort)(object)v);
+                    else if (tType == typeof(int))
+                        converter = v => BitConverter.GetBytes((int)(object)v);
+                    else if (tType == typeof(uint))
+                        converter = v => BitConverter.GetBytes((uint)(object)v);
+                    else if (tType == typeof(long))
+                        converter = v => BitConverter.GetBytes((long)(object)v);
+                    else if (tType == typeof(ulong))
+                        converter = v => BitConverter.GetBytes((ulong)(object)v);
+                    else if (tType == typeof(float))
+                        converter = v => BitConverter.GetBytes((float)(object)v);
+                    else if (tType == typeof(double))
+                        converter = v => BitConverter.GetBytes((double)(object)v);
+                    else
+                        throw new NotImplementedException("暂不支持的类型");
+
+                    return WriteValues(address, value, converter);
+                }
             }
+            catch (Exception ex)
+            {
+                return IoTResult.Create().AddError(ex);
+            }
+            
         }
 
         #endregion IIoTBase
