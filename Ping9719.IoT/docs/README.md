@@ -15,6 +15,7 @@
     - [SerialPortClient (串口)](#SerialPortClient)
     - [UsbHidClient (USB)](#UsbHidClient)
     - [BleClient (蓝牙)](#BleClient)
+    - [HttpClient](#HttpClient)
     - [HttpServer](#HttpServer)
     - MqttClient （待开发） 
     - MqttServer （待开发） 
@@ -264,10 +265,24 @@ client1.Open();
 
 //所有发送和接收和TcpClient一样，这里不在重复
 ```
+
+## HttpClient <a id="HttpClient"></a>
+`HttpClient : ClientBase`   
+
+1.使用`System.Net.Sockets.TcpClient`实现，只能在 NetStandard2.0+ 可用。   
+2.JSON解析自定义，参考 [如何自定义Json解析？](#UserJson)。
+
+```CSharp
+HttpClient.Default.Get<string>("http://www.baidu.com");//http://www.baidu.com
+HttpClient.Default.Get<string>(new string[] { "http://www.baidu.com", "s" });//http://www.baidu.com/s
+HttpClient.Default.Get<string>("http://www.baidu.com", new { a = 1, b = "ab" });//http://www.baidu.com?a=1&b=ab
+HttpClient.Default.Post<User>("http://www.baidu.com", new { id = 1 }, new { a = 1, b = "ab" });//http://www.baidu.com?a=1&b=ab  body:{id:1}
+```
+
 ## HttpServer <a id="HttpServer"></a>
 `HttpServer : ServiceBase`   
 
-1.某些情况下需要管理员权限运行。   
+1.使用`System.Net.HttpListener`实现，某些情况下需要管理员权限运行。   
 
 ```CSharp
 HttpService service = new HttpService(8090);

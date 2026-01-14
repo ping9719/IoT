@@ -11,6 +11,8 @@
 6.[优化]忽略空错误   
 7.[优化]OmronFins错误和结束符处理   
 8.[新增]OmronFins支持批量连续读写   
+9.[新增]HttpClient   
+10.[优化]读写try优化   
 ## v0.5.0（25-12-09） 
 1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
 2.[新增]`HttpService`   
