@@ -1,105 +1,97 @@
-﻿## Ping9719.IoT  
-An industrial internet communication library implementing mainstream protocols such as ModBus, S7, CIP, MC, FINS, and other commonly used protocols and PLCs. It enables simple and convenient data exchange through various methods including TCP, UDP, MQTT, USB, Bluetooth, etc.
+﻿## Ping9719.IoT
+Industrial Internet Communication Library Protocol Implementation, including mainstream protocols: ModBus, S7, CIP, MC, FINS... and other common protocols and PLCs. Data can be easily exchanged via different methods: TCP, UDP, MQTT, USB, Bluetooth...
 
-## Language:
-[简体中文](README.md) || [English](README_en-US.md) 
+### Language Selection:
+[简体中文](README.md) || [English](README_en-US.md)
 
-## Repository:
-Primary: ([Github](https://github.com/ping9719/IoT)); Mirror: ([Gitee](https://gitee.com/ping9719/IoT)) 
+### Open Source Code:
+Main Repository: [Github](https://github.com/ping9719/IoT)   
+Backup Repository: [Gitee](https://gitee.com/ping9719/IoT)
 
-## Projects:
+### Documentation Entry: <a id="DocMain"></a>
+Go to detailed documentation here: [Click to Enter Documentation](Ping9719.IoT/docs/README.md) || [Click to Enter Version Documentation](Ping9719.IoT/docs/VERSION.md)
 
-| Project |  Supported Frameworks | Documentation | Version | Dependencies | Package Name (NuGet) |
-|----------|----------------------------|------------------------------------------------|------------------------------------------------|----------------------|-----------------------------|
-| [Ping9719.IoT](#IoT) | net45;</br>netstandard2.0 | [Documentation](Ping9719.IoT/docs/README.md) | [Version](Ping9719.IoT/docs/VERSION.md) | System.IO.Ports | Ping9719.IoT |
-| [Ping9719.IoT.Hid](#Hid) | net45;</br>netstandard2.0 | [Documentation](Ping9719.IoT.Hid/docs/README.md) | [Version](Ping9719.IoT.Hid/docs/VERSION.md) | IoT;</br>HidSharp | Ping9719.IoT.Hid |
-| [Ping9719.IoT.WPF](#WPF) | net45;</br>net8.0-windows | [Documentation](Ping9719.IoT.WPF/docs/README.md) | [Version](Ping9719.IoT.WPF/docs/VERSION.md) | IoT; | Ping9719.IoT.WPF </br>(Not yet released) |
-| [Ping9719.IoT.Avalonia](#Avalonia) | net8.0;</br>netstandard2.0 | [Documentation](Ping9719.IoT.Avalonia/docs/README.md) | [Version](Ping9719.IoT.Avalonia/docs/VERSION.md) | IoT;</br>Avalonia | Ping9719.IoT.Avalonia </br>(Not yet released) |
+### Project Framework Diagram:
+![](img/frame.png)
 
-
-### Ping9719.IoT <a id="IoT"></a>
-> A cross-platform library.  
-Core: Interface definitions, return type definitions...  
-Communication: TCP, UDP, Serial Port...  
-Protocols: ModBus, MC, FINS...  
-Algorithms: CRC, LRC...  
-Devices: RFID, Barcode Scanner...  
-
-### Ping9719.IoT.Hid <a id="Hid"></a>
-> A cross-platform library extension.  
-Extends IoT to support USB and Bluetooth data transmission and reception on Windows, Android, and Apple phones, tablets, and computers.
-
-### Ping9719.IoT.WPF <a id="WPF"></a>
-> A UI library for Windows platform.  
-Provides numerous convenient, ready-to-use controls for quickly debugging various protocols and devices in IoT.
-
-### Ping9719.IoT.Avalonia <a id="Avalonia"></a>
-> A cross-platform UI library.  
-Provides numerous convenient, ready-to-use controls for quickly debugging various protocols and devices in IoT.
-
-## How to Install the Package
+## How to Install?
 ![](img/bao.png)
 
-## Introduction, Getting Started, Highlights
-1. <b>Common protocols</b> implement `IReadWrite`, enabling read/write operations via generics.  
+## Package Name & Introduction:
+
+| Package Name (NuGet)         |  Environment                          |  Introduction                      |
+|-----------------------|-------------------------				|----------------------------|
+| Ping9719.IoT          | net45 ; netstandard2.0            	|Cross-platform library. Contains basics, communication (TCP, UDP, Serial Port...), protocols (ModBus, MC, FINS...), algorithms (CRC, LRC...), device control|
+| Ping9719.IoT.Hid      | net45 ; netstandard2.0        		|Cross-platform library. Extension of IoT, supports USB and Bluetooth data transmission and reception on Windows, Android, Apple phones, tablets, and computers |
+| Ping9719.IoT.WPF</br>(Not yet released)      | net45 ; net8.0-windows |UI library for the Windows platform. Provides numerous convenient, ready-to-use controls for quickly debugging various protocols and devices in IoT|
+| Ping9719.IoT.Avalonia</br>(Not yet released) | net8.0 ; netstandard2.0|Cross-platform UI library. Provides numerous convenient, ready-to-use controls for quickly debugging various protocols and devices in IoT |
+
+## Highlights Introduction:
+> Here are the project highlights, not the detailed documentation!!! Detailed documentation is in the "Documentation Entry" above.   
+> If you cannot find it, you can click: ([Jump to Documentation Entry](#DocMain))([Jump to IoT Documentation](Ping9719.IoT/docs/README.md))
+
+1. Common protocol implementations of `IReadWrite` allow reading or writing via generic methods.
 ```CSharp
-client.Read<bool>("abc");// read 1
-client.Read<bool>("abc", 5);// read 5
-client.Write<bool>("abc", true);// write 1
-client.Write<int>("abc", 10, 20, 30);// write multiple
-client.Write<int>("abc", new int[] { 10, 20, 30 });// write multiple
+client.Read<bool>("abc"); // Read 1
+client.Read<bool>("abc", 5); // Read 5
+client.Write<bool>("abc", true); // Write 1
+client.Write<int>("abc", new int[] { 10, 20, 30 }); // Write multiple
 ```
 
-2. <b>All client protocols</b> can be quickly switched to different transport methods, for example, from `TCP` to `USB`.  
-> Taking `ModbusRtu` as an example, it only supports serial port by default. However, you can implement `ModbusRtuOverTcpClient` (using TCP to carry the `ModbusRtu` protocol). The same principle applies to other protocols. 
+2. All client protocols can quickly switch between different methods, such as from `TCP` to `USB`
+> Here, `ModbusRtu` is used as an example. By default, it only supports serial port. But if you want to implement `ModbusRtuOverTcpClient` (using TCP for `ModbusRtu` protocol), the principle is the same for others.
 
 ```CSharp
-var client0 = new ModbusRtuClient("COM1");// using serial port, default
-var client1 = new ModbusRtuClient(new TcpClient("127.0.0.1", 502));// using TCP, ModbusRtuOverTcpClient
-var client2 = new ModbusRtuClient(new UsbHidClient("xxxxx001"));// using USB, ModbusRtuOverUsbClient
-client1.Client.Open();// open
+var serialPortClient = new SerialPortClient("COM1", 9600);
+var tcpClient = new TcpClient("127.0.0.1", 502);
+var usbHidClient = new UsbHidClient(UsbHidClient.GetNames[0]);
+
+var client0 = new ModbusRtuClient(serialPortClient); // Using serial port, default
+var client1 = new ModbusRtuClient(tcpClient); // Using Tcp, ModbusRtuOverTcpClient
+var client2 = new ModbusRtuClient(usbHidClient); // Using Usb, ModbusRtuOverUsbClient
+client0.Client.Open(); // Open
 ```
 
-3. The base client `ClientBase` contains rich functionality with high code consistency.   
-【Tip】The following code is universally applicable to `TcpClient`, `SerialPortClient`, `UsbHidClient`, etc.
+3. The client `ClientBase` includes rich features and maintains high code consistency.
+> The following code is universal, including `TcpClient`, `SerialPortClient`, `UsbHidClient`, etc...
 ```CSharp
-ClientBase client1 = new TcpClient("127.0.0.1", 502);// TCP mode
+ClientBase client1 = new TcpClient("127.0.0.1", 502); // Tcp method
 client1.Encoding = Encoding.UTF8;
 
-// 1: Connection mode. Often used for auto-reconnection after disconnection.
-client1.ConnectionMode = ConnectionMode.Manual;// Manual. You need to open and close it yourself. This method is more flexible.
-client1.ConnectionMode = ConnectionMode.AutoOpen;// Auto open. If Open() hasn't been called, it will automatically open and close on every send/receive. Suitable for short-connection scenarios. For temporary long connections, you can call Open() then Close().
-client1.ConnectionMode = ConnectionMode.AutoReconnection;// Auto reconnect. After calling Open(), if a disconnection is detected, it will automatically reconnect. Suitable for long-connection scenarios. Calling Close() will stop reconnection attempts.
+// 1: Connection Mode. Auto-reconnection is commonly used.
+client1.ConnectionMode = ConnectionMode.Manual; // Manual. You need to open and close it yourself. This mode is more flexible.
+client1.ConnectionMode = ConnectionMode.AutoOpen; // Auto-open. If Open() is not executed, it will automatically open and close for each send/receive, suitable for short connection scenarios. For temporary long connections, call Open() followed by Close().
+client1.ConnectionMode = ConnectionMode.AutoReconnection; // Auto-reconnection. After Open() is called, if a disconnection is detected, it will automatically reopen, suitable for long connection scenarios. Calling Close() will stop reconnection.
 
-// 2: Receive mode. Handle packet sticking issues in the way you prefer.
-client.ReceiveMode = ReceiveMode.ParseByteAll();
-client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
+// 2: Receive Mode. Handles packet sticking in the way you think is best.
+client1.ReceiveMode = ReceiveMode.ParseByteAll();
+client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 
-// 3: Data processors. You can add line breaks when sending and remove them when receiving, or define custom processors.
+// 3: Data Processors. Can add line breaks when sending, remove them when receiving, or customize.
 client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 
 // 4: Event-driven.
-client1.Opened = (a) => { Console.WriteLine("Connected successfully."); };
+client1.Opened = (a) => { Console.WriteLine("Connection successful."); };
 client1.Closed = (a, b) => { Console.WriteLine($"Closed successfully. {(b ? "Manually disconnected" : "Automatically disconnected")}"); };
 client1.Received = (a, b) => { Console.WriteLine($"Received message: {a.Encoding.GetString(b)}"); };
 
-client1.Open();// Open. Set properties and events before opening.
+client1.Open(); // Open, handle properties and events before opening
 
-// 5: Simple send, receive, and send-then-wait operations.
-client1.Send("abc");// send
-client1.Receive();// receive
-client1.Receive(3000);// receive, 3-second timeout
-client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));// receive string ending with \n, 3-second timeout
-client1.SendReceive("abc", 3000);// send and wait for response, 3-second timeout
-client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));// send and wait for string ending with \n, 3-second timeout
+// 5: Simple send, receive, and send-receive operations.
+client1.Send("abc"); // Send
+client1.Receive(); // Receive
+client1.Receive(3000); // Receive, 3-second timeout
+client1.Receive(ReceiveMode.ParseToEnd("\n", 3000)); // Receive until "\n" string, 3-second timeout
+client1.SendReceive("abc", 3000); // Send and wait for data, 3-second timeout
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000)); // Send and receive until "\n" string, 3-second timeout
 ```
 
-4. Unified return type `IoTResult`, eliminating the need to use `Try` patterns separately for exception handling.  
-> `IoTResult<T>` contains `Value`, `IoTResult` does not. 
+4. The return type is unified as `IoTResult`, eliminating the need for separate `Try` blocks to handle exceptions.
+> `IoTResult<T>` contains `Value`, while `IoTResult` does not.
 ```CSharp
 var info = client.Read<bool>("abc");
-if (info.IsSucceed)// should check before accessing value
+if (info.IsSucceed) // Should check before getting the value
    var val = info.Value;
 else
    var err = info.ErrorText;
