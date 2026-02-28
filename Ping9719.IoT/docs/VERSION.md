@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.6.0（...） 
+## v0.6.0（26-01-23） 
 1.[新增]支持西门子中的`String[num]`类型   
 2.[新增]`net8.0`   
 3.[新增]可自定义Json解析   
