@@ -269,8 +269,7 @@ client1.Open();
 ## HttpClient <a id="HttpClient"></a>
 `HttpClient : ClientBase`   
 
-1.使用`System.Net.Sockets.TcpClient`实现，只能在 NetStandard2.0+ 可用。   
-2.JSON解析自定义，参考 [如何自定义Json解析？](#UserJson)。
+> 想JSON解析自定义？请参考 [如何自定义Json解析？](#UserJson)。
 
 ```CSharp
 HttpClient.Default.Get<string>("http://www.baidu.com");//http://www.baidu.com

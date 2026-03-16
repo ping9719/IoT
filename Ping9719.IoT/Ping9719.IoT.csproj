@@ -29,4 +29,8 @@ https://gitee.com/ping9719/IoT</Description>
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 	  <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+	  <Reference Include="System.Net.Http" />
+  </ItemGroup>
 </Project>
