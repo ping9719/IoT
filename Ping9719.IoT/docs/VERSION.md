@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.7.0（...） 
+## v0.7.0（26-03-16） 
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
 ## v0.6.0（26-01-23） 
