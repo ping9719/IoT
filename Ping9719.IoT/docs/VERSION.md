@@ -2,10 +2,12 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.7.0（26-03-16） 
+## v0.8.0（...） 
+1.[优化]部分PLC事件冲突优化为+=方式   
+## v0.7.0（26-03-16）
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
-## v0.6.0（26-01-23） 
+## v0.6.0（26-01-23）
 1.[新增]支持西门子中的`String[num]`类型   
 2.[新增]`net8.0`   
 3.[新增]可自定义Json解析   
@@ -16,7 +18,7 @@
 8.[新增]OmronFins支持批量连续读写   
 9.[新增]HttpClient   
 10.[优化]读写try优化   
-## v0.5.0（25-12-09） 
+## v0.5.0（25-12-09）
 1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
 2.[新增]`HttpService`   
 3.[新增]算法：线性回归   

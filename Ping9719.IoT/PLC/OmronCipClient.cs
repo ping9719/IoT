@@ -38,7 +38,7 @@ namespace Ping9719.IoT.PLC
             //Client.TimeOut = timeout;
             //Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
-            Client.Opened = (a) =>
+            Client.Opened += (a) =>
             {
                 //注册命令
                 byte[] RegisteredCommand = new byte[] {
@@ -71,7 +71,7 @@ namespace Ping9719.IoT.PLC
                 SessionByte[3] = response[7];
 
             };
-            Client.Closing = (a) =>
+            Client.Closing += (a) =>
             {
                 try
                 {

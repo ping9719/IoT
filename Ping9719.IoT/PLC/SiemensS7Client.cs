@@ -62,7 +62,7 @@ namespace Ping9719.IoT.PLC
             //Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
 
-            Client.Opened = (a) =>
+            Client.Opened += (a) =>
             {
                 var Command1 = SiemensConstant.Command1;
                 var Command2 = SiemensConstant.Command2;
@@ -104,7 +104,7 @@ namespace Ping9719.IoT.PLC
                     throw new Exception("打开S7第二次握手失败。");
 
             };
-            Client.Closing = (a) =>
+            Client.Closing += (a) =>
             {
                 //try
                 //{

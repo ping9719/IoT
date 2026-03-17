@@ -63,7 +63,7 @@ namespace Ping9719.IoT.PLC
             Client.Encoding = Encoding.ASCII;
             //Client.ConnectionMode = ConnectionMode.AutoReconnection;
             Client.IsAutoDiscard = true;
-            Client.Opened = (a) =>
+            Client.Opened += (a) =>
             {
                 BasicCommand[19] = SA1;
 

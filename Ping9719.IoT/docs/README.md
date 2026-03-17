@@ -174,9 +174,9 @@ client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Enco
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 
 //4：事件驱动。
-client1.Opened = (a) => { Console.WriteLine("链接成功。"); };
-client1.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
-client1.Received = (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
+client1.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client1.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
 client1.Open();//打开，在打开前处理属性和事件
 
@@ -197,15 +197,15 @@ service.Encoding = Encoding.UTF8;
 //接收模式
 service.ReceiveMode = ReceiveMode.ParseByteAll();//方法“Receive()”的默认方式
 service.ReceiveModeReceived = ReceiveMode.ParseByteAll();//事件“Received”的默认方式
-service.Opened = (a) =>
+service.Opened += (a) =>
 {
     Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]连接成功");
 };
-service.Closed = (a) =>
+service.Closed += (a) =>
 {
     Console.WriteLine($"客户端关闭成功");
 };
-service.Received = (a, b) =>
+service.Received += (a, b) =>
 {
     Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]收到消息：" + a.Encoding.GetString(b));
 };
@@ -229,9 +229,9 @@ var client = new UdpClient("10.10.1.69", 8001, 8002);
 client.Encoding = Encoding.UTF8;
 client.ConnectionMode = ConnectionMode.Manual;//Udp不要使用断线重连模式（AutoReconnection）
 
-client.Opened = (a) => { Console.WriteLine("链接成功。"); };
-client.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
-client.Received = (a, b) =>
+client.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client.Closed += (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client.Received += (a, b) =>
 {
     Console.WriteLine($"收到[{(a as INetwork)?.Socket?.RemoteEndPoint}]消息：{a.Encoding.GetString(b)}");
 };

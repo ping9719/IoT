@@ -72,9 +72,9 @@ client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Enco
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 
 //4：事件驱动。
-client1.Opened = (a) => { Console.WriteLine("链接成功。"); };
-client1.Closed = (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
-client1.Received = (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
+client1.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client1.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
 client1.Open();//打开，在打开前处理属性和事件
 
