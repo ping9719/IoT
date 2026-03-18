@@ -39,7 +39,18 @@ namespace Ping9719.IoT.Common
             else
             {
 #if NET8_0_OR_GREATER
-                return System.Text.Json.JsonSerializer.Deserialize<T>(json);
+                return System.Text.Json.JsonSerializer.Deserialize<T>(json, new System.Text.Json.JsonSerializerOptions
+                {
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,//解决中文转义问题
+                    //WriteIndented = false,//格式化输出
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never,//不忽略null值
+                    PropertyNamingPolicy = null,//属性命名策略，保持原样
+                    PropertyNameCaseInsensitive = true,//忽略属性名称大小写
+
+                    NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,//允许将字符串 "123" 反序列化为 int 类型
+                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,//跳过注释
+                    AllowTrailingCommas = true,//允许结尾多余的逗号
+                });
 #else
                 System.Runtime.Serialization.Json.DataContractJsonSerializer jsonFormator = new System.Runtime.Serialization.Json.DataContractJsonSerializer(typeof(T));
                 using (Stream readStream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
@@ -57,7 +68,18 @@ namespace Ping9719.IoT.Common
             else
             {
 #if NET8_0_OR_GREATER
-                return System.Text.Json.JsonSerializer.Serialize(obj);
+                return System.Text.Json.JsonSerializer.Serialize(obj, new System.Text.Json.JsonSerializerOptions
+                {
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,//解决中文转义问题
+                    //WriteIndented = false,//格式化输出
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.Never,//不忽略null值
+                    PropertyNamingPolicy = null,//属性命名策略，保持原样
+                    PropertyNameCaseInsensitive = true,//忽略属性名称大小写
+
+                    NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,//允许将字符串 "123" 反序列化为 int 类型
+                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip,//跳过注释
+                    AllowTrailingCommas = true,//允许结尾多余的逗号
+                });
 #else
             System.Runtime.Serialization.Json.DataContractJsonSerializer jsonFormator = new System.Runtime.Serialization.Json.DataContractJsonSerializer(obj.GetType());
             using (MemoryStream stream = new MemoryStream())
