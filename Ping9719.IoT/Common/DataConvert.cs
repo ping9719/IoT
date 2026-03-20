@@ -15,25 +15,32 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <param name="byteArray"></param>
         /// <returns></returns>
-        public static string BytesToHexString(this byte[] byteArray, string sepa = " ") => string.Join(sepa, byteArray.Select(t => t.ToString("X2")));
+        public static string BytesToHexString(this byte[] byteArray, string sepa = " ")
+        {
+            if (byteArray == null)
+                return null;
+
+            return string.Join(sepa, byteArray.Select(b => b.ToString("X2")));
+        }
         /// <summary>
         /// 16进制字符串转字节数组
         /// </summary>
         /// <param name="str16"></param>
-        /// <param name="strict">严格模式（严格按两个字母间隔一个空格）</param>
+        /// <param name="sepa">分隔符</param>
         /// <returns></returns>
         public static byte[] HexStringToBytes(this string str16, string sepa = " ")
         {
-            var str1 = str16?.Trim()?.Replace(sepa, "");
-            if (string.IsNullOrWhiteSpace(str16) || str1.Length % 2 != 0)
-                throw new ArgumentException("请传入有效的参数");
+            if (str16 == null)
+                return null;
 
-            var zfc = str16.ToArray();
-            var aLen = str1.Length / 2;
-            byte[] bytes = new byte[aLen];
-            for (int i = 0; i < aLen; i++)
+            var cleanHex = str16.Trim().Replace(sepa, "");
+            if (string.IsNullOrEmpty(cleanHex) || cleanHex.Length % 2 != 0)
+                throw new ArgumentException($"16进制字符串格式无效：{str16}", nameof(str16));
+
+            var bytes = new byte[cleanHex.Length / 2];
+            for (int i = 0; i < bytes.Length; i++)
             {
-                bytes[i] = Convert.ToByte(new string(zfc, i * 2, 2), 16);
+                bytes[i] = Convert.ToByte(cleanHex.Substring(i * 2, 2), 16);
             }
             return bytes;
         }
@@ -46,6 +53,10 @@ namespace Ping9719.IoT.Common
         /// <returns></returns>
         public static bool ArrayEquals(this byte[] byteArray, byte[] byteArray2)
         {
+            if (ReferenceEquals(byteArray, byteArray2))
+                return true;
+            if (byteArray == null || byteArray2 == null)
+                return false;
             if (byteArray.Length != byteArray2.Length)
                 return false;
 
@@ -54,6 +65,7 @@ namespace Ping9719.IoT.Common
                 if (byteArray[i] != byteArray2[i])
                     return false;
             }
+
             return true;
         }
         /// <summary>
@@ -67,6 +79,7 @@ namespace Ping9719.IoT.Common
                 return false;
             if (byteArray.Length < byteArray2.Length)
                 return false;
+
             for (int i = 0; i < byteArray2.Length; i++)
             {
                 if (byteArray2[i] != byteArray[i])
@@ -94,22 +107,20 @@ namespace Ping9719.IoT.Common
         }
 
         /// <summary>
-        /// Asciis数组字符串装字节数组
+        /// ASCII字节数组转字节数组
         /// 如：30 31 => 00 01
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static byte[] AsciiBytesToBytes(this byte[] str)
+        public static byte[] AsciiBytesToBytes(this byte[] asciiBytes)
         {
-            if (!str?.Any() ?? true)
-                throw new ArgumentException("请传入有效的参数");
+            if (asciiBytes == null)
+                return null;
+            if (asciiBytes.Length == 0)
+                return new byte[0];
 
-            List<string> stringList = new List<string>();
-            foreach (var item in str)
-            {
-                stringList.Add(((char)item).ToString());
-            }
-            return HexStringToBytes(string.Join("", stringList));
+            string hexString = Encoding.ASCII.GetString(asciiBytes);
+            return HexStringToBytes(hexString);
         }
         /// <summary>
         /// 字节数组转换成Ascii字节数组
@@ -117,9 +128,12 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static byte[] BytesToAsciiBytes(this byte[] str)
+        public static byte[] BytesToAsciiBytes(this byte[] bytes)
         {
-            return Encoding.ASCII.GetBytes(string.Join("", str.Select(t => t.ToString("X2"))));
+            if (bytes == null)
+                return null;
+
+            return Encoding.ASCII.GetBytes(bytes.BytesToHexString(""));
         }
 
         /// <summary>
