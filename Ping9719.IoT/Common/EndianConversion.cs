@@ -533,7 +533,7 @@ namespace Ping9719.IoT.Common
                 {
                     foreach (var item in value)
                     {
-                        var qu = DataConvert.ByteToBinaryBoolArray(item, 8, boolConv8Reverse).Select(o => (T)(object)o);
+                        var qu = DataConvert.ByteToBin(item, 8, boolConv8Reverse).Select(o => (T)(object)o);
                         buffer.AddRange(qu);
                     }
                 }

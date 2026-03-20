@@ -204,7 +204,7 @@ namespace Ping9719.IoT.WPF
                 var dc1 = Convert.ToInt32(dc.Text);
                 var xr1 = xr.Text;
 
-                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.StringToByteArray(), tx1);
+                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.HexStringToBytes(), tx1);
                 var re = DeviceData.ReadString(aaa, dc1, bm1.GetEncoding());
                 if (re.IsSucceed)
                     info.AppendText($"{re.Value}\r\n");
@@ -234,7 +234,7 @@ namespace Ping9719.IoT.WPF
                 var dc1 = Convert.ToInt32(dc.Text);
                 var xr1 = xr.Text;
 
-                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.StringToByteArray(), tx1);
+                var aaa = RfidAddress.GetRfidAddressStr(qy1, mm1.HexStringToBytes(), tx1);
                 var re = DeviceData.WriteString(aaa, xr1, dc1, bm1.GetEncoding());
                 if (re.IsSucceed)
                     info.AppendText($"成功\r\n");

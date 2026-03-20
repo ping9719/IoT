@@ -81,7 +81,7 @@ namespace Ping9719.IoT.Device.Rfid
             str.Add($"a={AntennaNum.ToString()}");
             if (Pass != null && Pass.Any())
             {
-                str.Add($"p={DataConvert.ByteArrayToString(Pass)}");
+                str.Add($"p={DataConvert.BytesToHexString(Pass)}");
             }
             return string.Join(";", str);
         }

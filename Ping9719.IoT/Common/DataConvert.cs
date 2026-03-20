@@ -15,46 +15,27 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <param name="byteArray"></param>
         /// <returns></returns>
-        public static string ByteArrayToString(this byte[] byteArray, string sepa = " ")
-        {
-            return string.Join(sepa, byteArray.Select(t => t.ToString("X2")));
-        }
+        public static string BytesToHexString(this byte[] byteArray, string sepa = " ") => string.Join(sepa, byteArray.Select(t => t.ToString("X2")));
         /// <summary>
-        /// 开头是否相等
+        /// 16进制字符串转字节数组
         /// </summary>
-        public static bool StartsWith(this byte[] byteArray, byte[] byteArray2)
+        /// <param name="str16"></param>
+        /// <param name="strict">严格模式（严格按两个字母间隔一个空格）</param>
+        /// <returns></returns>
+        public static byte[] HexStringToBytes(this string str16, string sepa = " ")
         {
-            if (byteArray == byteArray2)
-                return true;
-            if (byteArray == null || byteArray2 == null)
-                return false;
-            if (byteArray.Length < byteArray2.Length)
-                return false;
-            for (int i = 0; i < byteArray2.Length; i++)
-            {
-                if (byteArray2[i] != byteArray[i])
-                    return false;
-            }
-            return true;
-        }
+            var str1 = str16?.Trim()?.Replace(sepa, "");
+            if (string.IsNullOrWhiteSpace(str16) || str1.Length % 2 != 0)
+                throw new ArgumentException("请传入有效的参数");
 
-        /// <summary>
-        /// 结尾是否相等
-        /// </summary>
-        public static bool EndsWith(this byte[] byteArray, byte[] byteArray2)
-        {
-            if (byteArray == byteArray2)
-                return true;
-            if (byteArray == null || byteArray2 == null)
-                return false;
-            if (byteArray.Length < byteArray2.Length)
-                return false;
-            for (int i = 1; i <= byteArray2.Length; i++)
+            var zfc = str16.ToArray();
+            var aLen = str1.Length / 2;
+            byte[] bytes = new byte[aLen];
+            for (int i = 0; i < aLen; i++)
             {
-                if (byteArray2[byteArray2.Length - i] != byteArray[byteArray.Length - i])
-                    return false;
+                bytes[i] = Convert.ToByte(new string(zfc, i * 2, 2), 16);
             }
-            return true;
+            return bytes;
         }
 
         /// <summary>
@@ -75,69 +56,50 @@ namespace Ping9719.IoT.Common
             }
             return true;
         }
-
         /// <summary>
-        /// 16进制字符串转字节数组
+        /// 开头是否相等
         /// </summary>
-        /// <param name="str16"></param>
-        /// <param name="strict">严格模式（严格按两个字母间隔一个空格）</param>
-        /// <returns></returns>
-        public static byte[] StringToByteArray(this string str16)
+        public static bool StartsWith(this byte[] byteArray, byte[] byteArray2)
         {
-            var str1 = str16?.Trim()?.Replace(" ", "");
-            if (string.IsNullOrWhiteSpace(str16) || str1.Length % 2 != 0)
-                throw new ArgumentException("请传入有效的参数");
-
-            var zfc = str16.ToArray();
-            var aLen = str1.Length / 2;
-            byte[] bytes = new byte[aLen];
-            for (int i = 0; i < aLen; i++)
+            if (byteArray == byteArray2)
+                return true;
+            if (byteArray == null || byteArray2 == null)
+                return false;
+            if (byteArray.Length < byteArray2.Length)
+                return false;
+            for (int i = 0; i < byteArray2.Length; i++)
             {
-                bytes[i] = Convert.ToByte(new string(zfc, i * 2, 2), 16);
+                if (byteArray2[i] != byteArray[i])
+                    return false;
             }
-            return bytes;
+            return true;
         }
-
         /// <summary>
-        /// Asciis字符串数组字符串装字节数组
+        /// 结尾是否相等
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="strict"></param>
-        /// <returns></returns>
-        public static byte[] AsciiStringToByteArray(this string str, bool strict = true)
+        public static bool EndsWith(this byte[] byteArray, byte[] byteArray2)
         {
-            if (string.IsNullOrWhiteSpace(str) || str.Trim().Replace(" ", "").Length % 2 != 0)
-                throw new ArgumentException("请传入有效的参数");
-
-            if (strict)
+            if (byteArray == byteArray2)
+                return true;
+            if (byteArray == null || byteArray2 == null)
+                return false;
+            if (byteArray.Length < byteArray2.Length)
+                return false;
+            for (int i = 1; i <= byteArray2.Length; i++)
             {
-                List<string> stringList = new List<string>();
-                foreach (var item in str.Split(' '))
-                {
-                    stringList.Add(((char)(Convert.ToByte(item, 16))).ToString());
-                }
-                return StringToByteArray(string.Join("", stringList));
+                if (byteArray2[byteArray2.Length - i] != byteArray[byteArray.Length - i])
+                    return false;
             }
-            else
-            {
-                str = str.Trim().Replace(" ", "");
-                var stringList = new List<string>();
-                for (int i = 0; i < str.Length; i++)
-                {
-                    var stringAscii = str[i].ToString() + str[++i].ToString();
-                    stringList.Add(((char)Convert.ToByte(stringAscii, 16)).ToString());
-                }
-                return StringToByteArray(string.Join("", stringList));
-            }
+            return true;
         }
 
         /// <summary>
         /// Asciis数组字符串装字节数组
-        /// 如：30 31 =》 00 01
+        /// 如：30 31 => 00 01
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static byte[] AsciiArrayToByteArray(this byte[] str)
+        public static byte[] AsciiBytesToBytes(this byte[] str)
         {
             if (!str?.Any() ?? true)
                 throw new ArgumentException("请传入有效的参数");
@@ -147,30 +109,17 @@ namespace Ping9719.IoT.Common
             {
                 stringList.Add(((char)item).ToString());
             }
-            return StringToByteArray(string.Join("", stringList));
+            return HexStringToBytes(string.Join("", stringList));
         }
-
         /// <summary>
         /// 字节数组转换成Ascii字节数组
         /// 如：00 01 => 30 31
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static byte[] ByteArrayToAsciiArray(this byte[] str)
+        public static byte[] BytesToAsciiBytes(this byte[] str)
         {
             return Encoding.ASCII.GetBytes(string.Join("", str.Select(t => t.ToString("X2"))));
-        }
-
-        /// <summary>
-        /// Int转二进制
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="minLength">补0长度</param>
-        /// <returns></returns>
-        public static string IntToBinaryArray(this int value, int minLength = 0)
-        {
-            //Convert.ToString(12,2); // 将12转为2进制字符串，结果 “1100”
-            return Convert.ToString(value, 2).PadLeft(minLength, '0');
         }
 
         /// <summary>
@@ -179,29 +128,23 @@ namespace Ping9719.IoT.Common
         /// <param name="value"></param>
         /// <param name="minLength">补长度</param>
         /// <returns></returns>
-        public static bool[] ByteToBinaryBoolArray(this byte value, int minLength = 8, bool isReverse = true)
+        public static bool[] ByteToBin(this byte value, int minLength = 8, bool isReverse = true)
         {
             if (isReverse)
                 return Convert.ToString(value, 2).PadLeft(minLength, '0').Select(o => o == '1').Reverse().ToArray();
             return Convert.ToString(value, 2).PadLeft(minLength, '0').Select(o => o == '1').ToArray();
         }
-
-        public static bool[] ByteToBinaryBoolArray(this byte[] value, bool isReverse = true)
-        {
-            if (isReverse)
-               return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1').Reverse()).SelectMany(o => o).ToArray();
-            return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1')).SelectMany(o => o).ToArray();
-        }
-
         /// <summary>
-        /// 二进制转Int
+        /// Byte转二进制bool数组
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="minLength">补长度</param>
         /// <returns></returns>
-        public static int BinaryArrayToInt(this string value)
+        public static bool[] ByteToBin(this byte[] value, bool isReverse = true)
         {
-            //Convert.ToInt("1100",2); // 将2进制字符串转为整数，结果 12
-            return Convert.ToInt32(value, 2);
+            if (isReverse)
+                return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1').Reverse()).SelectMany(o => o).ToArray();
+            return value.Select(o => Convert.ToString(o, 2).PadLeft(8, '0').Select(o => o == '1')).SelectMany(o => o).ToArray();
         }
 
         /// <summary>
@@ -210,11 +153,7 @@ namespace Ping9719.IoT.Common
         /// <param name="value">要取某一位的整数</param>
         /// <param name="index">要取的位置索引，自右至左为0-7</param>
         /// <returns>返回某一位的值</returns>
-        public static bool GetBitValue(int value, int index)
-        {
-            return (value >> index & 1) == 1;
-        }
-
+        public static bool GetBit(int value, int index) => (value >> index & 1) == 1;
         /// <summary>
         /// 将整数的某位置设为0或1
         /// </summary>
@@ -222,21 +161,6 @@ namespace Ping9719.IoT.Common
         /// <param name="index">整数的某位</param>
         /// <param name="newValue">是否置1，TURE表示置1，FALSE表示置0</param>
         /// <returns>返回修改过的值</returns>
-        public static byte SetBitValue(byte value, int index, bool newValue)
-        {
-            return newValue ? (byte)(value | (0x1 << index)) : (byte)(value & ~(0x1 << index));
-        }
-
-        /// <summary>
-        /// 将整数的某位置设为0或1
-        /// </summary>
-        /// <param name="value">整数</param>
-        /// <param name="index">整数的某位</param>
-        /// <param name="newValue">是否置1，TURE表示置1，FALSE表示置0</param>
-        /// <returns>返回修改过的值</returns>
-        public static int SetBitValue(int value, int index,  bool newValue)
-        {
-            return newValue ? value | (0x1 << index) : value & ~(0x1 << index);
-        }
+        public static int SetBit(int value, int index, bool newValue) => newValue ? value | (0x1 << index) : value & ~(0x1 << index);
     }
 }

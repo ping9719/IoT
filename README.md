@@ -30,7 +30,7 @@
 > 这里是项目亮点介绍，不是详细文档！！！详细文档在上面的“文档入口”中。   
 > 假如你找不到，你可以点击：（[跳转到文档入口](#DocMain)）（[跳转到IoT文档](Ping9719.IoT/docs/README.md)）
 
-1.<b>常用协议</b>实现 `IReadWrite`，可通过泛型方式进行读或写。  
+1.<b>常用协议</b>实现 `IClientData`或`IReadWrite`，可通过泛型方式进行读或写。  
 ```CSharp
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc", 5);//读5个

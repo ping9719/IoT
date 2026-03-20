@@ -134,7 +134,7 @@ namespace Ping9719.IoT.PLC
                         var data = dataPackage.Skip(46).Take(count - 6).ToArray();//数据
                         if (dTypt == CipVariableType.BOOL)
                         {
-                            result.Value = DataConvert.ByteToBinaryBoolArray(data).Select(o => (object)o);
+                            result.Value = DataConvert.ByteToBin(data).Select(o => (object)o);
                         }
                         else if (dTypt == CipVariableType.BYTE)
                         {

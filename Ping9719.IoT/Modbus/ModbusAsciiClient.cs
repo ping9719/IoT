@@ -105,7 +105,7 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm.ToVal<string>();
 
-                var sVal = LRC.GetLRC(comm.Value).ByteArrayToAsciiArray();
+                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
                 sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
 
                 //获取响应报文
@@ -114,7 +114,7 @@ namespace Ping9719.IoT.Modbus
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<string>();
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
+                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<string>();
@@ -125,7 +125,7 @@ namespace Ping9719.IoT.Modbus
                 var data = sendResult.Value.Skip(3).Take(sendResult.Value[2]).ToArray();
                 string val2 = string.Empty;
                 if (encoding == null)
-                    val2 = data.ByteArrayToString("");
+                    val2 = data.BytesToHexString("");
                 else
                     val2 = encoding.GetString(data);
 
@@ -154,7 +154,7 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm.ToVal<IEnumerable<T>>();
 
-                var sVal = LRC.GetLRC(comm.Value).ByteArrayToAsciiArray();
+                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
                 sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
 
                 //获取响应报文
@@ -163,7 +163,7 @@ namespace Ping9719.IoT.Modbus
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<IEnumerable<T>>();
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
+                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<IEnumerable<T>>();
@@ -251,7 +251,7 @@ namespace Ping9719.IoT.Modbus
             {
                 var val2 = new byte[] { };
                 if (encoding == null)
-                    val2 = value.StringToByteArray();
+                    val2 = value.HexStringToBytes();
                 else
                     val2 = encoding.GetBytes(value);
 
@@ -284,7 +284,7 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm;
 
-                var sVal = LRC.GetLRC(comm.Value).ByteArrayToAsciiArray();
+                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
                 sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
 
                 //获取响应报文
@@ -293,7 +293,7 @@ namespace Ping9719.IoT.Modbus
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。");
 
                 sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiArrayToByteArray(sendResult.Value);
+                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
                 if (!LRC.CheckLRC(sendResult.Value))
                     return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败");

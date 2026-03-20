@@ -84,7 +84,7 @@ namespace Ping9719.IoT.Device.Rfid
                         }
                         var epcLen = (int)data[2];/*BitConverter.ToInt16(new byte[] { data[2], data[3] }, 0);*/
                         var epcData = data.Skip(3).Take(epcLen).ToArray();
-                        var epcStr = epcData.ByteArrayToString();
+                        var epcStr = epcData.BytesToHexString();
                         return new IoTResult<string>(epcStr);
                     }
                     else
@@ -115,7 +115,7 @@ namespace Ping9719.IoT.Device.Rfid
                         nums[5] = (byte)(tmp3 & 0xFF);
                         nums[6] = (byte)(tmp4 >> 8);
                         nums[7] = (byte)(tmp4 & 0xFF);
-                        retStr = DataConvert.ByteArrayToString(nums);
+                        retStr = DataConvert.BytesToHexString(nums);
                     }
                     else if (5200 == startAddress)
                     {
@@ -201,7 +201,7 @@ namespace Ping9719.IoT.Device.Rfid
                             length = values.Length / 2;
                         }
 
-                        byte[] value11 = values.StringToByteArray();
+                        byte[] value11 = values.HexStringToBytes();
                         byte[] bytes = new byte[19 + value11.Length];
                         bytes[0] = 0x01;//设备地址
                         bytes[1] = 0x10;//功能码
@@ -272,7 +272,7 @@ namespace Ping9719.IoT.Device.Rfid
                         byte[] val = new byte[0];
                         if (encoding == null)
                         {
-                            val = DataConvert.StringToByteArray(value);
+                            val = DataConvert.HexStringToBytes(value);
                         }
                         else
                         {

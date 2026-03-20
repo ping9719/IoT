@@ -131,11 +131,11 @@ namespace Ping9719.IoT.Device.TemperatureControl
 
             IoTResult<KuaiKeTemperatureControlInfo_378FA> result = new IoTResult<KuaiKeTemperatureControlInfo_378FA>() { Value = new KuaiKeTemperatureControlInfo_378FA() };
 
-            var info1 = re.Value[0].ByteToBinaryBoolArray();
+            var info1 = re.Value[0].ByteToBin();
             result.Value.开机 = info1[0];
             result.Value.休眠 = !info1[1];
 
-            var info2 = re.Value[1].ByteToBinaryBoolArray();
+            var info2 = re.Value[1].ByteToBin();
             result.Value.堵料报警 = info2[0];
             result.Value.传感器异常 = info2[1];
             result.Value.缺料报警 = info2[2];

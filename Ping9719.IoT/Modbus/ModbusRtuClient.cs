@@ -122,7 +122,7 @@ namespace Ping9719.IoT.Modbus
                 var data = sendResult.Value.Skip(3).Take(sendResult.Value[2]).ToArray();
                 string val2 = string.Empty;
                 if (encoding == null)
-                    val2 = data.ByteArrayToString("");
+                    val2 = data.BytesToHexString("");
                 else
                     val2 = encoding.GetString(data);
 
@@ -245,7 +245,7 @@ namespace Ping9719.IoT.Modbus
             {
                 var val2 = new byte[] { };
                 if (encoding == null)
-                    val2 = value.StringToByteArray();
+                    val2 = value.HexStringToBytes();
                 else
                     val2 = encoding.GetBytes(value);
 

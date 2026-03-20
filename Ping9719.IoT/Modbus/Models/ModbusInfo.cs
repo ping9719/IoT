@@ -363,7 +363,7 @@ namespace Ping9719.IoT.Modbus
                         {
                             isDan = false;
                             if (encoding == null)
-                                list1 = ((string)(object)Writevalue.ElementAt(0)).StringToByteArray();
+                                list1 = ((string)(object)Writevalue.ElementAt(0)).HexStringToBytes();
                             else
                                 list1 = encoding.GetBytes((string)(object)Writevalue.ElementAt(0)).ToArray();
 
@@ -608,7 +608,7 @@ namespace Ping9719.IoT.Modbus
                         {
                             isDan = false;
                             if (encoding == null)
-                                list1 = ((string)(object)Writevalue.ElementAt(0)).StringToByteArray();
+                                list1 = ((string)(object)Writevalue.ElementAt(0)).HexStringToBytes();
                             else
                                 list1 = encoding.GetBytes((string)(object)Writevalue.ElementAt(0)).ToArray();
 

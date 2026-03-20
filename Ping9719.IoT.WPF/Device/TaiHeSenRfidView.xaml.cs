@@ -99,12 +99,12 @@ namespace Ping9719.IoT.WPF
             if (bytes == null)
                 return null;
 
-            return bytes.ByteArrayToString().Replace(" ", "").TrimStart('0').PadLeft(5, '0');
+            return bytes.BytesToHexString().Replace(" ", "").TrimStart('0').PadLeft(5, '0');
         }
 
         public static byte[] WriteAna(string bytes)
         {
-            return bytes.Replace(" ", "").TrimStart('0').PadLeft(8, '0').StringToByteArray();
+            return bytes.Replace(" ", "").TrimStart('0').PadLeft(8, '0').HexStringToBytes();
         }
     }
 }
