@@ -6,6 +6,8 @@
 1.[优化]部分PLC事件冲突优化为+=方式   
 *2.[优化]更改DataConvert部分方法名称   
 3.[新增]增加`SerialClient`   
+*4.[优化]优化`DataConvert`并部分方法更名   
+*5.[优化]优化`EndianConversion`并部分方法更删   
 ## v0.7.0（26-03-16）
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
