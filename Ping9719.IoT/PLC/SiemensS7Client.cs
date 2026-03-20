@@ -20,22 +20,18 @@ namespace Ping9719.IoT.PLC
         /// CPU版本
         /// </summary>
         public SiemensVersion Version { get; private set; }
-
         /// <summary>
         /// 插槽号 
         /// </summary>
         public byte Slot { get; private set; }
-
         /// <summary>
         /// 机架号
         /// </summary>
         public byte Rack { get; private set; }
-
         /// <summary>
         /// 字节格式
         /// </summary>
-        public EndianFormat Format { get; set; } = EndianFormat.DCBA;
-
+        public EndianFormat Format { get; set; } = EndianFormat.ABCD;
         /// <summary>
         /// 超长时读写Byte采用循环的最小的步数
         /// </summary>
@@ -1174,7 +1170,6 @@ namespace Ping9719.IoT.PLC
             {
                 return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
-
         }
 
         public override IoTResult Write<T>(string address, T value)
@@ -1229,7 +1224,7 @@ namespace Ping9719.IoT.PLC
                 if (tType == typeof(bool))
                 {
                     if (value.Count() == 1)
-                        return Write(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }.ToByteFormat(Format), true);
+                        return Write(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }, true);
                     else
                         throw new NotImplementedException("暂不支持写多个bool类型");
                 }

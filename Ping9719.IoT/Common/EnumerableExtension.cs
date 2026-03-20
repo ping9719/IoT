@@ -36,7 +36,7 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <param name="source"></param>
-        /// <param name="size"></param>
+        /// <param name="size">块大小</param>
         /// <param name="isInsufficientDiscard">是否数量不足丢弃</param>
         /// <returns></returns>
         public static IEnumerable<IEnumerable<TSource>> Chunk<TSource>(this IEnumerable<TSource> source, int size, bool isInsufficientDiscard = true)

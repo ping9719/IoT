@@ -56,13 +56,13 @@ namespace Ping9719.IoT.Device.Rfid
                 if (typeof(T) == typeof(byte[]))
                     result.Value = (T)(object)byte1;
                 else if (typeof(T) == typeof(Int16))
-                    result.Value = (T)(object)BitConverter.ToInt16(byte1.ToByteFormat(format), 0);
+                    result.Value = (T)(object)BitConverter.ToInt16(byte1.EndianIotToNet(format), 0);
                 else if (typeof(T) == typeof(UInt16))
-                    result.Value = (T)(object)BitConverter.ToUInt16(byte1.ToByteFormat(format), 0);
+                    result.Value = (T)(object)BitConverter.ToUInt16(byte1.EndianIotToNet(format), 0);
                 else if (typeof(T) == typeof(Int32))
-                    result.Value = (T)(object)BitConverter.ToInt32(byte1.ToByteFormat(format), 0);
+                    result.Value = (T)(object)BitConverter.ToInt32(byte1.EndianIotToNet(format), 0);
                 else if (typeof(T) == typeof(UInt32))
-                    result.Value = (T)(object)BitConverter.ToUInt32(byte1.ToByteFormat(format), 0);
+                    result.Value = (T)(object)BitConverter.ToUInt32(byte1.EndianIotToNet(format), 0);
                 else if (typeof(T) == typeof(string))
                     result.Value = (T)(object)Client.Encoding.GetString(byte1);
                 else

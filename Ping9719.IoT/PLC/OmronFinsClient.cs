@@ -15,8 +15,6 @@ namespace Ping9719.IoT.PLC
     /// </summary>
     public class OmronFinsClient : ReadWriteBase, IClientData
     {
-        private EndianFormat endianFormat;
-
         /// <summary>
         /// 基础命令
         /// </summary>
@@ -28,7 +26,10 @@ namespace Ping9719.IoT.PLC
             0x00, 0x00, 0x00, 0x00,//Error Code字段
             0x00, 0x00, 0x00, 0x0B //Client/Server Node Address字段
         };
-
+        /// <summary>
+        /// 字节格式
+        /// </summary>
+        public EndianFormat Format { get; set; } = EndianFormat.CDAB;
         /// <summary>
         /// DA2(即Destination unit address，目标单元地址)
         /// 0x00：PC(CPU)
@@ -36,12 +37,10 @@ namespace Ping9719.IoT.PLC
         /// 0x10~0x1F：CPU总线单元 ，其值等于10 + 单元号(前端面板中配置的单元号)
         /// </summary>
         public byte UnitAddress { get; set; } = 0x00;
-
         /// <summary>
         /// SA1 客户端节点编号
         /// </summary>
         public byte SA1 { get; set; } = 0x00;
-
         /// <summary>
         /// DA1 服务器节点编号
         /// </summary>
@@ -55,7 +54,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="client">客户端</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public OmronFinsClient(ClientBase client, EndianFormat endianFormat = EndianFormat.CDAB)
+        public OmronFinsClient(ClientBase client)
         {
             Client = client;
             //Client.TimeOut = timeout;
@@ -105,8 +104,6 @@ namespace Ping9719.IoT.PLC
                 }
 
             };
-
-            this.endianFormat = endianFormat;
         }
 
         /// <summary>
@@ -116,9 +113,8 @@ namespace Ping9719.IoT.PLC
         /// <param name="port">端口</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public OmronFinsClient(string ip, int port = 1500, EndianFormat endianFormat = EndianFormat.CDAB) : this(new TcpClient(ip, port), endianFormat) { }
+        public OmronFinsClient(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
 
-        #region Read
         /// <summary>
         /// 读取数据
         /// </summary>
@@ -151,160 +147,6 @@ namespace Ping9719.IoT.PLC
             }
             return result.ToEnd();
         }
-        private IoTResult<bool> ReadBoolean(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = addressInt - startAddressInt;
-                var byteArry = values.Skip(interval * 1).Take(1).ToArray();
-                return new IoTResult<bool>
-                {
-                    Value = BitConverter.ToBoolean(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<bool>().AddError(ex);
-            }
-        }
-        private IoTResult<short> ReadInt16(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = addressInt - startAddressInt;
-                var byteArry = values.Skip(interval * 2).Take(2).Reverse().ToArray();
-                return new IoTResult<short>
-                {
-                    Value = BitConverter.ToInt16(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<short>().AddError(ex);
-            }
-        }
-        private IoTResult<ushort> ReadUInt16(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = addressInt - startAddressInt;
-                var byteArry = values.Skip(interval * 2).Take(2).Reverse().ToArray();
-                return new IoTResult<ushort>
-                {
-                    Value = BitConverter.ToUInt16(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<ushort>().AddError(ex);
-            }
-        }
-        private IoTResult<int> ReadInt32(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - startAddressInt) / 2;
-                var offset = (addressInt - startAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<int>
-                {
-                    Value = BitConverter.ToInt32(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<int>().AddError(ex);
-            }
-        }
-        private IoTResult<uint> ReadUInt32(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - startAddressInt) / 2;
-                var offset = (addressInt - startAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<uint>
-                {
-                    Value = BitConverter.ToUInt32(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<uint>().AddError(ex);
-            }
-        }
-        private IoTResult<long> ReadInt64(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - startAddressInt) / 4;
-                var offset = (addressInt - startAddressInt) % 4 * 2;
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<long>
-                {
-                    Value = BitConverter.ToInt64(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<long>().AddError(ex);
-            }
-        }
-        private IoTResult<ulong> ReadUInt64(int startAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - startAddressInt) / 4;
-                var offset = (addressInt - startAddressInt) % 4 * 2;
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<ulong>
-                {
-                    Value = BitConverter.ToUInt64(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<ulong>().AddError(ex);
-            }
-        }
-        private IoTResult<float> ReadFloat(int beginAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 2;
-                var offset = (addressInt - beginAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<float>
-                {
-                    Value = BitConverter.ToSingle(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<float>().AddError(ex);
-            }
-        }
-        private IoTResult<double> ReadDouble(int beginAddressInt, int addressInt, byte[] values)
-        {
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 4;
-                var offset = (addressInt - beginAddressInt) % 4 * 2;
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray().ByteFormatting(endianFormat, false);
-                return new IoTResult<double>
-                {
-                    Value = BitConverter.ToDouble(byteArry, 0)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<double>().AddError(ex);
-            }
-        }
-        #endregion
-
-        #region Write
-
         /// <summary>
         /// 写入数据
         /// </summary>
@@ -329,7 +171,6 @@ namespace Ping9719.IoT.PLC
             }
             return sendResult.ToEnd();
         }
-
         /// <summary>
         /// 写入数据(string专用)
         /// </summary>
@@ -354,7 +195,6 @@ namespace Ping9719.IoT.PLC
             }
             return result.ToEnd();
         }
-        #endregion
 
         #region 解析
         /// <summary>
@@ -572,127 +412,6 @@ namespace Ping9719.IoT.PLC
             return command;
         }
 
-        /// <summary>
-        /// 批量读取
-        /// </summary>
-        /// <param name="addresses"></param>
-        /// <param name="batchNumber">此参数设置无实际效果</param>
-        /// <returns></returns>
-        public IoTResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber)
-        {
-            var result = new IoTResult<Dictionary<string, object>>();
-            result.Value = new Dictionary<string, object>();
-
-            var omronFinsAddresses = addresses.Select(t => ConvertArg(t.Key, t.Value)).ToList();
-            var typeChars = omronFinsAddresses.Select(t => t.TypeChar).Distinct();
-            foreach (var typeChar in typeChars)
-            {
-                var tempAddresses = omronFinsAddresses.Where(t => t.TypeChar == typeChar).ToList();
-                var minAddress = tempAddresses.Select(t => t.BeginAddress).Min();
-                var maxAddress = tempAddresses.Select(t => t.BeginAddress).Max();
-
-                while (maxAddress >= minAddress)
-                {
-                    int readLength = 121;//TODO 分批读取的长度还可以继续调大
-
-                    var tempAddress = tempAddresses.Where(t => t.BeginAddress >= minAddress && t.BeginAddress <= minAddress + readLength).ToList();
-                    //如果范围内没有数据。按正确逻辑不存在这种情况。
-                    if (!tempAddress.Any())
-                    {
-                        minAddress = minAddress + readLength;
-                        continue;
-                    }
-
-                    var tempMax = tempAddress.OrderByDescending(t => t.BeginAddress).FirstOrDefault();
-                    switch (tempMax.DataTypeEnum)
-                    {
-                        case DataTypeEnum.Bool:
-                            throw new Exception("暂时不支持Bool类型批量读取");
-                        case DataTypeEnum.Byte:
-                            throw new Exception("暂时不支持Byte类型批量读取");
-                        //readLength = tempMax.BeginAddress + 1 - minAddress;
-                        //break;
-                        case DataTypeEnum.Int16:
-                        case DataTypeEnum.UInt16:
-                            readLength = tempMax.BeginAddress * 2 + 2 - minAddress * 2;
-                            break;
-                        case DataTypeEnum.Int32:
-                        case DataTypeEnum.UInt32:
-                        case DataTypeEnum.Float:
-                            readLength = tempMax.BeginAddress * 2 + 4 - minAddress * 2;
-                            break;
-                        case DataTypeEnum.Int64:
-                        case DataTypeEnum.UInt64:
-                        case DataTypeEnum.Double:
-                            readLength = tempMax.BeginAddress * 2 + 8 - minAddress * 2;
-                            break;
-                        default:
-                            throw new Exception("Err BatchRead 未定义类型 -1");
-                    }
-
-                    var tempResult = ReadBytes(typeChar + minAddress.ToString(), Convert.ToUInt16(readLength), false);
-
-                    if (!tempResult.IsSucceed)
-                    {
-                        return result.AddError(tempResult.Error).ToEnd();
-                    }
-
-                    var rValue = tempResult.Value.ToArray();
-                    foreach (var item in tempAddress)
-                    {
-                        object tempVaue = null;
-
-                        switch (item.DataTypeEnum)
-                        {
-                            case DataTypeEnum.Bool:
-                                tempVaue = ReadBoolean(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.Byte:
-                                throw new Exception("Err BatchRead 未定义类型 -2");
-                            case DataTypeEnum.Int16:
-                                tempVaue = ReadInt16(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.UInt16:
-                                tempVaue = ReadUInt16(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.Int32:
-                                tempVaue = ReadInt32(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.UInt32:
-                                tempVaue = ReadUInt32(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.Int64:
-                                tempVaue = ReadInt64(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.UInt64:
-                                tempVaue = ReadUInt64(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.Float:
-                                tempVaue = ReadFloat(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            case DataTypeEnum.Double:
-                                tempVaue = ReadDouble(minAddress, item.BeginAddress, rValue).Value;
-                                break;
-                            default:
-                                throw new Exception("Err BatchRead 未定义类型 -3");
-                        }
-
-                        result.Value.Add(item.TypeChar + item.BeginAddress.ToString(), tempVaue);
-                    }
-                    minAddress = minAddress + readLength / 2;
-
-                    if (tempAddresses.Any(t => t.BeginAddress >= minAddress))
-                        minAddress = tempAddresses.Where(t => t.BeginAddress >= minAddress).OrderBy(t => t.BeginAddress).FirstOrDefault().BeginAddress;
-                }
-            }
-            return result.ToEnd();
-        }
-
-        public IoTResult BatchWrite(Dictionary<string, object> addresses, int batchNumber)
-        {
-            throw new NotImplementedException();
-        }
-
         public IoTResult<byte[]> IsResponseOk(IoTResult<byte[]> data)
         {
             if (!data.IsSucceed || data.Value == null || data.Value.Length < 30)
@@ -756,47 +475,47 @@ namespace Ping9719.IoT.PLC
                 else if (tType == typeof(Int16))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(int))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt32(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt32(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(long))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt64(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt64(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(short))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(float))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToSingle(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToSingle(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(double))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToDouble(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToDouble(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(ushort))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt16(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt16(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(uint))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt32(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt32(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(ulong))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt64(readResut.Value.EndianIotToNet(endianFormat), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt64(readResut.Value.EndianIotToNet(Format), 0)) : readResut.ToVal<T>();
                 }
                 else
                 {
@@ -855,7 +574,7 @@ namespace Ping9719.IoT.PLC
                     return new IoTResult<IEnumerable<T>>().AddError("单次读取数量过大，建议不超过180个字节");
 
                 var readResut = ReadBytes(address, ynum);
-                var valJg = readResut.Value.ByteToObj<T>(endianFormat, false, endianAction: (a) => EndianConversion.EndianIotToNet(a, endianFormat));
+                var valJg = readResut.Value.ByteToObj<T>(Format, false);
                 return readResut.ToVal<IEnumerable<T>>(valJg);
             }
             catch (Exception ex)
@@ -878,35 +597,35 @@ namespace Ping9719.IoT.PLC
                 }
                 else if (value is short Int16v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int16v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(Int16v).EndianNetToIot(Format));
                 }
                 else if (value is int Int32v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int32v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(Int32v).EndianNetToIot(Format));
                 }
                 else if (value is long Int64v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int64v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(Int64v).EndianNetToIot(Format));
                 }
                 else if (value is float floatv)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(floatv).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(floatv).EndianNetToIot(Format));
                 }
                 else if (value is double doublev)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(doublev).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(doublev).EndianNetToIot(Format));
                 }
                 else if (value is ushort UInt16v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt16v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt16v).EndianNetToIot(Format));
                 }
                 else if (value is uint UInt32v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt32v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt32v).EndianNetToIot(Format));
                 }
                 else if (value is ulong UInt64v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt64v).EndianNetToIot(endianFormat));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt64v).EndianNetToIot(Format));
                 }
                 else
                 {
@@ -967,7 +686,7 @@ namespace Ping9719.IoT.PLC
                 }
                 else
                 {
-                    var obj = value.ObjToByte(endianFormat, endianAction: (a) => EndianConversion.EndianNetToIot(a, endianFormat));
+                    var obj = value.ObjToByte(Format);
                     return WriteBytes(address, obj, false);
                 }
             }

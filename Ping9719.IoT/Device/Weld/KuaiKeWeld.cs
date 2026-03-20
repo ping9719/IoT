@@ -107,7 +107,7 @@ namespace Ping9719.IoT.Device.Weld
         {
             var aaa = name.Substring(0, name.Length > 8 ? 8 : name.Length).PadRight(8);
             var values = Encoding.ASCII.GetBytes(aaa);
-            values = values.ByteFormatting(EndianFormat.BADC, true);
+            values = values.EndianIotToNet(EndianFormat.BADC);
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x80 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
@@ -132,7 +132,7 @@ namespace Ping9719.IoT.Device.Weld
         {
             var aaa = name.Substring(0, name.Length > 8 ? 8 : name.Length).PadRight(8);
             var values = Encoding.ASCII.GetBytes(aaa);
-            values = values.ByteFormatting(EndianFormat.BADC, true);
+            values = values.EndianIotToNet(EndianFormat.BADC);
             List<byte> bytes = new List<byte>() { 0x01, 0x03, 0x00, 0x84 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
@@ -182,7 +182,7 @@ namespace Ping9719.IoT.Device.Weld
         public IoTResult SetTemperatureInfo(int temperature)
         {
             var values = BitConverter.GetBytes(Convert.ToInt16(temperature));
-            values = values.ByteFormatting(EndianFormat.BADC, true);
+            values = values.EndianIotToNet(EndianFormat.BADC);
             List<byte> bytes = new List<byte>() { 0x01, 0x06, 0x01, 0x99 };
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
