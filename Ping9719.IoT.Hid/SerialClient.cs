@@ -1,30 +1,24 @@
 ﻿using HidSharp;
-using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Ports;
 using System.Linq;
-using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ping9719.IoT.Hid
 {
     /// <summary>
-    /// 蓝牙客户端
+    /// 串口客户端
     /// </summary>
-    public class BleClient : ClientBase
+    public class SerialClient : ClientBase
     {
-        public static string[] GetNames => DeviceList.Local.GetBleDevices().Select(o => o.DevicePath).ToArray();
+        public static string[] GetNames => DeviceList.Local.GetSerialDevices().Select(o => o.DevicePath).ToArray();
         public override bool IsOpen => base.IsOpen;
         string devicePath;
-        public HidSharp.Experimental.BleDevice Device;
+        public SerialDevice Device;
 
-        public BleClient(string devicePath)
+        public SerialClient(string devicePath)
         {
             this.devicePath = devicePath;
 
@@ -36,7 +30,7 @@ namespace Ping9719.IoT.Hid
 
         protected override OpenClientData Open2()
         {
-            Device = DeviceList.Local.GetBleDevices().FirstOrDefault(o => o.DevicePath == devicePath);
+            Device = DeviceList.Local.GetSerialDevices().FirstOrDefault(o => o.DevicePath == devicePath);
             if (Device == null)
                 throw new InvalidOperationException($"无法找到设备[{devicePath}]");
 

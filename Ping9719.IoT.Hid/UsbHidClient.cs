@@ -23,7 +23,7 @@ namespace Ping9719.IoT.Hid
         public static string[] GetNames => DeviceList.Local.GetHidDevices().Select(o => o.DevicePath).ToArray();
         public override bool IsOpen => base.IsOpen;
         string devicePath;
-        private HidSharp.HidDevice hidDevice;
+        public HidDevice Device;
 
         public UsbHidClient(string devicePath)
         {
@@ -38,11 +38,11 @@ namespace Ping9719.IoT.Hid
         protected override OpenClientData Open2()
         {
             //dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-            hidDevice = DeviceList.Local.GetHidDevices().FirstOrDefault(o => o.DevicePath == devicePath);
-            if (hidDevice == null)
+            Device = DeviceList.Local.GetHidDevices().FirstOrDefault(o => o.DevicePath == devicePath);
+            if (Device == null)
                 throw new InvalidOperationException($"无法找到设备[{devicePath}]");
 
-            return new OpenClientData(hidDevice.Open());
+            return new OpenClientData(Device.Open());
         }
 
         /// <summary>
