@@ -214,7 +214,7 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
-        /// <param name="format"></param>
+        /// <param name="format"><see href="endianIotToNet"/> 为 true：进来的顺序，false 目标的顺序</param>
         /// <param name="bool1To8">bool转换是否采用1对8的方式</param>
         /// <param name="bool1To8Reverse">采用了1对8的方式后是否进行反转</param>
         /// <param name="endianIotToNet">转换字节是否调用的<see cref="EndianIotToNet"/>方法,fasle为 <see cref="EndianNetToIot"/></param>
@@ -261,9 +261,7 @@ namespace Ping9719.IoT.Common
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="value"></param>
-        /// <param name="format"></param>
-        /// <param name="bool1To8">bool转换是否采用1对8的方式</param>
-        /// <param name="bool1To8Reverse">采用了1对8的方式后是否进行反转</param>
+        /// <param name="format"><see href="endianIotToNet"/> 为 true：进来的顺序，false 目标的顺序</param>
         /// <param name="endianIotToNet">转换字节是否调用的<see cref="EndianIotToNet"/>方法,fasle为 <see cref="EndianNetToIot"/></param>
         /// <returns></returns>
         public static byte[] ObjToByte<T>(this IEnumerable<T> value, EndianFormat format = EndianFormat.ABCD, bool endianIotToNet = false)
