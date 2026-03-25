@@ -184,35 +184,35 @@ namespace Ping9719.IoT.Modbus
                 }
                 else if (tType == typeof(short))
                 {
-                    val2 = data.SplitBlock(2, true).Select(o => (T)(object)BitConverter.ToInt16(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToInt16(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(ushort))
                 {
-                    val2 = data.SplitBlock(2, true).Select(o => (T)(object)BitConverter.ToUInt16(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToUInt16(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(int))
                 {
-                    val2 = data.SplitBlock(4, true).Select(o => (T)(object)BitConverter.ToInt32(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToInt32(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(uint))
                 {
-                    val2 = data.SplitBlock(4, true).Select(o => (T)(object)BitConverter.ToUInt32(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToUInt32(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(long))
                 {
-                    val2 = data.SplitBlock(8, true).Select(o => (T)(object)BitConverter.ToInt64(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToInt64(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(ulong))
                 {
-                    val2 = data.SplitBlock(8, true).Select(o => (T)(object)BitConverter.ToUInt64(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToUInt64(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(float))
                 {
-                    val2 = data.SplitBlock(4, true).Select(o => (T)(object)BitConverter.ToSingle(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToSingle(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 else if (tType == typeof(double))
                 {
-                    val2 = data.SplitBlock(8, true).Select(o => (T)(object)BitConverter.ToDouble(o.EndianIotToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToDouble(o.EndianIotToNet(format), 0)).Take(number);
                 }
                 //else if (tType == typeof(string))
                 //{

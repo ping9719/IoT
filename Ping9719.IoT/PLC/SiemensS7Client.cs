@@ -150,7 +150,7 @@ namespace Ping9719.IoT.PLC
             try
             {
                 var arg = SiemensAddress.ConvertArg(address);
-                var cs = WordHelp.SplitBlock(length, ReadWriteByteNum, arg.BeginAddress, 8);
+                var cs = SplitBlock(length, ReadWriteByteNum, arg.BeginAddress, 8);
                 foreach (var item in cs)
                 {
                     //发送读取信息
@@ -396,6 +396,34 @@ namespace Ping9719.IoT.PLC
             //    if (isAutoOpen) Dispose();
             //}
             return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 分块
+        /// </summary>
+        /// <param name="objNum">对象总数量</param>
+        /// <param name="blockSize">块大小</param>
+        /// <param name="addFir">第一个对象地址</param>
+        /// <param name="objSpace">每个对象的间距。x=startAdd+i*倍数</param>
+        /// <returns>1地址 2数量</returns>
+        public static Dictionary<int, int> SplitBlock(int objNum, int blockSize, int addFir, int objSpace = 1)
+        {
+            if (objNum <= blockSize)
+                return new Dictionary<int, int> { { addFir, objNum } };
+
+            var cs = objNum % blockSize == 0 ? objNum / blockSize : objNum / blockSize + 1;
+            var jg = new Dictionary<int, int>(cs);
+            for (var i = 0; i < cs; i++)
+            {
+                var aaa = blockSize * i + addFir;
+                jg.Add((aaa - addFir) * objSpace + addFir, blockSize);
+            }
+
+            if (objNum % blockSize != 0)
+            {
+                jg[jg.Last().Key] = objNum % blockSize;
+            }
+            return jg;
         }
 
         ///// <summary>
@@ -703,7 +731,7 @@ namespace Ping9719.IoT.PLC
             try
             {
                 var addr = SiemensWriteAddress.ConvertArg(address);
-                var cs = WordHelp.SplitBlock(data.Length, ReadWriteByteNum, addr.BeginAddress, 8);
+                var cs = SplitBlock(data.Length, ReadWriteByteNum, addr.BeginAddress, 8);
                 for (var i = 0; i < cs.Count; i++)
                 {
                     var item = cs.ElementAt(i);
@@ -1086,7 +1114,7 @@ namespace Ping9719.IoT.PLC
                 bool isOneBool = false;//是否为bool类型且数量为1
                 int address2 = 0;//DB10.2.3 中的3
                 var tType = typeof(T);
-                var ynum = WordHelp.OccupyBitNum<T>();//实际的读取长度
+                var ynum = DataHelp.GetByteCount<T>();//实际的读取长度
                 if (tType == typeof(bool))
                 {
                     if (number == 1)
@@ -1135,7 +1163,7 @@ namespace Ping9719.IoT.PLC
                     T[] valJg = new T[0];
                     if (tType == typeof(string))
                     {
-                        valJg = readResut.Value.SplitBlock(256, true).Select(o => (T)(object)Client.Encoding.GetString(o.Skip(2).Take(o[1]).ToArray())).ToArray();
+                        valJg = readResut.Value.Chunk(256).Select(o => (T)(object)Client.Encoding.GetString(o.Skip(2).Take(o.ElementAtOrDefault(1)).ToArray())).ToArray();
                     }
                     else if (tType == typeof(DateTime))
                     {

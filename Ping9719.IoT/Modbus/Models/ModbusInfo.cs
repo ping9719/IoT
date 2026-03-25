@@ -194,7 +194,7 @@ namespace Ping9719.IoT.Modbus
                         functionCode = tType == typeof(bool) ? ModbusCode.读线圈 : ModbusCode.读寄存器;
 
                     //计算真实数量
-                    var rCount = WordHelp.OccupyNum<T>();
+                    var rCount = DataHelp.GetWordCount<T>();
                     rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
                     result.AddRange(BitConverter.GetBytes(rCount).Reverse());
@@ -223,7 +223,7 @@ namespace Ping9719.IoT.Modbus
                         else if (functionCode == ModbusCode.写多个线圈)
                         {
                             isDan = false;
-                            list1 = WordHelp.SplitBlock(Writevalue.Select(o => ((bool)(object)o) ? 1 : 0), 8, 2, 0, true).Select(o => Convert.ToByte(string.Join("", o), 2)).ToArray();
+                            list1 = EnumerableExtension.ChunkSuppl(Writevalue.Select(o => ((bool)(object)o) ? 1 : 0), 8, true, 0, true).Select(o => Convert.ToByte(string.Join("", o), 2)).ToArray();
                             vCount = yCount;
                         }
                     }
@@ -439,7 +439,7 @@ namespace Ping9719.IoT.Modbus
                         functionCode = tType == typeof(bool) ? ModbusCode.读线圈 : ModbusCode.读寄存器;
 
                     //计算真实数量
-                    var rCount = WordHelp.OccupyNum<T>();
+                    var rCount = DataHelp.GetWordCount<T>();
                     rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
                     result.AddRange(BitConverter.GetBytes(rCount).Reverse());
@@ -468,7 +468,7 @@ namespace Ping9719.IoT.Modbus
                         else if (functionCode == ModbusCode.写多个线圈)
                         {
                             isDan = false;
-                            list1 = WordHelp.SplitBlock(Writevalue.Select(o => ((bool)(object)o) ? 1 : 0), 8, 2, 0, true).Select(o => Convert.ToByte(string.Join("", o), 2)).ToArray();
+                            list1 = EnumerableExtension.ChunkSuppl(Writevalue.Select(o => ((bool)(object)o) ? 1 : 0), 8, true, 0, true).Select(o => Convert.ToByte(string.Join("", o), 2)).ToArray();
                             vCount = yCount;
                         }
                     }

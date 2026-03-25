@@ -568,7 +568,7 @@ namespace Ping9719.IoT.PLC
         {
             try
             {
-                var ynum = WordHelp.OccupyBitNum<T>();
+                var ynum = DataHelp.GetByteCount<T>();
                 ynum = Convert.ToUInt16(ynum == 1 ? 1 : (ynum * number));
                 if (ynum > 180)
                     return new IoTResult<IEnumerable<T>>().AddError("单次读取数量过大，建议不超过180个字节");

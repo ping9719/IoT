@@ -27,5 +27,48 @@ namespace Ping9719.IoT.Common
                 .Select(g => g.Select(x => x.value))
                 .Where(o => isInsufficientDiscard ? o.Count() == size : true);
         }
+
+        /// <summary>
+        /// 分块，不足的进行补充
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="source">数据</param>
+        /// <param name="size">块大小</param>
+        /// <param name="isSupplEnd">是否从结尾补充。false 从前面补充</param>
+        /// <param name="supplVal">补充的值</param>
+        /// <param name="isReverse">是否反转每一个里面的元素</param>
+        /// <returns></returns>
+        public static IEnumerable<IEnumerable<TSource>> ChunkSuppl<TSource>(this IEnumerable<TSource> source, int size, bool isSupplEnd = true, TSource supplVal = default, bool isReverse = false)
+        {
+            if (source == null)
+                return null;
+
+            var info = source
+                .Select((value, index) => new { value, index })
+                .GroupBy(x => x.index / size)
+                .Select(g => g.Select(x => x.value).ToList()).ToList();
+
+            if ((info.LastOrDefault()?.Count() ?? size) != size)
+            {
+                if (isSupplEnd)
+                {
+                    var abc = Enumerable.Repeat(supplVal, size - info.Last().Count());
+                    info.Last().AddRange(abc);
+                }
+                else
+                {
+                    var abc = Enumerable.Repeat(supplVal, size - info.Last().Count());
+                    info.Last().InsertRange(0, abc);
+                }
+            }
+
+            //这里好像只能反转补充的值，需排查问题
+            if (isReverse)
+            {
+                foreach (var item in info)
+                    item.Reverse();
+            }
+            return info;
+        }
     }
 }

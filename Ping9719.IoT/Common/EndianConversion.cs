@@ -222,7 +222,7 @@ namespace Ping9719.IoT.Common
         /// <exception cref="NotImplementedException"></exception>
         public static T[] ByteToObj<T>(this byte[] value, EndianFormat format = EndianFormat.ABCD, bool bool1To8 = false, bool bool1To8Reverse = true, bool endianIotToNet = true)
         {
-            var sl = WordHelp.OccupyBitNum<T>();
+            var sl = DataHelp.GetByteCount<T>();
             if (value.Length % sl != 0)
                 throw new NotImplementedException($"转换失败，类型{typeof(T).Name}不为{sl}的倍数");
 
@@ -266,7 +266,7 @@ namespace Ping9719.IoT.Common
         /// <returns></returns>
         public static byte[] ObjToByte<T>(this IEnumerable<T> value, EndianFormat format = EndianFormat.ABCD, bool endianIotToNet = false)
         {
-            var sl = WordHelp.OccupyBitNum<T>();
+            var sl = DataHelp.GetByteCount<T>();
             var endianAction = endianIotToNet ? new Func<IEnumerable<byte>, EndianFormat, byte[]>(EndianIotToNet) : new Func<IEnumerable<byte>, EndianFormat, byte[]>(EndianNetToIot);
 
             var tType = typeof(T);
