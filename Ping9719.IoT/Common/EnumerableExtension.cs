@@ -62,7 +62,6 @@ namespace Ping9719.IoT.Common
                 }
             }
 
-            //这里好像只能反转补充的值，需排查问题
             if (isReverse)
             {
                 foreach (var item in info)
