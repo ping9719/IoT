@@ -12,6 +12,8 @@ namespace Ping9719.IoT
     /// </summary>
     public interface IClient
     {
+        //EndianFormat EndianFormat { get; set; }
+
         /// <summary>
         /// 客户端
         /// </summary>
