@@ -1167,11 +1167,11 @@ namespace Ping9719.IoT.PLC
                     }
                     else if (tType == typeof(DateTime))
                     {
-                        valJg = readResut.Value.ByteToObj<UInt16>(Format, true).Select(o => (T)(object)new DateTime(1990, 1, 1).AddDays(o)).ToArray();
+                        valJg = readResut.Value.EndianToObj<UInt16>(Format, true).Select(o => (T)(object)new DateTime(1990, 1, 1).AddDays(o)).ToArray();
                     }
                     else if (tType == typeof(TimeSpan))
                     {
-                        valJg = readResut.Value.ByteToObj<UInt32>(Format, true).Select(o => (T)(object)TimeSpan.FromMilliseconds(o)).ToArray();
+                        valJg = readResut.Value.EndianToObj<UInt32>(Format, true).Select(o => (T)(object)TimeSpan.FromMilliseconds(o)).ToArray();
                     }
                     else if (tType == typeof(Char))
                     {
@@ -1180,7 +1180,7 @@ namespace Ping9719.IoT.PLC
                     //正常类型
                     else
                     {
-                        valJg = readResut.Value.ByteToObj<T>(Format, true);
+                        valJg = readResut.Value.EndianToObj<T>(Format, true);
                         if (tType == typeof(bool))
                         {
                             valJg = valJg.Skip(address2).Take(number).ToArray();
@@ -1294,7 +1294,7 @@ namespace Ping9719.IoT.PLC
                 }
                 else
                 {
-                    var obj = value.ObjToByte(Format);
+                    var obj = value.EndianToByte(Format);
                     return Write(address, obj, false);
                 }
             }

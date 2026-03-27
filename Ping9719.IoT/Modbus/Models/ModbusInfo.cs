@@ -254,12 +254,12 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个寄存器)
                         {
                             isDan = true;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o)).Take(2).EndianNetToIot(format).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o)).Take(2).EndianToNet(format).ToArray();
                         }
                         else if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -271,12 +271,12 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个寄存器)
                         {
                             isDan = true;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o)).Take(2).EndianNetToIot(format).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o)).Take(2).EndianToNet(format).ToArray();
                         }
                         else if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -288,7 +288,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((int)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((int)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -300,7 +300,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((uint)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((uint)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -312,7 +312,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((long)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((long)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -324,7 +324,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ulong)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ulong)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -336,7 +336,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((float)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((float)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -348,7 +348,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((double)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((double)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -499,12 +499,12 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个寄存器)
                         {
                             isDan = true;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o)).Take(2).EndianNetToIot(format).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o)).Take(2).EndianToNet(format).ToArray();
                         }
                         else if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((short)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -516,12 +516,12 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写单个寄存器)
                         {
                             isDan = true;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o)).Take(2).EndianNetToIot(format).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o)).Take(2).EndianToNet(format).ToArray();
                         }
                         else if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -533,7 +533,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((int)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((int)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -545,7 +545,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((uint)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((uint)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -557,7 +557,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((long)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((long)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -569,7 +569,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ulong)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ulong)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -581,7 +581,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((float)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((float)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
@@ -593,7 +593,7 @@ namespace Ping9719.IoT.Modbus
                         if (functionCode == ModbusCode.写多个寄存器)
                         {
                             isDan = false;
-                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((double)(object)o).EndianNetToIot(format)).ToArray();
+                            list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((double)(object)o).EndianToNet(format)).ToArray();
                             vCount = Convert.ToUInt16(list1.Length / 2);
                         }
                     }
