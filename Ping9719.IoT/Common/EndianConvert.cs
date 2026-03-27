@@ -8,7 +8,7 @@ namespace Ping9719.IoT.Common
     /// <summary>
     /// 大小端转换
     /// </summary>
-    public static class EndianConversion
+    public static class EndianConvert
     {
         /// <summary>
         /// 转为Net的字节顺序，DCBA（一般用于读）

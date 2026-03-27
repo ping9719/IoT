@@ -11,6 +11,7 @@
 *6.[删除]删除`EnumerableExtension.DistinctBy`   
 *7.[优化]类`WordHelp`重命名`DataHelp`   
 *8.[优化]优化`WordHelp`并部分方法更名   
+*9.[优化]`EndianConversion`更名`EndianConvert`   
 ## v0.7.0（26-03-16）
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
