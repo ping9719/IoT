@@ -3,6 +3,9 @@
 [简体中文](README.md) || [English](README_en-US.md) 
 
 # 目录 
+- [字节数据(ByteData)](#ByteData)
+    - [内置转换器](#IByteConverter)
+    - [自定义转换器](#IByteConverter0)
 - [通讯 (Communication)](#Communication)
     - [客户端（ClientBase）](#ClientBase)
         - [1.连接模式（ConnectionMode）](#ConnectionMode)
@@ -61,6 +64,83 @@
 - [常见问题](#Issue)
     - [1.如何使用自定义协议？](#UserProtocol)
     - [2.如何自定义Json解析？](#UserJson)
+
+# 字节数据(ByteData) <a id="ByteData"></a>
+> 请注意：此功能为`beta`版本，可能会有较大改动。
+
+专门用来在字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具，主要用途为读取数据（如plc）的原始报文，然后进行批量转换，可以显著提升效率。   
+```CSharp
+public class test
+{
+    public Int16 aa { get; set; }
+    public Int16 bb { get; set; }
+}
+
+var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
+ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
+//添加自定义转换器（如果需要）
+//byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
+//解析单个
+var int160 = byteData.GetValue<Int16>();//1
+var int163 = byteData.GetValue<Int16>(2);//2 (2个偏差)
+var obj = byteData.GetValue<test>();//{"aa":1,"bb":2,"cc":0}
+//解析全部
+var int16s = byteData.GetValue<Int16[]>();//[1,2,3,4]
+var objs = byteData.GetValue<test[]>();//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+//解析指定个数
+var int16ss = byteData.GetValues<Int16>(2);//[1,2]
+var objss = byteData.GetValues<test>(2);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+//反向解析
+var bs = byteData.ToBytes(obj);//[0,1,0,2]
+```
+
+举例，在plc中使用：
+```CSharp
+var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
+var plcdata = client.Read<byte>("BD100.0.0", 100);//读100个原始数据
+
+ByteData byteD = new ByteData(plcdata.Value, client.Format);
+var v1 = byteD.GetValue<Int16>(0);//读第1个数据
+var v2 = byteD.GetValue<Int16>(2);//读第2个数据
+var v3 = byteD.GetValue<Int16>(4);//读第3个数据
+```
+
+# 内置转换器<a id="IByteConverter"></a>
+内置转换器分为"基础的"和"特殊的"。基础的在`ByteData`初始化的时候自带,特殊的不自带，你可以通过`byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())`此方式加入。   
+
+基础的：   
+ByteByteConverter  
+SByteByteConverter   
+Int16ByteConverter   
+UInt16ByteConverter  
+Int32ByteConverter   
+UInt32ByteConverter   
+SingleByteConverter   
+Int64ByteConverter   
+UInt64ByteConverter   
+DoubleByteConverter   
+
+特殊的：   
+[暂无]   
+
+# 自定义转换器<a id="IByteConverter0"></a>
+需要你的类实现接口`IByteConverter`。   
+```CSharp
+//示例：Int16的转换器
+public class Int16ByteConverter : IByteConverter
+{
+    public int ByteLength => 2;
+    public object ToObject(IEnumerable<byte> bytes, EndianFormat format) => BitConverter.ToInt16(DataConvert.EndianToNet(bytes, format, 0, ByteLength), 0);
+    public byte[] ToBytes(object data, EndianFormat format) => DataConvert.EndianToNet(BitConverter.GetBytes((short)data), format);
+}
+```
+使用：
+```CSharp
+var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
+ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
+//添加自定义转换器（如果需要）
+byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
+```
 
 # 通讯 (Communication) <a id="Communication"></a>
 使用指定的方式进行交互信息。
