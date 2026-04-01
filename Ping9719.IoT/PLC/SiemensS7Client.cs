@@ -99,20 +99,20 @@ namespace Ping9719.IoT.PLC
                     throw new Exception("打开S7第二次握手失败。");
 
             };
-            Client.Closing += (a) =>
-            {
-                //try
-                //{
-                //    byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-                //    Client.Send(command);
-                //}
-                //catch (Exception)
-                //{
+            //Client.Closing += (a) =>
+            //{
+            //    try
+            //    {
+            //        byte[] command = new byte[] { 0x66, 0x00, 0x00, 0x00, SessionByte[0], SessionByte[1], SessionByte[2], SessionByte[3], 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            //        Client.Send(command);
+            //    }
+            //    catch (Exception)
+            //    {
 
-                //    throw;
-                //}
-                return true;
-            };
+            //        throw;
+            //    }
+            //    return true;
+            //};
         }
 
         /// <summary>
