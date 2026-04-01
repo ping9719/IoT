@@ -45,7 +45,6 @@ namespace Ping9719.IoT.PLC
         /// <param name="client">客户端</param>
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
-        /// <param name="timeout">超时时间（毫秒）</param>
         public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00)
         {
             this.Version = version;
@@ -124,7 +123,6 @@ namespace Ping9719.IoT.PLC
         /// <param name="port">端口</param>
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
-        /// <param name="timeout">超时时间（毫秒）</param>
         public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00) : this(version, new TcpClient(ip, port), slot, rack) { }
 
         #region Read 

@@ -39,7 +39,6 @@ namespace Ping9719.IoT.Algorithm
     /// <summary>
     /// 稳定婚姻配对算法
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public static class GaleShapleyAlgorithm
     {
         /// <summary>

@@ -52,8 +52,6 @@ namespace Ping9719.IoT.PLC
         /// 初始化
         /// </summary>
         /// <param name="client">客户端</param>
-        /// <param name="format">数据格式</param>
-        /// <param name="stationNumber">站号</param>
         public OmronFinsClient(ClientBase client)
         {
             Client = client;
@@ -111,8 +109,6 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="ip">ip地址</param>
         /// <param name="port">端口</param>
-        /// <param name="format">数据格式</param>
-        /// <param name="stationNumber">站号</param>
         public OmronFinsClient(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
 
         /// <summary>
@@ -121,7 +117,6 @@ namespace Ping9719.IoT.PLC
         /// <param name="address">地址</param>
         /// <param name="length"></param>
         /// <param name="isBit"></param>
-        /// <param name="setEndian">返回值是否设置大小端</param>
         /// <returns></returns>
         private IoTResult<byte[]> ReadBytes(string address, ushort length, bool isBit = false)
         {

@@ -33,9 +33,7 @@ namespace Ping9719.IoT.Modbus
         /// <summary>
         /// 解析地址
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        /// <param name="isRead">是否为读</param>
         /// <param name="stationNumber">默认站号</param>
         /// <returns></returns>
         public static IoTResult<ModbusInfo> AddressAnalysis(string address, byte stationNumber)

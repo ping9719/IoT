@@ -212,8 +212,6 @@ namespace Ping9719.IoT.PLC
         /// 获取Read命令
         /// </summary>
         /// <param name="address"></param>
-        /// <param name="slot"></param>
-        /// <param name="length"></param>
         /// <returns></returns>
         protected byte[] GetReadCommand(AllenBradleyAddress address)
         {

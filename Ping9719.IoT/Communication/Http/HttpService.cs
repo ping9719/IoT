@@ -167,7 +167,7 @@ namespace Ping9719.IoT.Communication
                             }
 
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                            
                         }

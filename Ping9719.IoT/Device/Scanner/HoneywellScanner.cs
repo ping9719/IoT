@@ -36,7 +36,6 @@ namespace Ping9719.IoT.Device.Scanner
         /// <summary>
         /// 在外部触发模式下执行一次
         /// </summary>
-        /// <param name="timeout">保持时长（毫秒），填写解码设置：触发超时时间设置的值</param>
         /// <returns></returns>
         public IoTResult<string> ReadOne()
         {
@@ -46,7 +45,6 @@ namespace Ping9719.IoT.Device.Scanner
         /// <summary>
         /// 取消扫描
         /// </summary>
-        /// <param name="timeout"></param>
         /// <returns></returns>
         public IoTResult<string> ReadCancel()
         {

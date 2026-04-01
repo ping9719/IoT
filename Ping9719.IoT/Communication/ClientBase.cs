@@ -483,7 +483,7 @@ namespace Ping9719.IoT.Communication
                             //    //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
                             //    readLength = -2;
                             //}
-                            catch (Exception ex)
+                            catch (Exception)
                             {
                                 //其他原因
                                 readLength = -3;
@@ -557,7 +557,7 @@ namespace Ping9719.IoT.Communication
                             break;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
 
                     }
@@ -596,7 +596,7 @@ namespace Ping9719.IoT.Communication
                                 dt = DateTime.Now;
                             }
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
 
                         }

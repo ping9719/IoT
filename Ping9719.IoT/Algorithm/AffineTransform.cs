@@ -179,7 +179,7 @@ namespace Ping9719.IoT.Algorithm
                 IsCalibrated = true;
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 IsCalibrated = false;
                 return false;

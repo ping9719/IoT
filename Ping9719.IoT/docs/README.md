@@ -66,9 +66,9 @@
     - [2.如何自定义Json解析？](#UserJson)
 
 # 字节数据(ByteData) <a id="ByteData"></a>
-> 请注意：此功能为`beta`版本，可能会有较大改动。
+> 请注意：字节数据功能为`beta`版本，可能会有较大改动。
 
-专门用来在字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具，主要用途为读取数据（如plc）的原始报文，然后进行批量转换，可以显著提升效率。   
+可用在字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具。比如批量解析理plc的原始报文，可以显著提升效率。   
 ```CSharp
 public class test
 {
@@ -81,8 +81,7 @@ ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
 //添加自定义转换器（如果需要）
 //byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 //解析单个
-var int160 = byteData.GetValue<Int16>();//1
-var int163 = byteData.GetValue<Int16>(2);//2 (2个偏差)
+var int16 = byteData.GetValue<Int16>();//1
 var obj = byteData.GetValue<test>();//{"aa":1,"bb":2,"cc":0}
 //解析全部
 var int16s = byteData.GetValue<Int16[]>();//[1,2,3,4]

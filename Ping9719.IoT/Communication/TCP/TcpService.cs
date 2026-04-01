@@ -144,7 +144,7 @@ namespace Ping9719.IoT.Communication
                             tcpClientMy = TcpClient.Get(tcpClient, cc);
                             cc.clients.TryAdd(tcpClientMy, DateTime.Now);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             //监听停止了
                             continue;
@@ -163,7 +163,7 @@ namespace Ping9719.IoT.Communication
                         };
 
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
 
                     }

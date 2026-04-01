@@ -258,7 +258,6 @@ namespace Ping9719.IoT.PLC
         /// 获取Read命令
         /// </summary>
         /// <param name="address"></param>
-        /// <param name="slot"></param>
         /// <param name="length"></param>
         /// <returns></returns>
         protected byte[] GetReadCommand(string address, ushort length)
@@ -330,8 +329,6 @@ namespace Ping9719.IoT.PLC
         /// 获取Read命令
         /// </summary>
         /// <param name="address"></param>
-        /// <param name="slot"></param>
-        /// <param name="length"></param>
         /// <returns></returns>
         protected byte[] GetReadCommand2(AllenBradleyAddress address)
         {
@@ -405,8 +402,6 @@ namespace Ping9719.IoT.PLC
         /// 获取Read命令
         /// </summary>
         /// <param name="address"></param>
-        /// <param name="slot"></param>
-        /// <param name="length"></param>
         /// <returns></returns>
         protected byte[] GetReadCommand3(string address)
         {
@@ -583,7 +578,6 @@ namespace Ping9719.IoT.PLC
         /// <param name="address"></param>
         /// <param name="typeCode"></param>
         /// <param name="value"></param>
-        /// <param name="length"></param>
         /// <returns></returns>
         protected byte[] GetWriteCommand2(string address, CipVariableType typeCode, byte[] value)
         {
