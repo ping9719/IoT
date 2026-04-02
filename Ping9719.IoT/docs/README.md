@@ -74,6 +74,9 @@ public class test
 {
     public Int16 aa { get; set; }
     public Int16 bb { get; set; }
+
+    [IoT(IsIgnore = true)]
+    public Int16 cc { get; set; }
 }
 
 var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
