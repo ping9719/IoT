@@ -26,13 +26,21 @@ namespace Ping9719.IoT
     /// </summary>
     public class ByteData
     {
-        private IEnumerable<byte> Data { get; set; }
-        private EndianFormat Format { get; set; }
+        /// <summary>
+        /// 元数据字节数组。
+        /// </summary>
+        public IEnumerable<byte> Data { get; set; }
+        /// <summary>
+        /// 字节格式。
+        /// </summary>
+        public EndianFormat EndianFormat { get; set; }
 
+        public ByteData() : this(new byte[0], EndianFormat.DCBA) { }
+        public ByteData(EndianFormat endianFormat) : this(new byte[0], endianFormat) { }
         public ByteData(IEnumerable<byte> data, EndianFormat endianFormat = EndianFormat.DCBA)
         {
             Data = data;
-            Format = endianFormat;
+            EndianFormat = endianFormat;
         }
 
         private static readonly Dictionary<Type, IByteConverter> ByteDefaultConverters = new Dictionary<Type, IByteConverter>
@@ -116,12 +124,12 @@ namespace Ping9719.IoT
             if (ByteConverterDict.TryGetValue(t, out var v1))
             {
                 useLength += v1.ByteLength;
-                return v1.ToObject(Data.Skip(offset), Format);
+                return v1.ToObject(Data.Skip(offset), EndianFormat);
             }
             else if (ByteDefaultConverters.TryGetValue(t, out var v2))
             {
                 useLength += v2.ByteLength;
-                return v2.ToObject(Data.Skip(offset), Format);
+                return v2.ToObject(Data.Skip(offset), EndianFormat);
             }
             //类，结构体
             else if (t.IsClass || (t.IsValueType && !t.IsPrimitive && !t.IsEnum))
@@ -148,7 +156,7 @@ namespace Ping9719.IoT
                     else
                         throw new NotSupportedException($"属性 {prop.Name} 的类型 {prop.PropertyType.Name} 未找到对应的字节转换器");
 
-                    var value = converter.ToObject(Data.Skip(offset), Format);
+                    var value = converter.ToObject(Data.Skip(offset), EndianFormat);
                     prop.SetValue(instance, value);
 
                     useLength += converter.ByteLength;
@@ -177,7 +185,7 @@ namespace Ping9719.IoT
             {
                 for (int i = 0; i < count; i++)
                 {
-                    var obj = (T)v1.ToObject(Data.Skip(offset + i * v1.ByteLength), Format);
+                    var obj = (T)v1.ToObject(Data.Skip(offset + i * v1.ByteLength), EndianFormat);
                     results.Add(obj);
                 }
                 return results;
@@ -186,7 +194,7 @@ namespace Ping9719.IoT
             {
                 for (int i = 0; i < count; i++)
                 {
-                    var obj = (T)v2.ToObject(Data.Skip(offset + i * v2.ByteLength), Format);
+                    var obj = (T)v2.ToObject(Data.Skip(offset + i * v2.ByteLength), EndianFormat);
                     results.Add(obj);
                 }
                 return results;
@@ -238,11 +246,11 @@ namespace Ping9719.IoT
             }
             else if (ByteConverterDict.TryGetValue(t, out var v1))
             {
-                return v1.ToBytes(data, Format);
+                return v1.ToBytes(data, EndianFormat);
             }
             else if (ByteDefaultConverters.TryGetValue(t, out var v2))
             {
-                return v2.ToBytes(data, Format);
+                return v2.ToBytes(data, EndianFormat);
             }
             else if (t.IsClass || (t.IsValueType && !t.IsPrimitive && !t.IsEnum))
             {
@@ -263,7 +271,7 @@ namespace Ping9719.IoT
                     else
                         throw new NotSupportedException($"属性 {prop.Name} 的类型 {prop.PropertyType.Name} 未找到对应的字节转换器");
                     var value = prop.GetValue(data);
-                    bytes.AddRange(converter.ToBytes(value, Format));
+                    bytes.AddRange(converter.ToBytes(value, EndianFormat));
                 }
                 return bytes.ToArray();
             }

@@ -27,10 +27,6 @@ namespace Ping9719.IoT.PLC
             0x00, 0x00, 0x00, 0x0B //Client/Server Node Address字段
         };
         /// <summary>
-        /// 字节格式
-        /// </summary>
-        public EndianFormat Format { get; set; } = EndianFormat.CDAB;
-        /// <summary>
         /// DA2(即Destination unit address，目标单元地址)
         /// 0x00：PC(CPU)
         /// 0xFE： SYSMAC NET Link Unit or SYSMAC LINK Unit connected to network；
@@ -54,6 +50,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="client">客户端</param>
         public OmronFinsClient(ClientBase client)
         {
+            EndianFormat = EndianFormat.CDAB;
             Client = client;
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseByteAll();
@@ -470,47 +467,47 @@ namespace Ping9719.IoT.PLC
                 else if (tType == typeof(Int16))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(int))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt32(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt32(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(long))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt64(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt64(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(short))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToInt16(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(float))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToSingle(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToSingle(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(double))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToDouble(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToDouble(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(ushort))
                 {
                     var readResut = ReadBytes(address, 2);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt16(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt16(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(uint))
                 {
                     var readResut = ReadBytes(address, 4);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt32(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt32(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else if (tType == typeof(ulong))
                 {
                     var readResut = ReadBytes(address, 8);
-                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt64(readResut.Value.EndianToNet(Format), 0)) : readResut.ToVal<T>();
+                    return readResut.IsSucceed ? new IoTResult<T>(readResut, (T)(object)BitConverter.ToUInt64(readResut.Value.EndianToNet(EndianFormat), 0)) : readResut.ToVal<T>();
                 }
                 else
                 {
@@ -569,7 +566,7 @@ namespace Ping9719.IoT.PLC
                     return new IoTResult<IEnumerable<T>>().AddError("单次读取数量过大，建议不超过180个字节");
 
                 var readResut = ReadBytes(address, ynum);
-                var valJg = readResut.Value.EndianToObj<T>(Format, false);
+                var valJg = readResut.Value.EndianToObj<T>(EndianFormat, false);
                 return readResut.ToVal<IEnumerable<T>>(valJg);
             }
             catch (Exception ex)
@@ -592,35 +589,35 @@ namespace Ping9719.IoT.PLC
                 }
                 else if (value is short Int16v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int16v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(Int16v).EndianToNet(EndianFormat));
                 }
                 else if (value is int Int32v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int32v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(Int32v).EndianToNet(EndianFormat));
                 }
                 else if (value is long Int64v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(Int64v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(Int64v).EndianToNet(EndianFormat));
                 }
                 else if (value is float floatv)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(floatv).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(floatv).EndianToNet(EndianFormat));
                 }
                 else if (value is double doublev)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(doublev).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(doublev).EndianToNet(EndianFormat));
                 }
                 else if (value is ushort UInt16v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt16v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt16v).EndianToNet(EndianFormat));
                 }
                 else if (value is uint UInt32v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt32v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt32v).EndianToNet(EndianFormat));
                 }
                 else if (value is ulong UInt64v)
                 {
-                    return WriteBytes(address, BitConverter.GetBytes(UInt64v).EndianToNet(Format));
+                    return WriteBytes(address, BitConverter.GetBytes(UInt64v).EndianToNet(EndianFormat));
                 }
                 else
                 {
@@ -681,7 +678,7 @@ namespace Ping9719.IoT.PLC
                 }
                 else
                 {
-                    var obj = value.EndianToByte(Format);
+                    var obj = value.EndianToByte(EndianFormat);
                     return WriteBytes(address, obj, false);
                 }
             }

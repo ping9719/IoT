@@ -29,10 +29,6 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         public byte Rack { get; private set; }
         /// <summary>
-        /// 字节格式
-        /// </summary>
-        public EndianFormat Format { get; set; } = EndianFormat.ABCD;
-        /// <summary>
         /// 超长时读写Byte采用循环的最小的步数
         /// </summary>
         public ushort ReadWriteByteNum { get; set; } = 200;
@@ -47,7 +43,8 @@ namespace Ping9719.IoT.PLC
         /// <param name="rack">机架号</param>
         public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00)
         {
-            this.Version = version;
+            EndianFormat = EndianFormat.ABCD;
+            Version = version;
             Client = client;
             Slot = slot;
             Rack = rack;
@@ -1165,11 +1162,11 @@ namespace Ping9719.IoT.PLC
                     }
                     else if (tType == typeof(DateTime))
                     {
-                        valJg = readResut.Value.EndianToObj<UInt16>(Format, true).Select(o => (T)(object)new DateTime(1990, 1, 1).AddDays(o)).ToArray();
+                        valJg = readResut.Value.EndianToObj<UInt16>(EndianFormat, true).Select(o => (T)(object)new DateTime(1990, 1, 1).AddDays(o)).ToArray();
                     }
                     else if (tType == typeof(TimeSpan))
                     {
-                        valJg = readResut.Value.EndianToObj<UInt32>(Format, true).Select(o => (T)(object)TimeSpan.FromMilliseconds(o)).ToArray();
+                        valJg = readResut.Value.EndianToObj<UInt32>(EndianFormat, true).Select(o => (T)(object)TimeSpan.FromMilliseconds(o)).ToArray();
                     }
                     else if (tType == typeof(Char))
                     {
@@ -1178,7 +1175,7 @@ namespace Ping9719.IoT.PLC
                     //正常类型
                     else
                     {
-                        valJg = readResut.Value.EndianToObj<T>(Format, true);
+                        valJg = readResut.Value.EndianToObj<T>(EndianFormat, true);
                         if (tType == typeof(bool))
                         {
                             valJg = valJg.Skip(address2).Take(number).ToArray();
@@ -1292,7 +1289,7 @@ namespace Ping9719.IoT.PLC
                 }
                 else
                 {
-                    var obj = value.EndianToByte(Format);
+                    var obj = value.EndianToByte(EndianFormat);
                     return Write(address, obj, false);
                 }
             }

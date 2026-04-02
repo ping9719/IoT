@@ -15,9 +15,7 @@ namespace Ping9719.IoT.Modbus
     /// </summary>
     public class ModbusAsciiClient : ReadWriteBase, IClientData
     {
-        internal EndianFormat format;
         internal byte stationNumber = 1;
-
         public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
@@ -34,7 +32,7 @@ namespace Ping9719.IoT.Modbus
             Client.Encoding = Encoding.ASCII;
             //Client.ConnectionMode = ConnectionMode.AutoOpen;
 
-            this.format = format;
+            this.EndianFormat = format;
             this.stationNumber = stationNumber;
         }
 
@@ -101,7 +99,7 @@ namespace Ping9719.IoT.Modbus
                 if (!result.IsSucceed)
                     return result.ToVal<string>();
 
-                var comm = result.Value.GetModbusRtuCommand<string>(Convert.ToUInt16(length), null, Client.Encoding, format);
+                var comm = result.Value.GetModbusRtuCommand<string>(Convert.ToUInt16(length), null, Client.Encoding, EndianFormat);
                 if (!comm.IsSucceed)
                     return comm.ToVal<string>();
 
@@ -150,7 +148,7 @@ namespace Ping9719.IoT.Modbus
                 if (!result.IsSucceed)
                     return result.ToVal<IEnumerable<T>>();
 
-                var comm = result.Value.GetModbusRtuCommand<T>(Convert.ToUInt16(number), null, Client.Encoding, format);
+                var comm = result.Value.GetModbusRtuCommand<T>(Convert.ToUInt16(number), null, Client.Encoding, EndianFormat);
                 if (!comm.IsSucceed)
                     return comm.ToVal<IEnumerable<T>>();
 
@@ -184,35 +182,35 @@ namespace Ping9719.IoT.Modbus
                 }
                 else if (tType == typeof(short))
                 {
-                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToInt16(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToInt16(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(ushort))
                 {
-                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToUInt16(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(2).Select(o => (T)(object)BitConverter.ToUInt16(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(int))
                 {
-                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToInt32(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToInt32(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(uint))
                 {
-                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToUInt32(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToUInt32(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(long))
                 {
-                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToInt64(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToInt64(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(ulong))
                 {
-                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToUInt64(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToUInt64(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(float))
                 {
-                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToSingle(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(4).Select(o => (T)(object)BitConverter.ToSingle(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 else if (tType == typeof(double))
                 {
-                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToDouble(o.EndianToNet(format), 0)).Take(number);
+                    val2 = data.Chunk(8).Select(o => (T)(object)BitConverter.ToDouble(o.EndianToNet(EndianFormat), 0)).Take(number);
                 }
                 //else if (tType == typeof(string))
                 //{
@@ -280,7 +278,7 @@ namespace Ping9719.IoT.Modbus
                 if (!result.IsSucceed)
                     return result;
 
-                var comm = result.Value.GetModbusRtuCommand<T>(0, value, Client.Encoding, format);
+                var comm = result.Value.GetModbusRtuCommand<T>(0, value, Client.Encoding, EndianFormat);
                 if (!comm.IsSucceed)
                     return comm;
 

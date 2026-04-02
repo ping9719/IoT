@@ -13,6 +13,7 @@ namespace Ping9719.IoT
     /// </summary>
     public abstract class ReadWriteBase : IReadWrite
     {
+        public EndianFormat EndianFormat { get; set; } = EndianFormat.DCBA;
         #region IReadWrite
         public abstract IoTResult<T> Read<T>(string address);
         public abstract IoTResult<IEnumerable<T>> Read<T>(string address, int number);

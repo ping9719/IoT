@@ -12,6 +12,11 @@ namespace Ping9719.IoT
     public interface IReadWrite
     {
         /// <summary>
+        /// 字节序格式
+        /// </summary>
+        EndianFormat EndianFormat { get; set; }
+
+        /// <summary>
         /// 读取
         /// </summary>
         /// <typeparam name="T">类型</typeparam>

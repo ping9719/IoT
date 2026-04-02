@@ -12,7 +12,9 @@
 *7.[优化]类`WordHelp`重命名`DataHelp`   
 *8.[优化]优化`WordHelp`并部分方法更名   
 *9.[优化]`EndianConversion`更名`EndianConvert`   
-10.[新增]`ByteData`
+10.[新增]`ByteData`   
+11.[新增]接口`IReadWrite`新增`EndianFormat`   
+*12.[优化]部分协议中的`Format`更名为`EndianFormat`
 ## v0.7.0（26-03-16）
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
