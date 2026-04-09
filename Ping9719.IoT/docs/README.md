@@ -581,10 +581,12 @@ client.Client.Open();//打开
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 
-//读写多个
-client.Read<bool[]>("abc");//读
-client.Read<bool[]>("abc",5);//读多个，并截取前5个
-client.Write<bool[]>("abc",new bool[]{true,false});//写
+//读写数组。
+//注意：plc的类型为‘ARRAY[0..4] OF INT’表示为长度为5的int16的数组，
+//注意：读必然是出来5个；写也必须写5个
+client.Read<Int16[]>("abc");
+client.Read<bool[]>("abc",5);//读数组，并截取前5个
+client.Write<Int16>("abc", new Int16[] { 1, 2, 0, 5,2 });//必须类型+长度和plc中一致
 ```
 
 ## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
