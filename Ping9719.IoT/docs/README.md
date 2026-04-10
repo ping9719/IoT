@@ -20,8 +20,6 @@
     - [BleClient (蓝牙)](#BleClient)
     - [HttpClient](#HttpClient)
     - [HttpServer](#HttpServer)
-    - MqttClient （待开发） 
-    - MqttServer （待开发） 
 - [Modbus](#Modbus)
     - [ModbusRtuClient](#Modbus)
     - [ModbusTcpClient](#Modbus)
@@ -221,11 +219,13 @@ client1.SendDataProcessors.Add(new MyCalss());
 client1.ReceivedDataProcessors.Add(new MyCalss());
 ```
 ### 4.心跳（Heartbeat） <a id="Heartbeat"></a>
-自定义每隔多少的间隔操作指定的方法。   
-注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
+> 注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
+
+心跳分为主动心跳和被动心跳。  
+
+主动心跳：主动发送（循环）- 接收=》ok   
 ```CSharp
-//心跳间隔。默认为5秒。设置为0可以暂停发送心跳
-client1.HeartbeatTime = 5000;
+client1.HeartbeatTime = 5000;//间隔。设置为0可以暂停发送心跳
 //每次发送“1”并告知心跳结果。
 client1.Heartbeat = (a) =>
 {
@@ -233,6 +233,11 @@ client1.Heartbeat = (a) =>
     return aa.IsSucceed;
 };
 
+client1.Open();//打开，在打开前处理属性和事件
+```
+被动心跳：被动接收=》ok  
+```CSharp
+client1.HeartbeatReceiveTime = 5000;//检测间隔。
 client1.Open();//打开，在打开前处理属性和事件
 ```
 

@@ -29,6 +29,7 @@ namespace Ping9719.IoT.Communication
         protected Task task2;
         protected int ReconnectionCount = 0;
         protected CancellationTokenSource flushCts;
+        protected DateTime lastReceiveTime = DateTime.Now;//最后一次接收数据的时间，处理被动心跳
 
         /// <summary>
         /// 是否打开
@@ -55,9 +56,13 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public int ReceiveBufferSize { get; set; } = 1024 * 100;
         /// <summary>
-        /// 每次心跳的间隔（毫秒）。默认为5000。小于等于0不生效。在<see cref="ConnectionMode.AutoOpen"/>下不生效。
+        /// 每次主动心跳的间隔（毫秒）。默认为5000。小于等于0不生效。在<see cref="ConnectionMode.AutoOpen"/>下不生效。
         /// </summary>
         public int HeartbeatTime { get; set; } = 5000;
+        /// <summary>
+        /// 每次被动心跳的间隔（毫秒）。如果超过该时间未收到任何数据，则判定连接断开。默认为0（不启用）。在<see cref="ConnectionMode.AutoOpen"/>下不生效。
+        /// </summary>
+        public int HeartbeatReceiveTime { get; set; } = 0;
 
         /// <summary>
         /// 是否在发送和接收时丢弃来自缓冲区的数据（默认false）
@@ -101,7 +106,7 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public Action<ClientBase, byte[]> Received;
         /// <summary>
-        /// 每次心跳执行的内容，返回true成功，false会关闭连接。跳动时间需要设置属性 <see cref="HeartbeatTime"/>
+        /// 每次主动心跳执行的内容，返回true成功，false会关闭连接。跳动时间需要设置属性 <see cref="HeartbeatTime"/>
         /// </summary>
         public Func<ClientBase, bool> Heartbeat;
 
@@ -145,7 +150,10 @@ namespace Ping9719.IoT.Communication
                     if (isOpenOk || ConnectionMode == ConnectionMode.AutoReconnection)
                         GoRun();
                     if (isOpenOk)
+                    {
+                        lastReceiveTime = DateTime.Now;
                         Opened?.Invoke(this);
+                    }
                 }
             }
             catch (Exception ex)
@@ -183,6 +191,28 @@ namespace Ping9719.IoT.Communication
                 task2?.Wait();
             }
             return result.ToEnd();
+        }
+
+        /// <summary>
+        /// 内部关闭，非用户关闭
+        /// </summary>
+        void CloseIn()
+        {
+            IsOpen2 = false;
+            dataEri = null;
+            IsUserClose = false;
+            Close2();
+            Closed?.Invoke(this, false);
+        }
+
+        void OpenIn()
+        {
+            openData = Open2();
+            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+            IsOpen2 = true;
+            ReconnectionCount = 0;
+            lastReceiveTime = DateTime.Now;
+            Opened?.Invoke(this);
         }
 
         /// <summary>
@@ -448,12 +478,12 @@ namespace Ping9719.IoT.Communication
             task = Task.Factory.StartNew(async (a) =>
             {
                 var cc = (ClientBase)a;
-                byte[] data = new byte[ReceiveBufferSize];
+                byte[] data = new byte[cc.ReceiveBufferSize];
                 while (true)
                 {
                     try
                     {
-                        if (IsUserClose)
+                        if (cc.IsUserClose)
                         {
                             break;
                         }
@@ -494,17 +524,14 @@ namespace Ping9719.IoT.Communication
                             {
                                 if (cc.IsOpen2 || cc.IsOpen)
                                 {
-                                    IsOpen2 = false;
-                                    dataEri = null;
-                                    IsUserClose = false;
-                                    cc.Close2();
-                                    Closed?.Invoke(this, false);
+                                    cc.CloseIn();
                                 }
                             }
                             //收到消息
                             else
                             {
                                 cc.dataEri.Enqueue(data, 0, readLength);
+                                cc.lastReceiveTime = DateTime.Now;
                                 if (cc.Received != null && !cc.isSendReceive)
                                 {
                                     lock (cc.obj1)
@@ -512,16 +539,16 @@ namespace Ping9719.IoT.Communication
                                         if (cc.ReceiveModeReceived.Type == ReceiveModeEnum.Time)
                                         {
                                             // 取消之前的延迟刷新
-                                            flushCts?.Cancel();
-                                            flushCts = new CancellationTokenSource();
+                                            cc.flushCts?.Cancel();
+                                            cc.flushCts = new CancellationTokenSource();
 
                                             var countMax = (int)cc.ReceiveModeReceived.Data;
-                                            Task.Delay(countMax, flushCts.Token).ContinueWith(t =>
+                                            Task.Delay(countMax, cc.flushCts.Token).ContinueWith(t =>
                                             {
                                                 if (t.IsCanceled)
                                                     return;
 
-                                                var bytes = dataEri.DequeueAll();
+                                                var bytes = cc.dataEri.DequeueAll();
                                                 if (bytes != null && bytes.Length > 0)
                                                     cc.Received?.Invoke(this, DataProcessors(bytes, false));
                                             }, TaskContinuationOptions.ExecuteSynchronously);
@@ -539,18 +566,14 @@ namespace Ping9719.IoT.Communication
                         }
                         else if (cc.ConnectionMode == ConnectionMode.AutoReconnection)
                         {
-                            ReconnectionCount++;
-                            var tz = Math.Min(ReconnectionCount * 1000, cc.MaxReconnectionTime * 1000);
+                            cc.ReconnectionCount++;
+                            var tz = Math.Min(cc.ReconnectionCount * 1000, cc.MaxReconnectionTime * 1000);
                             System.Threading.Thread.Sleep(tz);
 
-                            if (IsUserClose)
+                            if (cc.IsUserClose)
                                 break;
 
-                            openData = cc.Open2();
-                            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-                            IsOpen2 = true;
-                            ReconnectionCount = 0;
-                            Opened?.Invoke(this);
+                            cc.OpenIn();
                         }
                         else
                         {
@@ -573,7 +596,7 @@ namespace Ping9719.IoT.Communication
             TaskScheduler.Default).Unwrap();
 
             //心跳线程
-            if (ConnectionMode != ConnectionMode.AutoOpen && Heartbeat != null)
+            if (ConnectionMode != ConnectionMode.AutoOpen && (Heartbeat != null || HeartbeatReceiveTime > 0))
             {
                 task2 = Task.Factory.StartNew(async (a) =>
                 {
@@ -585,22 +608,38 @@ namespace Ping9719.IoT.Communication
                         {
                             System.Threading.Thread.Sleep(100);
 
-                            if (cc.task.IsCompleted || cc.Heartbeat == null)
+                            if (cc.task.IsCompleted)
                                 break;
-                            if (cc.HeartbeatTime <= 0)
-                                continue;
-
-                            if ((DateTime.Now - dt).TotalMilliseconds >= cc.HeartbeatTime)
+                            if (!IsOpen2)
                             {
-                                IsOpen2 = cc.Heartbeat.Invoke(cc);
                                 dt = DateTime.Now;
+                                continue;
                             }
+
+                            //被动心跳
+                            if (cc.HeartbeatReceiveTime > 0)
+                            {
+                                if ((DateTime.Now - cc.lastReceiveTime).TotalMilliseconds > cc.HeartbeatReceiveTime)
+                                {
+                                    cc.CloseIn();
+                                    continue;
+                                }
+                            }
+
+                            //主动心跳
+                            if (cc.Heartbeat != null && cc.HeartbeatTime > 0)
+                            {
+                                if ((DateTime.Now - dt).TotalMilliseconds >= cc.HeartbeatTime)
+                                {
+                                    if (!cc.Heartbeat.Invoke(cc))
+                                        cc.CloseIn();
+
+                                    dt = DateTime.Now;
+                                }
+                            }
+
                         }
                         catch (Exception)
-                        {
-
-                        }
-                        finally
                         {
 
                         }
