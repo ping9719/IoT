@@ -98,9 +98,14 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public Func<ClientBase, bool> Closing;
         /// <summary>
-        /// 断开连接，item2:是否手动断开
+        /// 断开连接。item2：关闭代码。
+        /// 0：用户关闭/正常关闭；
+        /// -1：服务端主动断开/未知错误/通用错误；
+        /// -2：主动心跳验证失败；
+        /// -3：被动心跳超时；
+        /// 其他：请参考系统错误代码
         /// </summary>
-        public Action<ClientBase, bool> Closed;
+        public Action<ClientBase, int> Closed;
         /// <summary>
         /// 接收到信息
         /// </summary>
@@ -186,7 +191,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                Closed?.Invoke(this, true);
+                Closed?.Invoke(this, 0);
                 task?.Wait();
                 task2?.Wait();
             }
@@ -196,13 +201,13 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 内部关闭，非用户关闭
         /// </summary>
-        void CloseIn()
+        void CloseIn(int code)
         {
             IsOpen2 = false;
             dataEri = null;
             IsUserClose = false;
             Close2();
-            Closed?.Invoke(this, false);
+            Closed?.Invoke(this, code);
         }
 
         void OpenIn()
@@ -490,33 +495,17 @@ namespace Ping9719.IoT.Communication
                         else if (cc.IsOpen)
                         {
                             int readLength;
+                            int code = -1;
                             try
                             {
                                 readLength = await cc.openData.ReadAsync(data, 0, data.Length);
                             }
-                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.OperationAborted || (ex.InnerException as SocketException)?.ErrorCode == 125 /* 操作取消（Linux） */)
-                            //{
-                            //    //警告：此错误代码（995）可能会更改。
-                            //    //查看 https://docs.microsoft.com/en-us/windows/desktop/winsock/windows-sockets-error-codes-2
-                            //    //注意：在Linux上观察到NativeErrorCode和ErrorCode 125。
-
-                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("本地连接已关闭", ex));
-                            //    readLength = -1;
-                            //}
-                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionAborted)
-                            //{
-                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("连接失败", ex));
-                            //    readLength = -1;
-                            //}
-                            //catch (IOException ex) when ((ex.InnerException as SocketException)?.ErrorCode == (int)SocketError.ConnectionReset)
-                            //{
-                            //    //Message?.Invoke(this, new AsyncTcpEventArgs("远程连接重置", ex));
-                            //    readLength = -2;
-                            //}
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                code = GetErrorCode(ex);
+                                code = code == 0 ? -1 : code;
                                 //其他原因
-                                readLength = -3;
+                                readLength = -1;
                             }
 
                             //断开
@@ -524,7 +513,7 @@ namespace Ping9719.IoT.Communication
                             {
                                 if (cc.IsOpen2 || cc.IsOpen)
                                 {
-                                    cc.CloseIn();
+                                    cc.CloseIn(code);
                                 }
                             }
                             //收到消息
@@ -621,7 +610,7 @@ namespace Ping9719.IoT.Communication
                             {
                                 if ((DateTime.Now - cc.lastReceiveTime).TotalMilliseconds > cc.HeartbeatReceiveTime)
                                 {
-                                    cc.CloseIn();
+                                    cc.CloseIn(-3);
                                     continue;
                                 }
                             }
@@ -632,7 +621,7 @@ namespace Ping9719.IoT.Communication
                                 if ((DateTime.Now - dt).TotalMilliseconds >= cc.HeartbeatTime)
                                 {
                                     if (!cc.Heartbeat.Invoke(cc))
-                                        cc.CloseIn();
+                                        cc.CloseIn(-2);
 
                                     dt = DateTime.Now;
                                 }
@@ -810,6 +799,18 @@ namespace Ping9719.IoT.Communication
                 data2 = item.DataProcess(data2);
             }
             return data2;
+        }
+
+        int GetErrorCode(Exception ex)
+        {
+            if (ex is SocketException socketEx)
+                return socketEx.ErrorCode;
+            if (ex.InnerException != null)
+                return GetErrorCode(ex.InnerException);
+            if (ex is System.ComponentModel.Win32Exception win32Ex)
+                return win32Ex.NativeErrorCode;
+
+            return ex.HResult;
         }
     }
 

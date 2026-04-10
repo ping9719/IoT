@@ -262,7 +262,7 @@ client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client
 
 //4：事件驱动。
 client1.Opened += (a) => { Console.WriteLine("链接成功。"); };
-client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。关闭代码：{b}"); };
 client1.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
 client1.Open();//打开，在打开前处理属性和事件
@@ -317,7 +317,7 @@ client.Encoding = Encoding.UTF8;
 client.ConnectionMode = ConnectionMode.Manual;//Udp不要使用断线重连模式（AutoReconnection）
 
 client.Opened += (a) => { Console.WriteLine("链接成功。"); };
-client.Closed += (a, b) => { Console.WriteLine($"关闭成功。{(b ? "手动断开" : "自动断开")}"); };
+client.Closed += (a, b) => { Console.WriteLine($"关闭成功。错误代码：{b}"); };
 client.Received += (a, b) =>
 {
     Console.WriteLine($"收到[{(a as INetwork)?.Socket?.RemoteEndPoint}]消息：{a.Encoding.GetString(b)}");
