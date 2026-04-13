@@ -109,11 +109,11 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<string>();
+                    return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<string>();
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<string>();
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<string>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2])).ToVal<string>();
 
@@ -155,11 +155,11 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。").ToVal<IEnumerable<T>>();
+                    return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<IEnumerable<T>>();
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败").ToVal<IEnumerable<T>>();
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<IEnumerable<T>>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2])).ToVal<IEnumerable<T>>();
 
@@ -282,11 +282,11 @@ namespace Ping9719.IoT.Modbus
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。");
+                    return sendResult.AddError($"写入[{result.Value}]失败。");
 
                 //验证
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
-                    return sendResult.AddError($"读取 地址:{result.Value.Address} 站号:{result.Value.StationNumber} 功能码:{result.Value.FunctionCode} 失败。响应结果校验失败");
+                    return sendResult.AddError($"写入[{result.Value}]失败。响应结果校验失败");
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2]));
 

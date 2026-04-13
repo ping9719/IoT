@@ -645,5 +645,6 @@ namespace Ping9719.IoT.Modbus
             }
         }
 
+        public override string ToString() => $"s={StationNumber};x={(byte)(FunctionCode.HasValue ? FunctionCode.Value : (byte)0)};{Address}{(Bit.HasValue ? "." + Bit.Value : "")}";
     }
 }
