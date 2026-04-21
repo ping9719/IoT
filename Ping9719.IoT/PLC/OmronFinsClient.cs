@@ -433,15 +433,15 @@ namespace Ping9719.IoT.PLC
                 data.AddError("客户端和服务器使用了相同的FINS节点地址 The same FINS node address is being used by the client and server", true);
             else if (errCode == 0x25)
                 data.AddError("所有可用于分配的节点地址已被使用 All the node addresses available for allocation have been used", true);
-            else if (errCode == 0x25)
+            else
                 data.AddError($"PLC错误，错误代码：{errCode}", true);
 
             //判断是否结束
             UInt16 endCode = BitConverter.ToUInt16(data.Value.Skip(28).Take(2).Reverse().ToArray(), 0);
             if (endCode == 0x00)
                 data.IsSucceed = true;
-            //else if (endCode == 0x40)//部分plc才有？？？
-            //    data.AddError("PLC中产生了报警，可屏蔽64报警或清除plc错误", true);
+            else if (endCode == 0x40)//部分plc才有？？？
+                data.AddError($"PLC返回非致命错误：PLC处于运行模式 (结束码：{endCode})", true);
             else
                 data.AddError($"PLC错误，错误结束码：{endCode}");
 
