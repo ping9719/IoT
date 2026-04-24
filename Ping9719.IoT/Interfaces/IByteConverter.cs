@@ -102,7 +102,80 @@ namespace Ping9719.IoT
     #endregion
 
     #region 特殊的
+    /// <summary>
+    /// 单个 bool 转换器
+    /// </summary>
+    public class BoolByteConverter : IByteConverter
+    {
+        public int ByteLength => 1;
+        public object ToObject(IEnumerable<byte> bytes, EndianFormat format) => BitConverter.ToBoolean(bytes.ToArray(), 0);
+        public byte[] ToBytes(object data, EndianFormat format) => BitConverter.GetBytes((bool)data);
+    }
 
+    /// <summary>
+    /// 位布尔数组转换器（将 1 个 byte 转换为 8 个 bool 的数组，按位处理）
+    /// </summary>
+    public class BoolBitByteConverter : IByteConverter
+    {
+        public int ByteLength => 1;
+        public object ToObject(IEnumerable<byte> bytes, EndianFormat format = EndianFormat.DCBA) => Convert.ToString(bytes.First(), 2).PadLeft(8, '0').Select(o => o == '1').Reverse();
+        public byte[] ToBytes(object data, EndianFormat format) => new byte[] { (byte)((IEnumerable<bool>)data).Select((b, i) => b ? 1 << i : 0).Aggregate(0, (a, b) => a | b) };
+    }
+
+    /// <summary>
+    /// 字符串转换器
+    /// </summary>
+    public class StringByteConverter : IByteConverter
+    {
+        /// <summary>
+        /// 字符串编码，如果为 null 则使用十六进制字符串（大写，无分隔符）
+        /// </summary>
+        public Encoding Encoding { get; set; }
+        /// <summary>
+        /// 字节长度，如果为 -1 则转换全部
+        /// </summary>
+        public int ByteLength { get; set; }
+
+        public StringByteConverter(Encoding encoding, int byteLength = -1)
+        {
+            Encoding = encoding;
+            ByteLength = byteLength;
+        }
+
+        public object ToObject(IEnumerable<byte> bytes, EndianFormat format)
+        {
+            byte[] data = ByteLength < 0 ? bytes.ToArray() : bytes.Take(ByteLength).ToArray();
+
+            if (Encoding == null)
+                return BitConverter.ToString(data).Replace("-", "");
+            else
+                return Encoding.GetString(data).TrimEnd('\0');
+        }
+
+        public byte[] ToBytes(object data, EndianFormat format)
+        {
+            string str = (string)data;
+            byte[] buffer = new byte[ByteLength];
+
+            if (Encoding == null)
+            {
+                // 十六进制字符串解析（自动处理奇数长度）
+                if (str.Length % 2 != 0) str = "0" + str;
+                for (int i = 0; i < Math.Min(str.Length / 2, ByteLength); i++)
+                {
+                    buffer[i] = Convert.ToByte(str.Substring(i * 2, 2), 16);
+                }
+            }
+            else
+            {
+                // 编码转换（自动截断或补零）
+                byte[] encoded = Encoding.GetBytes(str);
+                Array.Copy(encoded, buffer, Math.Min(encoded.Length, ByteLength));
+            }
+
+            return buffer;
+        }
+    }
     #endregion
 
 }

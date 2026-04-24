@@ -79,20 +79,24 @@ public class test
 }
 
 var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
-ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
+
 //添加自定义转换器（如果需要）
-//byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
+Dictionary<Type, IByteConverter> converterDict = new Dictionary<Type, IByteConverter>()
+{
+    { typeof(bool), new BoolBitByteConverter()}
+};
+
 //解析单个
-var int16 = byteData.GetValue<Int16>();//1
-var obj = byteData.GetValue<test>();//{"aa":1,"bb":2,"cc":0}
+var int16 = ByteData.GetValue<Int16>(testArr, EndianFormat.ABCD, converterDict);//1
+var obj = ByteData.GetValue<test>(testArr, EndianFormat.ABCD, converterDict);//{"aa":1,"bb":2,"cc":0}
 //解析全部
-var int16s = byteData.GetValue<Int16[]>();//[1,2,3,4]
-var objs = byteData.GetValue<test[]>();//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+var int16s = ByteData.GetValue<Int16[]>(testArr, EndianFormat.ABCD, converterDict);//[1,2,3,4]
+var objs = ByteData.GetValue<test[]>(testArr, EndianFormat.ABCD, converterDict);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
 //解析指定个数
-var int16ss = byteData.GetValues<Int16>(2);//[1,2]
-var objss = byteData.GetValues<test>(2);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+var int16ss = ByteData.GetValues<Int16>(testArr, 2, EndianFormat.ABCD, converterDict);//[1,2]
+var objss = ByteData.GetValues<test>(testArr, 2, EndianFormat.ABCD, converterDict);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
 //反向解析
-var bs = byteData.ToBytes(obj);//[0,1,0,2]
+var bs = ByteData.ToBytes(obj, EndianFormat.ABCD);//[0,1,0,2]
 ```
 
 举例，在plc中使用：
