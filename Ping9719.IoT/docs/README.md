@@ -27,6 +27,7 @@
 - [PLC](#PLC)
     - [类型对照表](#PlcType)
     - [罗克韦尔 (AllenBradleyCipClient)](#AllenBradleyCipClient)   
+    - [基恩士 (KeyenceHostLinkClient)](#KeyenceHostLinkClient)   
     - [汇川 (InovanceModbusTcpClient)](#InovanceModbusTcpClient)
     - [三菱 (MitsubishiMcClient)](#MitsubishiMcClient)
     - [欧姆龙 (OmronFinsClient,OmronCipClient)](#OmronFinsClient)
@@ -508,6 +509,18 @@ client.Client.Open();//打开
 
 client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
+```
+
+## 基恩士 (KeyenceHostLinkClient) <a id="KeyenceHostLinkClient"></a>
+`KeyenceHostLinkClient : IClientData`  
+
+```CSharp
+KeyenceHostLinkClient client = new KeyenceHostLinkClient("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
+client.Read<bool>("B0");//读
+client.Write<bool>("B0",true);//写
 ```
 
 ## 汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>
