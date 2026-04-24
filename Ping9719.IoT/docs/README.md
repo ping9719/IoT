@@ -583,7 +583,7 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
 
 client.Read<Int16>("W0");//读
-client.Read<Int16>("W0",5);//读取5个
+client.Read<bool>("D100",10);//读取10个bool
 client.Write<Int16>("W0",10);//写
 client.Write<Int16>("W0",new Int16[]{1,2});//写多个
 ```

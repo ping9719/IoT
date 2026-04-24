@@ -20,11 +20,11 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         private byte[] BasicCommand = new byte[]
         {
-            0x46, 0x49, 0x4E, 0x53,//Magic字段  0x46494E53 对应的ASCII码，即FINS
-            0x00, 0x00, 0x00, 0x0C,//Length字段 表示其后所有字段的总长度
-            0x00, 0x00, 0x00, 0x00,//Command字段 
-            0x00, 0x00, 0x00, 0x00,//Error Code字段
-            0x00, 0x00, 0x00, 0x0B //Client/Server Node Address字段
+        0x46, 0x49, 0x4E, 0x53,//Magic字段  0x46494E53 对应的ASCII码，即FINS
+        0x00, 0x00, 0x00, 0x0C,//Length字段 表示其后所有字段的总长度
+        0x00, 0x00, 0x00, 0x00,//Command字段 
+        0x00, 0x00, 0x00, 0x00,//Error Code字段
+        0x00, 0x00, 0x00, 0x0B //Client/Server Node Address字段
         };
         /// <summary>
         /// DA2(即Destination unit address，目标单元地址)
@@ -248,6 +248,7 @@ namespace Ping9719.IoT.PLC
                     }
                 case 'E':
                     {
+                        // E区保持原有逻辑（位地址0-15）
                         string[] address_split = address.Split('.');
                         int block_length = Convert.ToInt32(address_split[0].Substring(1), 16);
                         if (block_length < 16)
@@ -305,19 +306,34 @@ namespace Ping9719.IoT.PLC
 
                     if (address_split.Length > 1)
                     {
-                        addressInfo.BitAddress[2] = byte.Parse(address_split[1]);
-                        if (addressInfo.BitAddress[2] > 15)
-                            //输入的位地址只能在0-15之间
-                            throw new Exception("位地址数据异常");
+                        byte bitVal = byte.Parse(address_split[1]);
+                        byte maxBit = addressInfo.TypeChar == "D" ? (byte)31 : (byte)15;
+                        if (bitVal > maxBit)
+                            throw new Exception($"位地址数据异常，{addressInfo.TypeChar}区位地址范围为 0-{maxBit}");
+
+                        addressInfo.BitAddress[2] = bitVal;
+
+                        // D区 16~31 自动映射到下一个字的对应位
+                        if (addressInfo.TypeChar == "D" && bitVal > 15)
+                        {
+                            ushort currentWord = (ushort)((addressInfo.BitAddress[0] << 8) | addressInfo.BitAddress[1]);
+                            ushort extra = (ushort)(bitVal / 16); // 0 或 1
+                            ushort newWord = (ushort)(currentWord + extra);
+                            byte newBit = (byte)(bitVal % 16);
+
+                            addressInfo.BitAddress[0] = (byte)(newWord >> 8);
+                            addressInfo.BitAddress[1] = (byte)(newWord & 0xFF);
+                            addressInfo.BitAddress[2] = newBit;
+                        }
                     }
                 }
                 else
                 {
                     // 字操作
-                    ushort address_location = ushort.Parse(address.Substring(1));
+                    ushort addressLocation = ushort.Parse(address.Substring(1));
                     addressInfo.BitAddress = new byte[3];
-                    addressInfo.BitAddress[0] = BitConverter.GetBytes(address_location)[1];
-                    addressInfo.BitAddress[1] = BitConverter.GetBytes(address_location)[0];
+                    addressInfo.BitAddress[0] = BitConverter.GetBytes(addressLocation)[1];
+                    addressInfo.BitAddress[1] = BitConverter.GetBytes(addressLocation)[0];
                 }
             }
 
@@ -556,18 +572,31 @@ namespace Ping9719.IoT.PLC
             }
         }
 
+        /// <summary>
+        /// 批量读取（bool 批量读取，最多32位/次，D区高位自动映射
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="address">地址</param>
+        /// <param name="number">数量，建议不超过180个</param>
+        /// <returns></returns>
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             try
             {
-                var ynum = DataHelp.GetByteCount<T>();
-                ynum = Convert.ToUInt16(ynum == 1 ? 1 : (ynum * number));
-                if (ynum > 180)
-                    return new IoTResult<IEnumerable<T>>().AddError("单次读取数量过大，建议不超过180个字节");
+                var newNum = Convert.ToUInt16(DataHelp.GetByteCount<T>() * number);
+                // if (ynum > 180)
+                //     return new IoTResult<IEnumerable<T>>().AddError("单次读取数量过大，建议不超过180个字节");
 
-                var readResut = ReadBytes(address, ynum);
-                var valJg = readResut.Value.EndianToObj<T>(EndianFormat, false);
-                return readResut.ToVal<IEnumerable<T>>(valJg);
+                var isBit = typeof(T) == typeof(bool);
+                var readResult = ReadBytes(address, newNum, isBit: isBit);
+                if (!readResult.IsSucceed)
+                    return readResult.ToVal<IEnumerable<T>>();
+
+                if (isBit)
+                    return new IoTResult<IEnumerable<T>>(readResult, readResult.Value.Select(b => (T)(object)(b != 0x00)).Take(number));
+
+                var valJg = readResult.Value.EndianToObj<T>(EndianFormat);
+                return readResult.ToVal<IEnumerable<T>>(valJg);
             }
             catch (Exception ex)
             {
@@ -634,7 +663,7 @@ namespace Ping9719.IoT.PLC
         {
             try
             {
-                encoding = encoding ?? Encoding.ASCII;
+                encoding ??= Encoding.ASCII;
 
                 //高低置位
                 string High_Data = string.Empty;
@@ -669,18 +698,15 @@ namespace Ping9719.IoT.PLC
                 {
                     if (value.Count() == 1)
                         return WriteBytes(address, (bool)(object)value.ElementAt(0) ? new byte[] { 0x01 } : new byte[] { 0x00 }, true);
-                    else
-                        throw new NotImplementedException("暂不支持写多个bool类型");
+
+                    throw new NotImplementedException("暂不支持写多个bool类型");
                 }
-                else if (value is byte[] bytev)
-                {
-                    return WriteBytes(address, bytev, false);
-                }
-                else
-                {
-                    var obj = value.EndianToByte(EndianFormat);
-                    return WriteBytes(address, obj, false);
-                }
+
+                if (value is byte[] bytev)
+                    return WriteBytes(address, bytev);
+
+                var obj = value.EndianToByte(EndianFormat);
+                return WriteBytes(address, obj);
             }
             catch (Exception ex)
             {
