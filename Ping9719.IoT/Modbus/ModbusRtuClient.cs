@@ -59,25 +59,11 @@ namespace Ping9719.IoT.Modbus
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
-                if (!result.IsSucceed)
-                    return result.ToVal<T>();
-
                 var val = Read<T>(address, 1);
                 if (!val.IsSucceed)
                     return val.ToVal<T>();
 
-                if (!result.Value.Bit.HasValue)
-                {
-                    return val.ToVal<T>(val.Value.FirstOrDefault());
-                }
-                //取位
-                else
-                {
-                    var val2 = Convert.ToInt64(val.Value.FirstOrDefault()?.ToString() ?? "0");
-                    var vql3 = Convert.ToString(val2, 2).PadLeft(64, '0').Reverse().ElementAtOrDefault(result.Value.Bit.Value).ToString();
-                    return val.ToVal<T>((T)Convert.ChangeType(vql3, typeof(T)));
-                }
+                return val.ToVal<T>(val.Value.FirstOrDefault());
             }
             catch (Exception ex)
             {
@@ -169,7 +155,13 @@ namespace Ping9719.IoT.Modbus
                 IEnumerable<T> val2 = null;
                 if (tType == typeof(bool))
                 {
-                    val2 = data.SelectMany(o => Convert.ToString(o, 2).PadLeft(8, '0').Reverse()).Select(o => (T)(object)(o == '1')).Take(number);
+                    if (result.Value.Bit.HasValue)
+                    {
+                        var aaa = data.Chunk(2).Select(o => BitConverter.ToUInt16(o.EndianToNet(EndianFormat), 0)).Select(o => Convert.ToString(o, 2).PadLeft(16, '0').Reverse().Select(o => (T)(object)(o == '1'))).SelectMany(o => o);
+                        val2 = aaa.Skip(result.Value.Bit.Value).Take(number);
+                    }
+                    else
+                        val2 = data.SelectMany(o => Convert.ToString(o, 2).PadLeft(8, '0').Reverse()).Select(o => (T)(object)(o == '1')).Take(number);
                 }
                 else if (tType == typeof(byte))
                 {

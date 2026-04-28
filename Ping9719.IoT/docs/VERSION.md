@@ -21,6 +21,7 @@
 16.[优化]`OmronFinsClient`0x40错误码处理  
 17.[新增]`KeyenceHostLinkClient`协议   
 18.[新增]`OmronFinsClient`支持bool多个读   
+*19.[新增]`Modbus`支持读寄存器多个的位   
 ## v0.7.0（26-03-16）
 1.[优化]`HttpClient`最低支持net45   
 *2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   

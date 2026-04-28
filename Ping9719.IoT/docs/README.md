@@ -467,10 +467,11 @@ client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连。
 client.Client.Open();//打开
 
 client.Read<Int16>("100");//读寄存器
-client.Read<Int16>("100.1");//读寄存器中的位，读位只支持单个读，最好是uint16,int16
+client.Read<bool>("100.1");//读寄存器中的位
 client.Read<Int16>("s=2;x=3;100");//读寄存器，对应站号，功能码，地址
 client.Read<bool>("100");//读线圈
 client.Read<bool>("100", 10);//读多个线圈
+client.Read<bool>("100.1", 10);//读寄存器中的位
 
 client.Write<Int16>("100", 100);//写寄存器
 client.Write<Int16>("100", 100, 110);//写多个寄存器
