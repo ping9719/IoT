@@ -97,6 +97,9 @@ var int16ss = ByteData.GetValues<Int16>(testArr, 2, EndianFormat.ABCD, converter
 var objss = ByteData.GetValues<test>(testArr, 2, EndianFormat.ABCD, converterDict);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
 //反向解析
 var bs = ByteData.ToBytes(obj, EndianFormat.ABCD);//[0,1,0,2]
+
+//特殊情况（1byte=8bool）
+var bools = ByteData.GetValues<bool>(testArr, 1, EndianFormat.ABCD, converterDict);//[F,F,F,F,F,F,F,F]
 ```
 
 举例，在plc中使用：
