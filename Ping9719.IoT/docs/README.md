@@ -59,6 +59,7 @@
         - 米勒螺丝机 (MiLeScrew)
     - [焊接机 (Weld)](#Weld)
         - 快克焊接机 (KuaiKeWeld)
+        - JBC焊接机 (JBCWeld)
     - [其他列表](#EstsList)
 - [常见问题](#Issue)
     - [1.如何使用自定义协议？](#UserProtocol)
@@ -841,6 +842,19 @@ MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
 ## 螺丝机 (Screw) <a id="Screw"></a>
 ```CSharp
 MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
+```
+
+## 焊接机 (Weld) <a id="Weld"></a>
+```CSharp
+//JBC焊接机
+JBCWeld jBCWeld = new JBCWeld("COM5");
+jBCWeld.Client.Open();
+while (true)
+{
+    var assa = jBCWeld.ReadInfo();
+    Console.WriteLine(assa.IsSucceed ? assa.Value : assa.ErrorText);
+    Thread.Sleep(200);
+}
 ```
 
 ## 其他列表 <a id="EstsList"></a>
