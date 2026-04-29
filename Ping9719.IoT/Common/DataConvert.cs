@@ -46,6 +46,36 @@ namespace Ping9719.IoT.Common
         }
 
         /// <summary>
+        /// 替换字节数组
+        /// </summary>
+        /// <param name="source">原始字节数组</param>
+        /// <param name="oldBytes">旧的字节数组</param>
+        /// <param name="newBytes">新的字节数组</param>
+        /// <returns>替换后的字节数组</returns>
+        public static byte[] Replace(this byte[] source, byte[] oldBytes, byte[] newBytes)
+        {
+            if (source == null || oldBytes == null || newBytes == null)
+                return source;
+
+            List<byte> result = new List<byte>();
+            int i = 0;
+            while (i < source.Length)
+            {
+                if (i <= source.Length - oldBytes.Length && source.Skip(i).Take(oldBytes.Length).SequenceEqual(oldBytes))
+                {
+                    result.AddRange(newBytes);
+                    i += oldBytes.Length;
+                }
+                else
+                {
+                    result.Add(source[i]);
+                    i++;
+                }
+            }
+            return result.ToArray();
+        }
+
+        /// <summary>
         /// ASCII字节数组转字节数组
         /// 如：30 31 => 00 01
         /// </summary>
