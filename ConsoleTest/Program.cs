@@ -4,36 +4,71 @@ using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using Ping9719.IoT.Device.Fct;
 using Ping9719.IoT.Device.Rfid;
+using Ping9719.IoT.Device.Weld;
+using Ping9719.IoT.Hid;
 using Ping9719.IoT.Modbus;
 using Ping9719.IoT.PLC;
+using System;
+using System.ComponentModel;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using HttpClient = Ping9719.IoT.Communication.HttpClient;
 
 namespace ConsoleTest
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        public class MyJsonParse : IJsonParse
         {
-            // 测试三菱PLC MC协议客户端
-            var client = new MitsubishiMcClient(
-                MitsubishiVersion.Qna_3E,
-                "127.0.0.1",
-                6000
-            );
+            public T DeserializeObject<T>(string json) => Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+            public string SerializeObject(object obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+        }
 
-            client.Client.Open();
+        public class test
+        {
+            public Int16 aa { get; set; }
+            public Int16 bb { get; set; }
 
-            // 测试short的批量读写
-            //TestShortReadWrite(client);
+            [IoT(IsIgnore = true)]
+            public Int16 cc { get; set; }
+        }
 
-            // 测试bool的读写
-            //TestBoolReadWrite(client);
+        private static async Task Main(string[] args)
+        {
+            JBCWeld jBCWeld = new JBCWeld("COM5");
+            jBCWeld.Client.Open();
+            while (true)
+            {
+                var assa = jBCWeld.ReadInfo();
+                Console.WriteLine(assa.IsSucceed ? assa.Value : assa.ErrorText);
+                Thread.Sleep(200);
+            }
 
-            //TestFloatReadWrite(client);
-            //TestDoubleReadWrite(client);
+            ////var testArr = new byte[] { 205,};
+            //var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
+            ////添加自定义转换器（如果需要）
+            //Dictionary<Type, IByteConverter> converterDict = new Dictionary<Type, IByteConverter>()
+            //{
+            //    { typeof(bool), new BoolBitByteConverter()}
+            //};
 
-            //TestInt32ReadWrite(client);
-            TestStringReadWrite(client);
+            ////解析单个
+            //var int16 = ByteData.GetValues<bool>(testArr,2, EndianFormat.ABCD, converterDict);//1
+            //var obj = ByteData.GetValue<test>(testArr, EndianFormat.ABCD, converterDict);//{"aa":1,"bb":2,"cc":0}
+            ////解析全部
+            //var int16s = ByteData.GetValue<Int16[]>(testArr, EndianFormat.ABCD, converterDict);//[1,2,3,4]
+            //var objs = ByteData.GetValue<test[]>(testArr, EndianFormat.ABCD, converterDict);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+            ////解析指定个数
+            //var int16ss = ByteData.GetValues<Int16>(testArr, 2, EndianFormat.ABCD, converterDict);//[1,2]
+            //var objss = ByteData.GetValues<test>(testArr, 2, EndianFormat.ABCD, converterDict);//[{"aa":1,"bb":2,"cc":0},{"aa":3,"bb":4,"cc":0}]
+            ////反向解析
+            //var bs = ByteData.ToBytes(obj, EndianFormat.ABCD);//[0,1,0,2]
+
+            ////特殊情况，1byte=8bool
+            //var bools = ByteData.GetValues<bool>(testArr, 1, EndianFormat.ABCD, converterDict);//[F,F,F,F,F,F,F,F]
+
+            Console.ReadKey();
         }
 
         /// <summary>

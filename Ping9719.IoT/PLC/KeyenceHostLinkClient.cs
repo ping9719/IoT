@@ -83,7 +83,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
     {
         if (_typeSuffixMap.TryGetValue(typeof(T), out string suffix))
             return suffix;
-        
+
         return TypeUnsigned16;
     }
 
@@ -179,7 +179,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
 
         byte[] lowBytes = BitConverter.GetBytes(lowWord);
         byte[] highBytes = BitConverter.GetBytes(highWord);
-        byte[] floatBytes = [lowBytes[0], lowBytes[1], highBytes[0], highBytes[1]];
+        byte[] floatBytes = new byte[] { lowBytes[0], lowBytes[1], highBytes[0], highBytes[1] };
 
         return BitConverter.ToSingle(floatBytes, 0);
     }
@@ -194,7 +194,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
 
         byte[] lowBytes = BitConverter.GetBytes(lowWord);
         byte[] highBytes = BitConverter.GetBytes(highWord);
-        byte[] intBytes = [lowBytes[0], lowBytes[1], highBytes[0], highBytes[1]];
+        byte[] intBytes = new byte[] { lowBytes[0], lowBytes[1], highBytes[0], highBytes[1] };
 
         return BitConverter.ToInt32(intBytes, 0);
     }
@@ -209,7 +209,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
 
         byte[] lowBytes = BitConverter.GetBytes(lowWord);
         byte[] highBytes = BitConverter.GetBytes(highWord);
-        byte[] uintBytes = [lowBytes[0], lowBytes[1], highBytes[0], highBytes[1]];
+        byte[] uintBytes = new byte[] { lowBytes[0], lowBytes[1], highBytes[0], highBytes[1] };
 
         return BitConverter.ToUInt32(uintBytes, 0);
     }
@@ -223,13 +223,13 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             !ushort.TryParse(w3Str, out ushort w3) || !ushort.TryParse(w4Str, out ushort w4))
             throw new FormatException($"ULong解析失败：{w1Str},{w2Str},{w3Str},{w4Str}");
 
-        byte[] bytes =
-        [
+        byte[] bytes = new byte[]
+        {
             BitConverter.GetBytes(w1)[0], BitConverter.GetBytes(w1)[1],
             BitConverter.GetBytes(w2)[0], BitConverter.GetBytes(w2)[1],
             BitConverter.GetBytes(w3)[0], BitConverter.GetBytes(w3)[1],
             BitConverter.GetBytes(w4)[0], BitConverter.GetBytes(w4)[1]
-        ];
+        };
 
         return BitConverter.ToUInt64(bytes, 0);
     }
@@ -243,13 +243,13 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             !ushort.TryParse(w3Str, out ushort w3) || !ushort.TryParse(w4Str, out ushort w4))
             throw new FormatException($"Double解析失败：{w1Str},{w2Str},{w3Str},{w4Str}");
 
-        byte[] bytes =
-        [
+        byte[] bytes = new byte[]
+        {
             BitConverter.GetBytes(w1)[0], BitConverter.GetBytes(w1)[1],
             BitConverter.GetBytes(w2)[0], BitConverter.GetBytes(w2)[1],
             BitConverter.GetBytes(w3)[0], BitConverter.GetBytes(w3)[1],
             BitConverter.GetBytes(w4)[0], BitConverter.GetBytes(w4)[1]
-        ];
+        };
 
         return BitConverter.ToDouble(bytes, 0);
     }
@@ -265,7 +265,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             throw new Exception("PLC返回空响应，通讯异常");
 
         // 拆分响应数据
-        string[] parts = response.Split([' ', '\t', '\n'], StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = response.Split(new char[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length < expectedCount)
             throw new Exception($"PLC响应数据不足：预期{expectedCount}个值，实际{parts.Length}个，响应内容：{response}");
@@ -291,7 +291,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             string command = registerCount == 1 ? CmdReadSingle : CmdReadMultiple;
             string fullCommand = BuildHostLinkCommand(command, address, typeSuffix, registerCount);
 
-           var receiveResult = Client.SendReceive(fullCommand);
+            var receiveResult = Client.SendReceive(fullCommand);
             if (!receiveResult.IsSucceed)
                 return receiveResult.ToVal<T>();
 
@@ -379,7 +379,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             // 发送指令并获取响应
             var receiveResult = Client.SendReceive(fullCommand);
             if (!receiveResult.IsSucceed)
-               return receiveResult.ToVal<string>();
+                return receiveResult.ToVal<string>();
 
             // 解析响应
             string[] responseParts = ParseResponse(receiveResult.Value.Trim(), wordCount);
@@ -394,8 +394,8 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
                 // 低字节转字符
                 byte lowByte = Convert.ToByte(hexStr.Substring(2, 2), 16);
 
-                if (sb.Length < length) sb.Append(encoding.GetString([highByte]));
-                if (sb.Length < length) sb.Append(encoding.GetString([lowByte]));
+                if (sb.Length < length) sb.Append(encoding.GetString(new byte[] { highByte }));
+                if (sb.Length < length) sb.Append(encoding.GetString(new byte[] { lowByte }));
             }
 
             result.Value = sb.ToString().Substring(0, Math.Min(sb.Length, length));
