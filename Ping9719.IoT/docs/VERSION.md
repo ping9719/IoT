@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.8.0（...） 
+## v0.8.0（26-05-06） 
 1.[优化]部分PLC事件冲突优化为+=方式   
 *2.[优化]更改DataConvert部分方法名称   
 3.[新增]增加`SerialClient`   
