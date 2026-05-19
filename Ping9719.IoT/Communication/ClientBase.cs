@@ -100,7 +100,7 @@ namespace Ping9719.IoT.Communication
         /// <summary>
         /// 断开连接。item2：关闭代码。
         /// 0：用户关闭/正常关闭；
-        /// -1：服务端主动断开/未知错误/通用错误；
+        /// -1：主动断开/未知错误/通用错误；
         /// -2：主动心跳验证失败；
         /// -3：被动心跳超时；
         /// 其他：请参考系统错误代码
@@ -183,6 +183,7 @@ namespace Ping9719.IoT.Communication
                 IsUserClose = true;
                 IsOpen2 = false;
                 dataEri = null;
+                Closed?.Invoke(this, 0);
                 Close2();
             }
             catch (Exception ex)
@@ -191,7 +192,6 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                Closed?.Invoke(this, 0);
                 task?.Wait();
                 task2?.Wait();
             }
@@ -206,8 +206,8 @@ namespace Ping9719.IoT.Communication
             IsOpen2 = false;
             dataEri = null;
             IsUserClose = false;
-            Close2();
             Closed?.Invoke(this, code);
+            Close2();
         }
 
         void OpenIn()

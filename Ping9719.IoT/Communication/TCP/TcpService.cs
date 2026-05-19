@@ -22,9 +22,14 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public Action<ClientBase> Opened;
         /// <summary>
-        /// 客户端断开链接
+        /// 断开连接。item2：关闭代码。
+        /// 0：用户关闭/正常关闭；
+        /// -1：主动断开/未知错误/通用错误；
+        /// -2：主动心跳验证失败；
+        /// -3：被动心跳超时；
+        /// 其他：请参考系统错误代码
         /// </summary>
-        public Action<ClientBase> Closed;
+        public Action<ClientBase, int> Closed;
         /// <summary>
         /// 接收到信息
         /// </summary>
@@ -154,7 +159,7 @@ namespace Ping9719.IoT.Communication
                         Opened?.Invoke(tcpClientMy);
                         tcpClientMy.Closed += (a, b) =>
                         {
-                            cc.Closed?.Invoke(a);
+                            cc.Closed?.Invoke(a, b);
                             cc.clients.TryRemove(tcpClientMy, out DateTime dt);
                         };
                         tcpClientMy.Received += (a, b) =>

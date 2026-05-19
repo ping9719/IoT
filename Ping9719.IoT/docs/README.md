@@ -299,7 +299,7 @@ service.Opened += (a) =>
 };
 service.Closed += (a) =>
 {
-    Console.WriteLine($"客户端关闭成功");
+    Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]关闭成功");
 };
 service.Received += (a, b) =>
 {
