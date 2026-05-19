@@ -28,6 +28,11 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public int OpenTimeOut { get; set; } = 8000;
 
+        private TcpClient()
+        {
+            Ini();
+        }
+
         /// <summary>
         /// 初始化客户端
         /// </summary>
@@ -96,7 +101,7 @@ namespace Ping9719.IoT.Communication
 
         internal static TcpClient Get(System.Net.Sockets.TcpClient tcpClient, ServiceBase serviceBase)
         {
-            TcpClient tcpClient1 = new TcpClient("", 0);
+            TcpClient tcpClient1 = new TcpClient();
             tcpClient1.ReceiveBufferSize = serviceBase.ReceiveBufferSize;
             tcpClient1.IsAutoDiscard = serviceBase.IsAutoDiscard;
             tcpClient1.Encoding = serviceBase.Encoding;
