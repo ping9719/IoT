@@ -634,6 +634,7 @@ client.Write<DateTime>("BD100.0.0",DateTime.Now);//写
 //支持超长的读和写
 client.Read<Int16>("BD100.0.0",9999);//连续读9999个数据，大概只需百毫秒
 client.Write<Int16>("BD100.0.0",new Int16[]{1,2,3});//连续写9999个数据，大概只需百毫秒
+client.Write<bool>("BD100.0.0", new bool[] { true, false, true, true, false, false, false, false });//bool类型只支持8的整数倍
 
 //字符串说明
 client.Read<string>("BD100.0.0");//plc的类型必须为string，只支持字母数字等ASCII编码

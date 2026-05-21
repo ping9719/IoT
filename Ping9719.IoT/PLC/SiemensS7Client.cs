@@ -1248,6 +1248,12 @@ namespace Ping9719.IoT.PLC
                 {
                     if (value.Count() == 1)
                         return Write(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }, true);
+                    else if (value.Count() % 8 == 0)
+                    {
+                        BoolBitByteConverter boolBitByteConverter = new BoolBitByteConverter();
+                        var bytes = boolBitByteConverter.ToBytes(value, EndianFormat);
+                        return Write(address, bytes, false);
+                    }
                     else
                         throw new NotImplementedException("暂不支持写多个bool类型");
                 }
