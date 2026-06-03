@@ -117,20 +117,28 @@ var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 # 内置转换器<a id="IByteConverter"></a>
 内置转换器分为"基础的"和"特殊的"。基础的在`ByteData`初始化的时候自带,特殊的不自带，你可以通过`byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())`此方式加入。   
 
-基础的：   
-ByteByteConverter  
-SByteByteConverter   
-Int16ByteConverter   
-UInt16ByteConverter  
-Int32ByteConverter   
-UInt32ByteConverter   
-SingleByteConverter   
-Int64ByteConverter   
-UInt64ByteConverter   
-DoubleByteConverter   
+> 基础的
 
-特殊的：   
-[暂无]   
+| 名称 | 说明   | 
+| ----------------  | --------- |
+| ByteByteConverter |  Byte |
+| SByteByteConverter | SByte  |
+| Int16ByteConverter | Int16  |
+| UInt16ByteConverter |UInt16   |
+| Int32ByteConverter | Int32  |
+| UInt32ByteConverter | UInt32  |
+| Int64ByteConverter | Int64  |
+| UInt64ByteConverter |UInt64   |
+| SingleByteConverter | Single  |
+| DoubleByteConverter | Double  |
+
+> 特殊的
+
+| 名称 | 说明   | 
+| ----------------------- | --------- |
+| BoolByteConverter | 1byte = 1bool |
+| BoolBitByteConverter | 1byte = 8bool |
+| StringByteConverter | 字符串转换器，Encoding 为 null 则使用十六进制字符串 |
 
 # 自定义转换器<a id="IByteConverter0"></a>
 需要你的类实现接口`IByteConverter`。   
