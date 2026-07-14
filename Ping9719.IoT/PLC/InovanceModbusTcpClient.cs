@@ -36,7 +36,7 @@ namespace Ping9719.IoT.PLC
         /// 读取
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public override IoTResult<T> Read<T>(string address)
+        public new IoTResult<T> Read<T>(string address)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
         /// <param name="number">读取数量</param>
-        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public new IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace Ping9719.IoT.PLC
         /// 写入
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public override IoTResult Write<T>(string address, T value)
+        public new IoTResult Write<T>(string address, T value)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace Ping9719.IoT.PLC
         /// 写入，内部循环，失败了就跳出
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public override IoTResult Write<T>(string address, IEnumerable<T> value)
+        public new IoTResult Write<T>(string address, IEnumerable<T> value)
         {
             try
             {
