@@ -2,8 +2,10 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.9.0（...） 
+## v0.9.0（26-07-14） 
 1.[优化]`SiemensS7Client`bool支持写入8个倍数个   
+2.[优化]固定语言版本为12避免latest版本反转数组太激进的问题   
+3.[优化]`InovanceModbusTcpClient`读写循环引用的问题   
 ## v0.8.1（26-05-19） 
 1.[优化]`TcpService`链接优化   
 1.[优化]`TcpService`断开优化   
