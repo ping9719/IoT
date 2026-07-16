@@ -1255,7 +1255,7 @@ namespace Ping9719.IoT.PLC
                         return Write(address, bytes, false);
                     }
                     else
-                        throw new NotImplementedException("暂不支持写多个bool类型");
+                        throw new NotImplementedException("暂不支持写非8的倍数的多个bool类型");
                 }
                 else if (tType == typeof(string))
                 {
