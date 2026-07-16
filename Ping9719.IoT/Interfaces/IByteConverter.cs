@@ -113,13 +113,24 @@ namespace Ping9719.IoT
     }
 
     /// <summary>
-    /// 位布尔数组转换器（将 1 个 byte 转换为 8 个 bool 的数组，按位处理）
+    /// 位布尔数组转换器（将第1个byte转换为8个bool的数组,按位处理）
     /// </summary>
-    public class BoolBitByteConverter : IByteConverter
+    public class BoolBitByteFirstConverter : IByteConverter
     {
         public int ByteLength => 1;
         public object ToObject(IEnumerable<byte> bytes, EndianFormat format = EndianFormat.DCBA) => Convert.ToString(bytes.First(), 2).PadLeft(8, '0').Select(o => o == '1').Reverse();
         public byte[] ToBytes(object data, EndianFormat format) => new byte[] { (byte)((IEnumerable<bool>)data).Select((b, i) => b ? 1 << i : 0).Aggregate(0, (a, b) => a | b) };
+    }
+
+
+    /// <summary>
+    /// 位布尔数组转换器（将每个byte转换为8个bool的数组,按位处理）
+    /// </summary>
+    public class BoolBitByteConverter : IByteConverter
+    {
+        public int ByteLength => 1;
+        public object ToObject(IEnumerable<byte> bytes, EndianFormat format = EndianFormat.DCBA) => bytes.SelectMany(b => Convert.ToString(b, 2).PadLeft(8, '0').Select(o => o == '1').Reverse());
+        public byte[] ToBytes(object data, EndianFormat format) => ((IEnumerable<bool>)data).Select((b, i) => new { b, i }).GroupBy(x => x.i / 8).Select(g => (byte)g.Select((x, j) => x.b ? 1 << j : 0).Sum()).ToArray();
     }
 
     /// <summary>
