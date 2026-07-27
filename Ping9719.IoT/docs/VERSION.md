@@ -5,6 +5,7 @@
 ## v0.9.1（...） 
 *1.[更名]`BoolBitByteConverter` 更名 `BoolBitByteFirstConverter`   
 2.[新增]`BoolBitByteConverter`   
+3.[优化]`SiemensS7Client` 8的倍数大量bool写优化
 ## v0.9.0（26-07-14） 
 1.[优化]`SiemensS7Client`bool支持写入8个倍数个   
 2.[优化]固定语言版本为12避免latest版本反转数组太激进的问题   

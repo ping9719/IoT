@@ -161,7 +161,7 @@ byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 
 # 通讯 (Communication) <a id="Communication"></a>
 使用指定的方式进行交互信息。
-## 客户端(ClientBase)  <a id="ClientBase"></a>
+## 客户端基类(ClientBase)  <a id="ClientBase"></a>
 `TcpClient`或`SerialPortClient`都是实现于`ClientBase`，他们的使用方式都是一样的。
 
 ### 1.链接模式 <a id="ConnectionMode"></a>    
