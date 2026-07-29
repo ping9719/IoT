@@ -58,7 +58,7 @@ namespace Ping9719.IoT.Communication
             ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
 
-        protected override OpenClientData Open2()
+        protected override OpenClientData OpenCore()
         {
             udpClient = new System.Net.Sockets.UdpClient(listeningPort);
             udpClient.Connect(ip, port);
@@ -66,7 +66,7 @@ namespace Ping9719.IoT.Communication
             return new OpenClientData(udpClient.Client);
         }
 
-        protected override void Close2()
+        protected override void CloseCore()
         {
             udpClient?.Client?.Shutdown(SocketShutdown.Both);
             udpClient?.Close();

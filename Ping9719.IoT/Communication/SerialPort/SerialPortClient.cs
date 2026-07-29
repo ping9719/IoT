@@ -128,7 +128,7 @@ namespace Ping9719.IoT.Communication
             }
         }
 
-        protected override OpenClientData Open2()
+        protected override OpenClientData OpenCore()
         {
             serialPort = new System.IO.Ports.SerialPort(portName, baudRate, parity, dataBits, stopBits);
             serialPort.Encoding = Encoding;
@@ -141,7 +141,7 @@ namespace Ping9719.IoT.Communication
             return new OpenClientData(serialPort.BaseStream);
         }
 
-        protected override void Close2()
+        protected override void CloseCore()
         {
             serialPort?.Close();
             serialPort?.Dispose();

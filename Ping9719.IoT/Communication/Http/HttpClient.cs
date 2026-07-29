@@ -153,7 +153,7 @@ namespace Ping9719.IoT.Communication
             }
             return result.ToEnd();
         }
-        protected override OpenClientData Open2()
+        protected override OpenClientData OpenCore()
         {
             throw new NotImplementedException();
         }

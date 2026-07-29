@@ -34,7 +34,7 @@ namespace Ping9719.IoT.Hid
             ReceiveModeReceived = ReceiveMode.ParseByteAll();
         }
 
-        protected override OpenClientData Open2()
+        protected override OpenClientData OpenCore()
         {
             Device = DeviceList.Local.GetBleDevices().FirstOrDefault(o => o.DevicePath == devicePath);
             if (Device == null)

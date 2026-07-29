@@ -140,7 +140,7 @@ namespace Ping9719.IoT.Communication
 
                     try
                     {
-                        openData = Open2();
+                        openData = OpenCore();
                         isOpenOk = true;
                     }
                     catch (Exception ex)
@@ -184,7 +184,7 @@ namespace Ping9719.IoT.Communication
                 IsOpen2 = false;
                 dataEri = null;
                 Closed?.Invoke(this, 0);
-                Close2();
+                CloseCore();
             }
             catch (Exception ex)
             {
@@ -207,12 +207,12 @@ namespace Ping9719.IoT.Communication
             dataEri = null;
             IsUserClose = false;
             Closed?.Invoke(this, code);
-            Close2();
+            CloseCore();
         }
 
         void OpenIn()
         {
-            openData = Open2();
+            openData = OpenCore();
             dataEri = new QueueByteFixed(ReceiveBufferSize, true);
             IsOpen2 = true;
             ReconnectionCount = 0;
@@ -259,7 +259,7 @@ namespace Ping9719.IoT.Communication
                 result.Requests.Add(d2);
                 lock (obj1)
                 {
-                    Send2(d2, offset, count);
+                    SendCore(d2, offset, count);
                 }
             }
             catch (Exception ex)
@@ -317,7 +317,7 @@ namespace Ping9719.IoT.Communication
                     if (IsAutoDiscard)
                         DiscardInBuffer();
 
-                    result.Value = DataProcessors(Receive2(receiveMode), false);
+                    result.Value = DataProcessors(ReceiveCore(receiveMode), false);
                     result.Responses.Add(result.Value);
                 }
 
@@ -384,8 +384,8 @@ namespace Ping9719.IoT.Communication
 
                     var d1 = DataProcessors(data, true);
                     result.Requests.Add(d1);
-                    Send2(d1);
-                    result.Value = DataProcessors(Receive2(receiveMode), false);
+                    SendCore(d1);
+                    result.Value = DataProcessors(ReceiveCore(receiveMode), false);
                     result.Responses.Add(result.Value);
                 }
             }
@@ -544,7 +544,7 @@ namespace Ping9719.IoT.Communication
                                         }
                                         else
                                         {
-                                            var bytes = cc.Receive2(cc.ReceiveModeReceived, true);
+                                            var bytes = cc.ReceiveCore(cc.ReceiveModeReceived, true);
                                             if (bytes != null && bytes.Length > 0)
                                                 cc.Received?.Invoke(this, DataProcessors(bytes, false));
                                         }
@@ -642,21 +642,21 @@ namespace Ping9719.IoT.Communication
 
         }
 
-        protected abstract OpenClientData Open2();
+        protected abstract OpenClientData OpenCore();
 
-        protected virtual void Close2()
+        protected virtual void CloseCore()
         {
             openData.Close();
         }
 
-        protected virtual void Send2(byte[] data, int offset = 0, int count = -1)
+        protected virtual void SendCore(byte[] data, int offset = 0, int count = -1)
         {
             if (openData == null)
                 throw new Exception("未链接");
             openData.Write(data, offset, count < 0 ? data.Length : count);
         }
 
-        protected virtual byte[] Receive2(ReceiveMode receiveMode = null, bool isevent = false)
+        protected virtual byte[] ReceiveCore(ReceiveMode receiveMode = null, bool isevent = false)
         {
             receiveMode ??= ReceiveMode;
             byte[] value = null;

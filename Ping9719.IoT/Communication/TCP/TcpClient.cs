@@ -124,7 +124,7 @@ namespace Ping9719.IoT.Communication
             return tcpClient1;
         }
 
-        protected override OpenClientData Open2()
+        protected override OpenClientData OpenCore()
         {
             tcpClient = new System.Net.Sockets.TcpClient(AddressFamily.InterNetworkV6);
             tcpClient.Client.DualMode = true;
@@ -139,7 +139,7 @@ namespace Ping9719.IoT.Communication
             return new OpenClientData(tcpClient.Client);
         }
 
-        protected override void Close2()
+        protected override void CloseCore()
         {
             tcpClient?.Client?.Shutdown(SocketShutdown.Both);
             tcpClient?.Close();
