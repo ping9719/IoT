@@ -176,13 +176,25 @@ byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 > 2.如没有成功就继续增加一秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
 > 3.直到重连成功，或用户手动调用关闭(`Close()`)。   
 
-简要代码：  
+链接模式列子：  
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
 client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。
 client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。
 client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
+```
+
+进阶（使用 `IsAutoClose` 来发送或接受消息）：  
+> `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。
+```CSharp
+client1.ConnectionMode = ConnectionMode.AutoOpen;
+
+client.IsAutoClose = false;
+client.SendReceive(data1); // 打开→发→收
+client.SendReceive(data1); // 发→收
+client.IsAutoClose = true;
+client.SendReceive(data1); // 发→收→关闭
 ```
 
 ### 2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>

@@ -40,6 +40,14 @@ namespace Ping9719.IoT.Communication
         /// </summary>
         public ConnectionMode ConnectionMode { get; set; }
         /// <summary>
+        /// 是否自动打开。默认false。只有在为<see cref="ConnectionMode.AutoOpen"/> 时生效。
+        /// </summary>
+        public bool IsAutoOpen { get; private set; } = false;
+        /// <summary>
+        /// 是否自动关闭。默认true。只有在为<see cref="ConnectionMode.AutoOpen"/> 时生效。
+        /// </summary>
+        public bool IsAutoClose { get; set; } = true;
+        /// <summary>
         /// 发送数据处理器
         /// </summary>
         public List<IDataProcessor> SendDataProcessors { get; set; } = new List<IDataProcessor>();
@@ -180,6 +188,7 @@ namespace Ping9719.IoT.Communication
                 if (aa == false)
                     throw new Exception("用户已拒绝断开");
 
+                IsAutoOpen = false;
                 IsUserClose = true;
                 IsOpen2 = false;
                 dataEri = null;
@@ -251,9 +260,12 @@ namespace Ping9719.IoT.Communication
             try
             {
                 if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
-                { result = Open(); isHmOpen = true; }
-                if (!result.IsSucceed)
-                    return result;
+                {
+                    result = Open();
+                    if (!result.IsSucceed) return result;
+                    isHmOpen = true;
+                    IsAutoOpen = true;
+                }
 
                 var d2 = DataProcessors(data, true);
                 result.Requests.Add(d2);
@@ -268,7 +280,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && (isHmOpen || IsAutoOpen) && IsAutoClose)
                     Close();
 
                 isSendReceive = false;
@@ -308,9 +320,12 @@ namespace Ping9719.IoT.Communication
             try
             {
                 if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
-                { result = Open().ToVal<byte[]>(); isHmOpen = true; }
-                if (!result.IsSucceed)
-                    return result;
+                {
+                    result = Open().ToVal<byte[]>();
+                    if (!result.IsSucceed) return result;
+                    isHmOpen = true;
+                    IsAutoOpen = true;
+                }
 
                 lock (obj1)
                 {
@@ -328,7 +343,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen && IsAutoClose)
                     Close();
 
                 isSendReceive = false;
@@ -373,9 +388,12 @@ namespace Ping9719.IoT.Communication
             try
             {
                 if (!IsOpen && ConnectionMode == ConnectionMode.AutoOpen)
-                { result = Open().ToVal<byte[]>(); isHmOpen = true; }
-                if (!result.IsSucceed)
-                    return result;
+                {
+                    result = Open().ToVal<byte[]>();
+                    if (!result.IsSucceed) return result;
+                    isHmOpen = true;
+                    IsAutoOpen = true;
+                }
 
                 lock (obj1)
                 {
@@ -395,7 +413,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen && IsAutoClose)
                     Close();
 
                 isSendReceive = false;
