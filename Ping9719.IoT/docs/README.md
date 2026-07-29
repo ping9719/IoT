@@ -190,6 +190,12 @@ client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒�
 ```CSharp
 client1.ConnectionMode = ConnectionMode.AutoOpen;
 
+//不使用 IsAutoClose
+client.SendReceive("1/3"); // 打开→发→收→关闭
+client.SendReceive("2/3"); // 打开→发→收→关闭
+client.SendReceive("3/3"); // 打开→发→收→关闭
+
+//使用 IsAutoClose
 client.IsAutoClose = false;
 client.SendReceive("1/3"); // 打开→发→收
 client.SendReceive("2/3"); // 发→收
