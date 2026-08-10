@@ -8,6 +8,7 @@
 3.[优化]`SiemensS7Client` 8的倍数大量bool写优化   
 *4.[更名]`Open2`更名`OpenCore`   
 5.[新增]客户端新增`IsAutoClose`属性   
+6.[优化]`TcpService`连接断开稳定性   
 ## v0.9.0（26-07-14） 
 1.[优化]`SiemensS7Client`bool支持写入8个倍数个   
 2.[优化]固定语言版本为12避免latest版本反转数组太激进的问题   

@@ -65,7 +65,7 @@
     - [1.如何使用自定义协议？](#UserProtocol)
     - [2.如何自定义Json解析？](#UserJson)
 
-# 字节数据(ByteData) <a id="ByteData"></a>
+# 字节数据(ByteData) `beta` <a id="ByteData"></a> 
 > 请注意：字节数据功能为`beta`版本，可能会有较大改动。
 
 可用在字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具。比如批量解析理plc的原始报文，可以显著提升效率。   
@@ -323,9 +323,9 @@ service.Opened += (a) =>
 {
     Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]连接成功");
 };
-service.Closed += (a) =>
+service.Closed += (a, b) =>
 {
-    Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]关闭成功");
+    Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]关闭成功，关闭代码：{b}");
 };
 service.Received += (a, b) =>
 {
@@ -337,7 +337,7 @@ service.Open();
 
 if (service.Clients.Any())
 {
-    //给第一个客户端发送信息，这里和'TcpClient'使用方式一样，不做多余的说明
+    //给第一个客户端发送信息，这里和'TcpClient'使用方式一样，可参考'TcpClient'文档
     service.Clients[0].Send("123");
 }
 ```

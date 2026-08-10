@@ -69,6 +69,27 @@ namespace Ping9719.IoT.Communication
         }
 
         /// <summary>
+        /// 初始化客户端
+        /// </summary>
+        /// <param name="connectString">比如：127.0.0.1:502。</param>
+        public TcpService(string connectString)
+        {
+            this.localaddr = IPAddress.Parse("127.0.0.1");
+            this.port = 502;
+
+            if (string.IsNullOrWhiteSpace(connectString))
+                return;
+
+            foreach (string item in connectString.Split(new char[] { ':', '：' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (int.TryParse(item.ToUpper(), out int intVal))
+                    this.port = intVal;
+                else
+                    this.localaddr = IPAddress.Parse(item);
+            }
+        }
+
+        /// <summary>
         /// 初始化TCP服务端
         /// </summary>
         public TcpService(IPAddress localaddr, int port)
@@ -83,7 +104,6 @@ namespace Ping9719.IoT.Communication
             try
             {
                 tcpListener = new TcpListener(localaddr, port);
-                //tcpListener.Server.DualMode = true;
                 tcpListener.Start();
 
                 IsOpen2 = true;
@@ -108,8 +128,13 @@ namespace Ping9719.IoT.Communication
                 //IsUserClose = isUser;
                 //dataEri = null;
 
-                tcpListener?.Server?.Shutdown(SocketShutdown.Both);
                 tcpListener?.Stop();
+
+                foreach (var item in clients)
+                {
+                    item.Key.Close();
+                }
+                clients.Clear();
             }
             catch (Exception ex)
             {
@@ -117,8 +142,6 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                //Closed?.Invoke(this, isUser);
-
                 //if (isUser)
                 task?.Wait();
             }
@@ -131,7 +154,6 @@ namespace Ping9719.IoT.Communication
             task = Task.Factory.StartNew(async (a) =>
             {
                 var cc = (TcpService)a;
-                byte[] data = new byte[ReceiveBufferSize];
                 while (true)
                 {
                     try
@@ -142,19 +164,31 @@ namespace Ping9719.IoT.Communication
                             break;
                         }
 
-                        TcpClient tcpClientMy;
+                        System.Net.Sockets.TcpClient tcpClient = null;
+                        TcpClient tcpClientMy = null;
                         try
                         {
-                            var tcpClient = await tcpListener.AcceptTcpClientAsync();
+                            tcpClient = await tcpListener.AcceptTcpClientAsync();
                             tcpClientMy = TcpClient.Get(tcpClient, cc);
-                            cc.clients.TryAdd(tcpClientMy, DateTime.Now);
                         }
                         catch (Exception)
                         {
-                            //监听停止了
-                            continue;
+                            try
+                            {
+                                tcpClientMy?.Close();
+                                tcpClientMy = null;
+
+                                tcpClient?.Client?.Shutdown(SocketShutdown.Both);
+                                tcpClient?.Close();
+                                tcpClient = null;
+
+                                //进行下一个监听
+                                continue;
+                            }
+                            catch { }
                         }
 
+                        cc.clients.TryAdd(tcpClientMy, DateTime.Now);
                         //客户端链接
                         Opened?.Invoke(tcpClientMy);
                         tcpClientMy.Closed += (a, b) =>
