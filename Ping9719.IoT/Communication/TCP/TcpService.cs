@@ -1,5 +1,4 @@
-﻿using Ping9719.IoT.Common;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -98,11 +97,21 @@ namespace Ping9719.IoT.Communication
             this.port = port;
         }
 
+        /// <summary>
+        /// 打开，先断开在启动监听
+        /// </summary>
         public override IoTResult Open()
         {
             var result = new IoTResult();
             try
             {
+                if (task != null && !task.IsCompleted)
+                {
+                    var aClose = Close();
+                    if (!aClose.IsSucceed)
+                        return result;
+                }
+
                 tcpListener = new TcpListener(localaddr, port);
                 tcpListener.Start();
 
@@ -118,7 +127,9 @@ namespace Ping9719.IoT.Communication
             }
             return result.ToEnd();
         }
-
+        /// <summary>
+        /// 关闭。停止监听并断开所有客户端连接
+        /// </summary>
         public override IoTResult Close()
         {
             var result = new IoTResult();
@@ -129,6 +140,8 @@ namespace Ping9719.IoT.Communication
                 //dataEri = null;
 
                 tcpListener?.Stop();
+                stream = null;
+                tcpListener = null;
 
                 foreach (var item in clients)
                 {
@@ -148,8 +161,7 @@ namespace Ping9719.IoT.Communication
             return result.ToEnd();
         }
 
-        #region 内部
-        void GoRun()
+        private void GoRun()
         {
             task = Task.Factory.StartNew(async (a) =>
             {
@@ -158,7 +170,6 @@ namespace Ping9719.IoT.Communication
                 {
                     try
                     {
-
                         if (!IsOpen)
                         {
                             break;
@@ -219,7 +230,5 @@ namespace Ping9719.IoT.Communication
 
             //task.Start();
         }
-
-        #endregion
     }
 }
