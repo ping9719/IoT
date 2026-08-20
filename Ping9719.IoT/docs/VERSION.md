@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.10.0（...） 
+## v0.10.0（26-08-17） 
 *1.[更名]`BoolBitByteConverter` 更名 `BoolBitByteFirstConverter`   
 2.[新增]`BoolBitByteConverter`   
 3.[优化]`SiemensS7Client` 8的倍数大量bool写优化   
