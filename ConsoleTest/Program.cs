@@ -34,16 +34,49 @@ namespace ConsoleTest
             public Int16 cc { get; set; }
         }
 
+        public class ApiResult
+        {
+            public int Code { get; set; }
+            public string Message { get; set; }
+
+            public bool IsOk => Code == 200;
+        }
+
+        public class ApiResult<T> : ApiResult
+        {
+            public T Data { get; set; }
+        }
+
         private static async Task Main(string[] args)
         {
-            JBCWeld jBCWeld = new JBCWeld("COM5");
-            jBCWeld.Client.Open();
-            while (true)
-            {
-                var assa = jBCWeld.ReadInfo();
-                Console.WriteLine(assa.IsSucceed ? assa.Value : assa.ErrorText);
-                Thread.Sleep(200);
-            }
+            var aaa = new byte[] { 1, 2 };
+            var memory = new MemoryStream(aaa);
+
+var formData = new MultipartFormDataContent();
+var filePath = @"D:\123.png";
+formData.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));
+var p = HttpClient.Default.Post<ApiResult<string>>("http://127.0.0.1/a/b", content: formData);
+
+var md5 = p.Value.Data;
+
+
+            //Content-Type: application/octet-stream
+            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 });
+            //Content-Type: application/octet-stream
+            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new MemoryStream(new byte[] { 1, 2 }));
+            //Content-Type: application/json; charset=utf-8
+            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 }.ToList());
+            //Content-Type: application/json; charset=utf-8
+            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new { a = 1, b = 2 });
+
+            //JBCWeld jBCWeld = new JBCWeld("COM5");
+            //jBCWeld.Client.Open();
+            //while (true)
+            //{
+            //    var assa = jBCWeld.ReadInfo();
+            //    Console.WriteLine(assa.IsSucceed ? assa.Value : assa.ErrorText);
+            //    Thread.Sleep(200);
+            //}
 
             ////var testArr = new byte[] { 205,};
             //var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };

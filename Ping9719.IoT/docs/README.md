@@ -394,10 +394,35 @@ client1.Open();
 > 想JSON解析自定义？请参考 [如何自定义Json解析？](#UserJson)。
 
 ```CSharp
+
+//1.常用方式
+
 HttpClient.Default.Get<string>("http://www.baidu.com");//http://www.baidu.com
 HttpClient.Default.Get<string>(new string[] { "http://www.baidu.com", "s" });//http://www.baidu.com/s
 HttpClient.Default.Get<string>("http://www.baidu.com", new { a = 1, b = "ab" });//http://www.baidu.com?a=1&b=ab
 HttpClient.Default.Post<User>("http://www.baidu.com", new { id = 1 }, new { a = 1, b = "ab" });//http://www.baidu.com?a=1&b=ab  body:{id:1}
+
+//2.body可根据类型自动设置 Content-Type
+
+//Content-Type: text/plain; charset=utf-8
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", "abc");
+//Content-Type: application/octet-stream
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 });
+//Content-Type: application/octet-stream
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new MemoryStream(new byte[] { 1, 2 }));
+//Content-Type: application/json; charset=utf-8
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 }.ToList());
+//Content-Type: application/json; charset=utf-8
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new { a = 1, b = 2 });
+
+//3.使用表单（multipart/form-data）上传文件
+
+var formData = new MultipartFormDataContent();
+var filePath = @"D:\123.png";
+formData.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));//上传名字为file的文件
+formData.Add(new StringContent("18"), "age");//在年龄的字符串
+//提交
+HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", content: formData);
 ```
 
 ## HttpServer <a id="HttpServer"></a>
