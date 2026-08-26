@@ -2,7 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,14 +24,18 @@ namespace Ping9719.IoT.Communication
         public static HttpClient Default => Default_ == null ? Default_ = new HttpClient() : Default_;
 
         public System.Net.Http.HttpClient httpClient;
-
         public Action<ApiHelpRequestMessage> ReceivedHttp;
-        public HttpClient()
+
+        /// <summary>
+        /// 初始化HttpClient
+        /// </summary>
+        /// <param name="timeOut">超时时间（毫秒）</param>
+        public HttpClient(int timeOut = 8000)
         {
-            TimeOut = 5000;
+            TimeOut = timeOut;
 
             httpClient = new System.Net.Http.HttpClient();
-            httpClient.Timeout = TimeSpan.FromMilliseconds(TimeOut);
+            httpClient.Timeout = TimeSpan.FromMilliseconds(timeOut);
             httpClient.DefaultRequestHeaders.Add("User-Agent", "Chrome/132.0.0.0 Safari/537.36");
             //ServicePointManager.Expect100Continue = false;
 
@@ -41,9 +48,10 @@ namespace Ping9719.IoT.Communication
         /// <typeparam name="T">类型。可以为string和对象</typeparam>
         /// <param name="uri">地址</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Get<T>(string uri, object query = null, object body = null) => Send<T>(System.Net.Http.HttpMethod.Get, uri, query, body);
+        public IoTResult<T> Get<T>(string uri, object query = null, object body = null, HttpContent content = null) => Send<T>(System.Net.Http.HttpMethod.Get, uri, query, body, content);
 
         /// <summary>
         /// GET请求
@@ -51,9 +59,10 @@ namespace Ping9719.IoT.Communication
         /// <typeparam name="T">类型。可以为string和对象</typeparam>
         /// <param name="uri">多个地址。如["https://0.0.0.1","/User/Login"]</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Get<T>(IEnumerable<object> uri, object query = null, object body = null) => Send<T>(System.Net.Http.HttpMethod.Get, uri, query, body);
+        public IoTResult<T> Get<T>(IEnumerable<object> uri, object query = null, object body = null, HttpContent content = null) => Send<T>(System.Net.Http.HttpMethod.Get, uri, query, body, content);
 
         /// <summary>
         /// POST请求
@@ -61,9 +70,10 @@ namespace Ping9719.IoT.Communication
         /// <typeparam name="T">类型。可以为string和对象</typeparam>
         /// <param name="uri">地址</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Post<T>(string uri, object body = null, object query = null) => Send<T>(System.Net.Http.HttpMethod.Post, uri, query, body);
+        public IoTResult<T> Post<T>(string uri, object body = null, object query = null, HttpContent content = null) => Send<T>(System.Net.Http.HttpMethod.Post, uri, query, body, content);
 
         /// <summary>
         /// POST请求
@@ -71,9 +81,10 @@ namespace Ping9719.IoT.Communication
         /// <typeparam name="T">类型。可以为string和对象</typeparam>
         /// <param name="uri">多个地址。如["https://0.0.0.1","/User/Login"]</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Post<T>(IEnumerable<object> uri, object body = null, object query = null) => Send<T>(System.Net.Http.HttpMethod.Post, uri, query, body);
+        public IoTResult<T> Post<T>(IEnumerable<object> uri, object body = null, object query = null, HttpContent content = null) => Send<T>(System.Net.Http.HttpMethod.Post, uri, query, body, content);
 
         /// <summary>
         /// 发送请求
@@ -81,9 +92,10 @@ namespace Ping9719.IoT.Communication
         /// <typeparam name="T">类型。可以为string和对象</typeparam>
         /// <param name="uri">地址</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Send<T>(System.Net.Http.HttpMethod method, string uri, object query = null, object body = null) => Send<T>(method, new string[] { uri }, query, body);
+        public IoTResult<T> Send<T>(System.Net.Http.HttpMethod method, string uri, object query = null, object body = null, HttpContent content = null) => Send<T>(method, new string[] { uri }, query, body, content);
 
         /// <summary>
         /// 发送请求
@@ -92,10 +104,10 @@ namespace Ping9719.IoT.Communication
         /// <param name="method">请求方式。</param>
         /// <param name="uri">多个地址。如["https://0.0.0.1","/User/Login"]</param>
         /// <param name="query">请求头。URI中的查询信息</param>
-        /// <param name="body">请求体。转为json字符串形式</param>
-        /// <param name="mediaType">媒体类型。默认为‘application/json’会调用自带的转换器，如果是自定义只接受body为字符串的类型</param>
+        /// <param name="body">请求体。根据类型自动判断内容，目前可判断 string、byte[]、Stream、json</param>
+        /// <param name="content">内容。</param>
         /// <returns>成功返回对象，成功但StatusCode不在200-299返回默认值</returns>
-        public IoTResult<T> Send<T>(System.Net.Http.HttpMethod method, IEnumerable<object> uri, object query = null, object body = null, string mediaType = "application/json")
+        public IoTResult<T> Send<T>(System.Net.Http.HttpMethod method, IEnumerable<object> uri, object query = null, object body = null, HttpContent content = null)
         {
             var result = IoTResult.Create<T>();
             try
@@ -103,17 +115,36 @@ namespace Ping9719.IoT.Communication
                 System.Net.Http.HttpRequestMessage httpRequestMessage = new System.Net.Http.HttpRequestMessage(method, "".AppendPathSegments(uri).SetQueryParams(query));
 
                 string myContent = string.Empty;
-                if (body != null)
+                //没有内容时，自动判断 body 的类型
+                if (content == null && body != null)
                 {
-                    if (mediaType == "application/json")
+                    if (body is string str)
                     {
-                        myContent = JsonParse.SerializeObject(body);
-                        httpRequestMessage.Content = new System.Net.Http.StringContent(myContent, Encoding.UTF8, mediaType);
+                        myContent = str;
+                        httpRequestMessage.Content = new System.Net.Http.StringContent(str, Encoding.UTF8, "text/plain");
+                    }
+                    else if (body is byte[] byytes)
+                    {
+                        myContent = "application/octet-stream";
+                        httpRequestMessage.Content = new System.Net.Http.ByteArrayContent(byytes);
+                        httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    }
+                    else if (body is Stream stream)
+                    {
+                        myContent = "application/octet-stream";
+                        httpRequestMessage.Content = new System.Net.Http.StreamContent(stream);
+                        httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
                     }
                     else
                     {
-                        httpRequestMessage.Content = new System.Net.Http.StringContent(body.ToString(), Encoding.UTF8, mediaType);
+                        myContent = JsonParse.SerializeObject(body);
+                        httpRequestMessage.Content = new System.Net.Http.StringContent(myContent, Encoding.UTF8, "application/json");
                     }
+                }
+                else if (content != null)
+                {
+                    httpRequestMessage.Content = content;
+                    myContent = content?.Headers?.ContentType?.ToString();
                 }
 
                 var re = httpClient.SendAsync(httpRequestMessage).Result;
