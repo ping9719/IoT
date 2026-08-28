@@ -186,7 +186,8 @@ client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒�
 ```
 
 进阶（使用 `IsAutoClose` 来发送或接受消息）：  
-> `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。
+> `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。   
+使用场景：需要在短连接或不知道什么链接情况下连续发送或接收消息。
 ```CSharp
 client1.ConnectionMode = ConnectionMode.AutoOpen;
 
