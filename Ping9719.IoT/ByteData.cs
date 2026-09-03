@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -23,7 +24,7 @@ namespace Ping9719.IoT
     /// </summary>
     public static class ByteData
     {
-        private static readonly Dictionary<Type, IByteConverter> ByteDefaultConverters = new Dictionary<Type, IByteConverter>
+        private static readonly ReadOnlyDictionary<Type, IByteConverter> ByteDefaultConverters = new ReadOnlyDictionary<Type, IByteConverter>(new Dictionary<Type, IByteConverter>
         {
             //1
             { typeof(Byte), new ByteByteConverter() },
@@ -39,7 +40,7 @@ namespace Ping9719.IoT
             { typeof(Int64), new Int64ByteConverter() },
             { typeof(UInt64), new UInt64ByteConverter() },
             { typeof(Double), new DoubleByteConverter() },
-        };
+        });
 
         /// <summary>
         /// 得到值。支持基本类型、类、结构体、数组和集合，只支持属性不支持字段。
