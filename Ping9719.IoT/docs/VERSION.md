@@ -2,6 +2,9 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
+## v0.12.0（...） 
+1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
+2.[新增]JsonParse默认使用函数
 ## v0.11.0（26-08-26） 
 1.[优化]`HttpClient` body自动判断类型     
 2.[新增] HttpContent  

@@ -968,18 +968,12 @@ var info = client.ReadXXX();
 ## 2.如何自定义Json解析？ <a id="UserJson"></a>
 1.Json解析优先采用用户自定义的   
 2.在`NET8`中采用`System.Text.Json`   
-3.非`NET8`中采用`System.Runtime.Serialization.Json`  
+3.非`NET8`中优先采用`Newtonsoft.Json`失败后采用`System.Runtime.Serialization.Json`  
 
 所以在非`NET8`中推荐自定义Json解析：
 ```CSharp
-//自定义Json解析
-public class MyJsonParse : IJsonParse
-{
-    public T DeserializeObject<T>(string json) => Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
-    public string SerializeObject(object obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-}
-
-//使用自定义Json解析，写在Main方法中
-JsonParse.UseJsonParse = new MyJsonParse();
+//在程序入口处设置，只需要设置一次就可以了
+JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
 ```
 
