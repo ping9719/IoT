@@ -68,7 +68,7 @@ namespace Ping9719.IoT.Modbus
             return new byte[] { (byte)random.Next(255), (byte)random.Next(255) };
         }
 
-        #region IoTBase
+        #region IReadWrite
         /// <summary>
         /// 读取
         /// </summary>

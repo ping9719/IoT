@@ -166,17 +166,17 @@ namespace Ping9719.IoT
         /// </summary>
         /// <typeparam name="T1">新的值的类型</typeparam>
         /// <param name="value">新的值</param>
-        /// <param name="isValNull">是否原先的值为null就不采用新的值</param>
+        /// <param name="isSkipNull">是否原先的值为null就不采用新的值</param>
         /// <returns></returns>
-        public IoTResult<T1> ToVal<T1>(T1 value, bool isValNull = false) => (isValNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, value);
+        public IoTResult<T1> ToVal<T1>(T1 value, bool isSkipNull = false) => (isSkipNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, value);
 
         /// <summary>
         /// 转为有值的结果
         /// </summary>
         /// <typeparam name="T1">转换的类型</typeparam>
         /// <param name="func">把原来的值转为新的值</param>
-        /// <param name="isValNull">是否原先的值为null就不采用新的值</param>
+        /// <param name="isSkipNull">是否原先的值为null就不采用新的值</param>
         /// <returns></returns>
-        public IoTResult<T1> ToVal<T1>(Func<T, T1> func, bool isValNull = false) => (isValNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, func.Invoke(Value));
+        public IoTResult<T1> ToVal<T1>(Func<T, T1> func, bool isSkipNull = false) => (isSkipNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, func.Invoke(Value));
     }
 }

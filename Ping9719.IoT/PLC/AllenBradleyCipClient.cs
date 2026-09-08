@@ -142,7 +142,7 @@ namespace Ping9719.IoT.PLC
         public uint Session => BitConverter.ToUInt32(SessionByte, 0);
 
         #region Read
-        public IoTResult<object> Read(string address, int len = 1)
+        private IoTResult<object> ReadIn(string address, int len = 1)
         {
             var result = new IoTResult<object>();
             try
@@ -468,7 +468,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region Write
-        public IoTResult Write(string address, CipVariableType typeCode, byte[] data)
+        private IoTResult WriteIn(string address, CipVariableType typeCode, byte[] data)
         {
             IoTResult result = new IoTResult();
             try
@@ -717,21 +717,11 @@ namespace Ping9719.IoT.PLC
         }
         #endregion
 
-        #region IIoTBase
+        #region IReadWrite
         public override IoTResult<T> Read<T>(string address)
         {
-            var aaa = Read(address, 1);
-            try
-            {
-                return aaa.IsSucceed ? new IoTResult<T>(aaa, (T)aaa.Value) : new IoTResult<T>(aaa);
-            }
-            catch (Exception ex)
-            {
-                var bbb = new IoTResult<T>(aaa);
-                bbb.IsSucceed = false;
-                bbb.AddError(ex.Message);
-                return bbb;
-            }
+            var aaa = ReadIn(address, 1);
+            return aaa.IsSucceed ? new IoTResult<T>(aaa, (T)aaa.Value) : new IoTResult<T>(aaa);
         }
 
         public override IoTResult<string> ReadString(string address, int length, Encoding encoding)
@@ -741,18 +731,8 @@ namespace Ping9719.IoT.PLC
 
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            var aaa = Read(address, number);
-            try
-            {
-                return aaa.IsSucceed ? new IoTResult<IEnumerable<T>>(aaa, ((IEnumerable)aaa.Value).Cast<T>()) : new IoTResult<IEnumerable<T>>(aaa);
-            }
-            catch (Exception ex)
-            {
-                var bbb = new IoTResult<IEnumerable<T>>(aaa);
-                bbb.IsSucceed = false;
-                bbb.AddError(ex.Message);
-                return bbb;
-            }
+            var aaa = ReadIn(address, number);
+            return aaa.IsSucceed ? new IoTResult<IEnumerable<T>>(aaa, ((IEnumerable)aaa.Value).Cast<T>()) : new IoTResult<IEnumerable<T>>(aaa);
         }
 
         public override IoTResult Write<T>(string address, T value)
@@ -761,49 +741,49 @@ namespace Ping9719.IoT.PLC
             {
                 if (value is bool boolv)
                 {
-                    return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                    return WriteIn(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
                 }
                 else if (value is byte bytev)
                 {
-                    return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                    return WriteIn(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
                 }
                 else if (value is float Singlev)
                 {
-                    return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
+                    return WriteIn(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
                 }
                 else if (value is double doublev)
                 {
-                    return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
+                    return WriteIn(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
                 }
                 else if (value is short Int16v)
                 {
-                    return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
+                    return WriteIn(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
                 }
                 else if (value is int Int32v)
                 {
-                    return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
+                    return WriteIn(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
                 }
                 else if (value is long Int64v)
                 {
-                    return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
+                    return WriteIn(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
                 }
                 else if (value is ushort UInt16v)
                 {
-                    return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
+                    return WriteIn(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
                 }
                 else if (value is uint UInt32v)
                 {
-                    return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
+                    return WriteIn(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
                 }
                 else if (value is ulong UInt64v)
                 {
-                    return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
+                    return WriteIn(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
                 }
                 else if (value is string stringv)
                 {
                     var valueBytes = Encoding.GetBytes(stringv);
                     var data = BitConverter.GetBytes((ushort)valueBytes.Length).Concat(valueBytes).ToArray();
-                    return Write(address, CipVariableType.STRING, data);
+                    return WriteIn(address, CipVariableType.STRING, data);
                 }
                 else
                     throw new NotImplementedException("暂不支持的类型");

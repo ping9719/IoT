@@ -31,7 +31,55 @@ namespace Ping9719.IoT.PLC
         /// <param name="stationNumber"></param>
         public InovanceModbusTcpClient(string ip, int port = 502, EndianFormat format = EndianFormat.CDAB, byte stationNumber = 1) : base(ip, port, format, stationNumber) { }
 
-        #region IIoTBase
+        /// <summary>
+        /// 解析地址
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        public static IoTResult<string> AddressAnalysis(string address)
+        {
+            try
+            {
+                var ty = address.Trim().ToUpper().First();
+                var readAddress = Convert.ToInt32(address.Trim().Substring(1));
+
+                switch (ty)
+                {
+                    case 'D'://0-7999
+                        readAddress += 0;
+                        break;
+                    case 'R'://12288-45055
+                        readAddress += 12288;
+                        break;
+                    case 'M'://0-7999
+                        readAddress += 0;
+                        break;
+                    case 'B'://12288-45055
+                        readAddress += 12288;
+                        break;
+                    case 'S'://57344-61439
+                        readAddress += 57344;
+                        break;
+                    case 'X'://63488-64511
+                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 63488;
+                        break;
+                    case 'Y': //61512-65535
+                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 61512;
+                        break;
+                    default:
+                        return new IoTResult<string>().AddError("不支持的类型：" + ty);
+                }
+
+                return new IoTResult<string>(readAddress.ToString());
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult<string>().AddError(ex.Message);
+            }
+
+        }
+
+        #region IReadWrite
         /// <summary>
         /// 读取
         /// </summary>
@@ -86,52 +134,5 @@ namespace Ping9719.IoT.PLC
         }
         #endregion
 
-        /// <summary>
-        /// 解析地址
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <returns></returns>
-        public static IoTResult<string> AddressAnalysis(string address)
-        {
-            try
-            {
-                var ty = address.Trim().ToUpper().First();
-                var readAddress = Convert.ToInt32(address.Trim().Substring(1));
-
-                switch (ty)
-                {
-                    case 'D'://0-7999
-                        readAddress += 0;
-                        break;
-                    case 'R'://12288-45055
-                        readAddress += 12288;
-                        break;
-                    case 'M'://0-7999
-                        readAddress += 0;
-                        break;
-                    case 'B'://12288-45055
-                        readAddress += 12288;
-                        break;
-                    case 'S'://57344-61439
-                        readAddress += 57344;
-                        break;
-                    case 'X'://63488-64511
-                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 63488;
-                        break;
-                    case 'Y': //61512-65535
-                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 61512;
-                        break;
-                    default:
-                        return new IoTResult<string>().AddError("不支持的类型：" + ty);
-                }
-
-                return new IoTResult<string>(readAddress.ToString());
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<string>().AddError(ex.Message);
-            }
-
-        }
     }
 }

@@ -8,6 +8,7 @@
 3.[新增]Write(string type)支持更多情况   
 4.[优化]汇川可能读写解析错误的情况   
 5.[优化]框架继承后重写不在出现内部调用错误问题   
+6.[新增]IoTResult 增加 isSkipNull
 ## v0.11.0（26-08-26） 
 1.[优化]`HttpClient` body自动判断类型     
 2.[新增] HttpContent  

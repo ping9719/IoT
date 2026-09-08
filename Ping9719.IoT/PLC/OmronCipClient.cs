@@ -101,7 +101,7 @@ namespace Ping9719.IoT.PLC
         public uint Session => BitConverter.ToUInt32(SessionByte, 0);
 
         #region Read
-        public IoTResult<IEnumerable<object>> Read(string address, Encoding encoding = null)
+        public IoTResult<IEnumerable<object>> ReadIn(string address, Encoding encoding = null)
         {
             var result = new IoTResult<IEnumerable<object>>();
             try
@@ -275,7 +275,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region Write
-        public IoTResult Write(string address, CipVariableType typeCode, byte[] data, ushort num = 1, Encoding encoding = null)
+        public IoTResult WriteIn(string address, CipVariableType typeCode, byte[] data, ushort num = 1, Encoding encoding = null)
         {
             IoTResult result = new IoTResult();
             try
@@ -385,10 +385,10 @@ namespace Ping9719.IoT.PLC
         }
         #endregion
 
-        #region IIoTBase
+        #region IReadWrite
         public override IoTResult<T> Read<T>(string address)
         {
-            var aaa = Read(address);
+            var aaa = ReadIn(address);
             if (!aaa.IsSucceed)
                 return new IoTResult<T>(aaa);
 
@@ -472,7 +472,7 @@ namespace Ping9719.IoT.PLC
         {
             try
             {
-                var aaa = Read(address, encoding);
+                var aaa = ReadIn(address, encoding);
                 return aaa.IsSucceed ? new IoTResult<string>(aaa, aaa.Value.Cast<string>().FirstOrDefault()) : new IoTResult<string>(aaa);
             }
             catch (Exception ex)
@@ -485,7 +485,7 @@ namespace Ping9719.IoT.PLC
         {
             try
             {
-                var aaa = Read(address);
+                var aaa = ReadIn(address);
                 if (!aaa.IsSucceed)
                     return new IoTResult<IEnumerable<T>>(aaa);
 
@@ -503,51 +503,51 @@ namespace Ping9719.IoT.PLC
             {
                 if (value is bool boolv)
                 {
-                    return Write(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                    return WriteIn(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
                 }
                 else if (value is byte bytev)
                 {
-                    return Write(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                    return WriteIn(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
                 }
                 else if (value is float Singlev)
                 {
-                    return Write(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
+                    return WriteIn(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
                 }
                 else if (value is double doublev)
                 {
-                    return Write(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
+                    return WriteIn(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
                 }
                 else if (value is short Int16v)
                 {
-                    return Write(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
+                    return WriteIn(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
                 }
                 else if (value is int Int32v)
                 {
-                    return Write(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
+                    return WriteIn(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
                 }
                 else if (value is long Int64v)
                 {
-                    return Write(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
+                    return WriteIn(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
                 }
                 else if (value is ushort UInt16v)
                 {
-                    return Write(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
+                    return WriteIn(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
                 }
                 else if (value is uint UInt32v)
                 {
-                    return Write(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
+                    return WriteIn(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
                 }
                 else if (value is ulong UInt64v)
                 {
-                    return Write(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
+                    return WriteIn(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
                 }
                 else if (value is string stringv)
                 {
-                    return Write(address, CipVariableType.STRING, GetStringByte(stringv));
+                    return WriteIn(address, CipVariableType.STRING, GetStringByte(stringv));
                 }
                 else if (value is DateTime DateTimev)
                 {
-                    return Write(address, CipVariableType.DATE_AND_TIME_NSEC, GetDateTimeByte(DateTimev));
+                    return WriteIn(address, CipVariableType.DATE_AND_TIME_NSEC, GetDateTimeByte(DateTimev));
                 }
                 else
                     throw new NotImplementedException("暂不支持的类型");
@@ -560,7 +560,7 @@ namespace Ping9719.IoT.PLC
 
         public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
         {
-            return Write(address, CipVariableType.STRING, GetStringByte(value, encoding), 1, encoding);
+            return WriteIn(address, CipVariableType.STRING, GetStringByte(value, encoding), 1, encoding);
         }
 
         public override IoTResult Write<T>(string address, IEnumerable<T> value)
@@ -569,53 +569,53 @@ namespace Ping9719.IoT.PLC
             {
                 if (value is IEnumerable<bool> boolv)
                 {
-                    return Write(address, CipVariableType.BOOL, boolv.SelectMany(o => o ? BoolTrueByteVal.ToList() : new List<byte> { 0x00, 0x00 }).ToArray());
+                    return WriteIn(address, CipVariableType.BOOL, boolv.SelectMany(o => o ? BoolTrueByteVal.ToList() : new List<byte> { 0x00, 0x00 }).ToArray());
                 }
                 else if (value is IEnumerable<byte> bytev)
                 {
-                    return Write(address, CipVariableType.BYTE, bytev.ToArray());
+                    return WriteIn(address, CipVariableType.BYTE, bytev.ToArray());
                 }
                 else if (value is IEnumerable<float> Singlev)
                 {
-                    return Write(address, CipVariableType.REAL, Singlev.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.REAL, Singlev.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<double> doublev)
                 {
-                    return Write(address, CipVariableType.LREAL, doublev.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.LREAL, doublev.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<short> Int16v)
                 {
-                    return Write(address, CipVariableType.INT, Int16v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.INT, Int16v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<int> Int32v)
                 {
-                    return Write(address, CipVariableType.DINT, Int32v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.DINT, Int32v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<long> Int64v)
                 {
-                    return Write(address, CipVariableType.LINT, Int64v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.LINT, Int64v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<ushort> UInt16v)
                 {
-                    return Write(address, CipVariableType.UINT, UInt16v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.UINT, UInt16v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<uint> UInt32v)
                 {
-                    return Write(address, CipVariableType.UDINT, UInt32v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.UDINT, UInt32v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<ulong> UInt64v)
                 {
-                    return Write(address, CipVariableType.ULINT, UInt64v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
+                    return WriteIn(address, CipVariableType.ULINT, UInt64v.SelectMany(o => BitConverter.GetBytes(o)).ToArray());
                 }
                 else if (value is IEnumerable<string> stringv)
                 {
                     if (stringv != null && stringv.Count() != 1)
                         throw new NotImplementedException("字符串类型长度只能为1");
-                    return Write(address, CipVariableType.STRING, GetStringByte(stringv.First()));
+                    return WriteIn(address, CipVariableType.STRING, GetStringByte(stringv.First()));
                 }
                 else if (value is IEnumerable<DateTime> DateTimev)
                 {
-                    return Write(address, CipVariableType.DATE_AND_TIME_NSEC, DateTimev.SelectMany(o => GetDateTimeByte(o)).ToArray());
+                    return WriteIn(address, CipVariableType.DATE_AND_TIME_NSEC, DateTimev.SelectMany(o => GetDateTimeByte(o)).ToArray());
                 }
                 else
                     throw new NotImplementedException("暂不支持的类型");

@@ -130,7 +130,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="length">读取长度</param>
         /// <param name="isBit">是否Bit类型</param>        
         /// <returns></returns>
-        public IoTResult<byte[]> Read(string address, ushort length, bool isBit = false)
+        public IoTResult<byte[]> ReadByte(string address, ushort length, bool isBit = false)
         {
             //if (!socket?.Connected ?? true)
             //{
@@ -720,7 +720,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="data">值</param>
         /// <param name="isBit">值</param>
         /// <returns></returns>
-        public IoTResult Write(string address, byte[] data, bool isBit = false)
+        public IoTResult WriteByte(string address, byte[] data, bool isBit = false)
         {
             IoTResult<byte[]> ioTResult = new IoTResult<byte[]>();
             try
@@ -1048,14 +1048,11 @@ namespace Ping9719.IoT.PLC
 
         #endregion
 
-        #region IIoTBase
+        #region IReadWrite
         public override IoTResult<T> Read<T>(string address)
         {
-            var info = Read<T>(address, 1);
-            if (info.IsSucceed)
-                return info.ToVal(info.Value.FirstOrDefault());
-            else
-                return info.ToVal(default(T));
+            var info = ReadIn<T>(address, 1);
+            return info.IsSucceed ? info.ToVal(info.Value.FirstOrDefault()) : info.ToVal(default(T));
         }
 
         /// <summary>
@@ -1072,7 +1069,7 @@ namespace Ping9719.IoT.PLC
             try
             {
                 //[总长度][数量][数据...]
-                readResut = Read(address, (UInt16)length, false);
+                readResut = ReadByte(address, (UInt16)length, false);
                 if (readResut.IsSucceed)
                 {
                     string nr = string.Empty;
@@ -1103,6 +1100,61 @@ namespace Ping9719.IoT.PLC
         }
 
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        {
+            return ReadIn<T>(address, number);
+        }
+
+        public override IoTResult Write<T>(string address, T value)
+        {
+            return WriteIn<T>(address, new T[] { value });
+        }
+
+        /// <summary>
+        /// 针对与PLC中类型“WString”的写
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="length">-1，自动检测长度，>0 PLC里面的长度比如 Sring[3] 这里填写3</param>
+        /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
+        /// <returns></returns>
+        public override IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
+        {
+            try
+            {
+                encoding = encoding ?? Encoding.BigEndianUnicode;
+
+                var valueBytes = encoding.GetBytes(value);
+                if (valueBytes.Length > 508)
+                    return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
+                if (length > 0 && valueBytes.Length > length)
+                    return IoTResult.Create().AddError($"字符串长度{valueBytes.Length}超过设定长度{length}");
+
+                if (length == -1 && encoding == Encoding.BigEndianUnicode)
+                {
+                    var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
+                    var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                    return WriteByte(address, bytes, false);
+                }
+                else
+                {
+                    var sl = BitConverter.GetBytes((UInt16)valueBytes.Length);
+                    var bytes = new byte[] { sl[1], sl[0] }.Concat(valueBytes).ToArray();
+                    return WriteByte(address, bytes, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                return IoTResult.Create().AddError(ex);
+            }
+        }
+
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
+        {
+            return WriteIn(address, value);
+        }
+
+
+        private IoTResult<IEnumerable<T>> ReadIn<T>(string address, int number)
         {
             try
             {
@@ -1152,7 +1204,7 @@ namespace Ping9719.IoT.PLC
                 else
                     ynum = Convert.ToUInt16(number * ynum);
 
-                var readResut = Read(address, ynum, isOneBool);
+                var readResut = ReadByte(address, ynum, isOneBool);
                 if (readResut.IsSucceed)
                 {
                     T[] valJg = new T[0];
@@ -1194,52 +1246,7 @@ namespace Ping9719.IoT.PLC
                 return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
         }
-
-        public override IoTResult Write<T>(string address, T value)
-        {
-            return Write<T>(address, new T[] { value });
-        }
-
-        /// <summary>
-        /// 针对与PLC中类型“WString”的写
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="length">-1，自动检测长度，>0 PLC里面的长度比如 Sring[3] 这里填写3</param>
-        /// <param name="encoding">默认为 Encoding.BigEndianUnicode </param>
-        /// <returns></returns>
-        public override IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
-        {
-            try
-            {
-                encoding = encoding ?? Encoding.BigEndianUnicode;
-
-                var valueBytes = encoding.GetBytes(value);
-                if (valueBytes.Length > 508)
-                    return IoTResult.Create().AddError($"字符串长度不能超过{508 / 2}");
-                if (length > 0 && valueBytes.Length > length)
-                    return IoTResult.Create().AddError($"字符串长度{valueBytes.Length}超过设定长度{length}");
-
-                if (length == -1 && encoding == Encoding.BigEndianUnicode)
-                {
-                    var sl = BitConverter.GetBytes((UInt16)(valueBytes.Length / 2));
-                    var bytes = new byte[] { 0, 254, sl[1], sl[0] }.Concat(valueBytes).ToArray();
-                    return Write(address, bytes, false);
-                }
-                else
-                {
-                    var sl = BitConverter.GetBytes((UInt16)valueBytes.Length);
-                    var bytes = new byte[] { sl[1], sl[0] }.Concat(valueBytes).ToArray();
-                    return Write(address, bytes, false);
-                }
-            }
-            catch (Exception ex)
-            {
-                return IoTResult.Create().AddError(ex);
-            }
-        }
-
-        public override IoTResult Write<T>(string address, IEnumerable<T> value)
+        private IoTResult WriteIn<T>(string address, IEnumerable<T> value)
         {
             try
             {
@@ -1247,12 +1254,12 @@ namespace Ping9719.IoT.PLC
                 if (tType == typeof(bool))
                 {
                     if (value.Count() == 1)
-                        return Write(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }, true);
+                        return WriteByte(address, new byte[1] { (bool)(object)value.ElementAt(0) ? (byte)1 : (byte)0 }, true);
                     else if (value.Count() % 8 == 0)
                     {
                         BoolBitByteConverter boolBitByteConverter = new BoolBitByteConverter();
                         var bytes = boolBitByteConverter.ToBytes(value, EndianFormat);
-                        return Write(address, bytes, false);
+                        return WriteByte(address, bytes, false);
                     }
                     else
                         throw new NotImplementedException("暂不支持写非8的倍数的多个bool类型");
@@ -1276,27 +1283,27 @@ namespace Ping9719.IoT.PLC
                             bytes.AddRange(new byte[] { 254, Convert.ToByte(item.Length) }.Concat(item).Concat(bc));
                         }
                     }
-                    return Write(address, bytes.ToArray(), false);
+                    return WriteByte(address, bytes.ToArray(), false);
                 }
                 else if (tType == typeof(DateTime))
                 {
                     var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).Reverse()).SelectMany(o => o).ToArray();
-                    return Write(address, data2, false);
+                    return WriteByte(address, data2, false);
                 }
                 else if (tType == typeof(TimeSpan))
                 {
                     var data = value.Select(o => BitConverter.GetBytes(Convert.ToUInt32(((TimeSpan)(object)o).TotalMilliseconds)).Reverse()).SelectMany(o => o).ToArray();
-                    return Write(address, data, false);
+                    return WriteByte(address, data, false);
                 }
                 else if (tType == typeof(Char))
                 {
                     var data = Client.Encoding.GetBytes(value.Select(o => (Char)(object)o).ToArray());
-                    return Write(address, data, false);
+                    return WriteByte(address, data, false);
                 }
                 else
                 {
                     var obj = value.EndianToByte(EndianFormat);
-                    return Write(address, obj, false);
+                    return WriteByte(address, obj, false);
                 }
             }
             catch (Exception ex)

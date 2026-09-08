@@ -465,7 +465,7 @@ namespace Ping9719.IoT.PLC
         }
         #endregion
 
-        #region IIoTBase
+        #region IReadWrite
         public override IoTResult<T> Read<T>(string address)
         {
             try

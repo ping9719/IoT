@@ -274,7 +274,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
     }
     #endregion
 
-    #region 读
+    #region IReadWrite
     /// <summary>
     /// 通用读
     /// </summary>
@@ -407,9 +407,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
         }
         return result.ToEnd();
     }
-    #endregion
 
-    #region 写
     /// <summary>
     /// 通用写入
     /// </summary>
@@ -549,6 +547,7 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
         }
         return result.ToEnd();
     }
+    #endregion
 
     /// <summary>
     /// 写入单个布尔值
@@ -639,7 +638,6 @@ public class KeyenceHostLinkClient : ReadWriteBase, IClientData
             return false;
         }
     }
-    #endregion
 
     #region 数据类型转换
     /// <summary>

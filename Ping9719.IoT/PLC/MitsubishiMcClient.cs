@@ -463,8 +463,6 @@ namespace Ping9719.IoT.PLC
 
         #endregion 生成报文命令
 
-        #region private
-
         #region 地址解析
 
         /// <summary>
@@ -850,9 +848,8 @@ namespace Ping9719.IoT.PLC
             return prefix + newNumPart;
         }
 
-        #endregion private
 
-        #region IIoTBase
+        #region IReadWrite
 
         public override IoTResult<T> Read<T>(string address)
         {
@@ -1140,6 +1137,6 @@ namespace Ping9719.IoT.PLC
             
         }
 
-        #endregion IIoTBase
+        #endregion
     }
 }
