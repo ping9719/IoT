@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.12.0（...） 
+## v0.12.0（26-09-08） 
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
 2.[新增]JsonParse默认使用函数   
 3.[新增]Write(string type)支持更多情况   
