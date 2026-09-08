@@ -56,20 +56,9 @@ namespace Ping9719.IoT.Modbus
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
         public override IoTResult<T> Read<T>(string address)
         {
-            try
-            {
-                var val = Read<T>(address, 1);
-                if (!val.IsSucceed)
-                    return val.ToVal<T>();
-
-                return val.ToVal<T>(val.Value.FirstOrDefault());
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<T>().AddError(ex);
-            }
+            var val = ReadIn<T>(address, 1);
+            return val.IsSucceed ? val.ToVal<T>(val.Value.FirstOrDefault()) : val.ToVal<T>();
         }
-
         /// <summary>
         /// 读取字符串
         /// </summary>
@@ -120,13 +109,65 @@ namespace Ping9719.IoT.Modbus
                 return new IoTResult<string>().AddError(ex);
             }
         }
-
         /// <summary>
         /// 读取多个
         /// </summary>
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
         /// <param name="number">读取数量</param>
         public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        {
+            return ReadIn<T>(address, number);
+        }
+
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
+        public override IoTResult Write<T>(string address, T value)
+        {
+            return WriteIn<T>(address, new[] { value });
+        }
+        /// <summary>
+        /// 写入字符串
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="value">值</param>
+        /// <param name="length">长度。一般用于补充的长度</param>
+        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
+        /// <returns></returns>
+        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
+        {
+            try
+            {
+                var val2 = new byte[] { };
+                if (encoding == null)
+                    val2 = value.HexStringToBytes();
+                else
+                    val2 = encoding.GetBytes(value);
+
+                if (length > 0 && val2.Length < length * 2)
+                    val2 = val2.Concat(Enumerable.Repeat<byte>(0, length * 2 - val2.Length)).ToArray();
+                if (val2.Length % 2 != 0)
+                    val2 = val2.Concat(new byte[] { 0 }).ToArray();
+
+                return Write(address, val2);
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult().AddError(ex);
+            }
+        }
+        /// <summary>
+        /// 写入多个
+        /// </summary>
+        /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
+        {
+            return WriteIn(address, value);
+        }
+
+        private IoTResult<IEnumerable<T>> ReadIn<T>(string address, int number)
         {
             try
             {
@@ -217,52 +258,7 @@ namespace Ping9719.IoT.Modbus
                 return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
         }
-
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public override IoTResult Write<T>(string address, T value)
-        {
-            return Write<T>(address, new[] { value });
-        }
-
-        /// <summary>
-        /// 写入字符串
-        /// </summary>
-        /// <param name="address">地址</param>
-        /// <param name="value">值</param>
-        /// <param name="length">长度。一般用于补充的长度</param>
-        /// <param name="encoding">编码。一般情况下，如果为null为16进制的字符串</param>
-        /// <returns></returns>
-        public override IoTResult WriteString(string address, string value, int length, Encoding encoding)
-        {
-            try
-            {
-                var val2 = new byte[] { };
-                if (encoding == null)
-                    val2 = value.HexStringToBytes();
-                else
-                    val2 = encoding.GetBytes(value);
-
-                if (length > 0 && val2.Length < length * 2)
-                    val2 = val2.Concat(Enumerable.Repeat<byte>(0, length * 2 - val2.Length)).ToArray();
-                if (val2.Length % 2 != 0)
-                    val2 = val2.Concat(new byte[] { 0 }).ToArray();
-
-                return Write(address, val2);
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult().AddError(ex);
-            }
-        }
-
-        /// <summary>
-        /// 写入多个
-        /// </summary>
-        /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
-        public override IoTResult Write<T>(string address, IEnumerable<T> value)
+        private IoTResult WriteIn<T>(string address, IEnumerable<T> value)
         {
             try
             {
@@ -297,6 +293,6 @@ namespace Ping9719.IoT.Modbus
                 return new IoTResult<IEnumerable<T>>().AddError(ex);
             }
         }
-        #endregion 
+        #endregion
     }
 }

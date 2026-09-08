@@ -36,18 +36,13 @@ namespace Ping9719.IoT.PLC
         /// 读取
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public new IoTResult<T> Read<T>(string address)
+        public override IoTResult<T> Read<T>(string address)
         {
-            try
-            {
-                var nAddress = AddressAnalysis(address);
-                return base.Read<T>(nAddress);
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<T>().AddError(ex);
-            }
+            var nAddress = AddressAnalysis(address);
+            if (!nAddress.IsSucceed)
+                return nAddress.ToVal<T>();
 
+            return base.Read<T>(nAddress.Value);
         }
 
         /// <summary>
@@ -55,54 +50,39 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
         /// <param name="number">读取数量</param>
-        public new IoTResult<IEnumerable<T>> Read<T>(string address, int number)
+        public override IoTResult<IEnumerable<T>> Read<T>(string address, int number)
         {
-            try
-            {
-                var nAddress = AddressAnalysis(address);
-                return base.Read<T>(nAddress, number);
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult<IEnumerable<T>>().AddError(ex);
-            }
+            var nAddress = AddressAnalysis(address);
+            if (!nAddress.IsSucceed)
+                return nAddress.ToVal<IEnumerable<T>>();
 
+            return base.Read<T>(nAddress.Value, number);
         }
 
         /// <summary>
         /// 写入
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public new IoTResult Write<T>(string address, T value)
+        public override IoTResult Write<T>(string address, T value)
         {
-            try
-            {
-                var nAddress = AddressAnalysis(address);
-                return base.Write(nAddress, value);
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult().AddError(ex);
-            }
+            var nAddress = AddressAnalysis(address);
+            if (!nAddress.IsSucceed)
+                return nAddress.ToVal<IEnumerable<T>>();
 
+            return base.Write(nAddress.Value, value);
         }
 
         /// <summary>
-        /// 写入，内部循环，失败了就跳出
+        /// 写入
         /// </summary>
         /// <param name="address">D、R为寄存器，M、B、S、X、Y为线圈</param>
-        public new IoTResult Write<T>(string address, IEnumerable<T> value)
+        public override IoTResult Write<T>(string address, IEnumerable<T> value)
         {
-            try
-            {
-                var nAddress = AddressAnalysis(address);
-                return base.Write(nAddress, value);
-            }
-            catch (Exception ex)
-            {
-                return new IoTResult().AddError(ex);
-            }
+            var nAddress = AddressAnalysis(address);
+            if (!nAddress.IsSucceed)
+                return nAddress.ToVal<IEnumerable<T>>();
 
+            return base.Write(nAddress.Value, value);
         }
         #endregion
 
@@ -111,39 +91,47 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public static string AddressAnalysis(string address)
+        public static IoTResult<string> AddressAnalysis(string address)
         {
-            var ty = address.Trim().ToUpper().First();
-            var readAddress = Convert.ToInt32(address.Trim().Substring(1));
-
-            switch (ty)
+            try
             {
-                case 'D'://0-7999
-                    readAddress += 0;
-                    break;
-                case 'R'://12288-45055
-                    readAddress += 12288;
-                    break;
-                case 'M'://0-7999
-                    readAddress += 0;
-                    break;
-                case 'B'://12288-45055
-                    readAddress += 12288;
-                    break;
-                case 'S'://57344-61439
-                    readAddress += 57344;
-                    break;
-                case 'X'://63488-64511
-                    readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 63488;
-                    break;
-                case 'Y': //61512-65535
-                    readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 61512;
-                    break;
-                default:
-                    throw new Exception("不支持的类型：" + ty);
+                var ty = address.Trim().ToUpper().First();
+                var readAddress = Convert.ToInt32(address.Trim().Substring(1));
+
+                switch (ty)
+                {
+                    case 'D'://0-7999
+                        readAddress += 0;
+                        break;
+                    case 'R'://12288-45055
+                        readAddress += 12288;
+                        break;
+                    case 'M'://0-7999
+                        readAddress += 0;
+                        break;
+                    case 'B'://12288-45055
+                        readAddress += 12288;
+                        break;
+                    case 'S'://57344-61439
+                        readAddress += 57344;
+                        break;
+                    case 'X'://63488-64511
+                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 63488;
+                        break;
+                    case 'Y': //61512-65535
+                        readAddress = Convert.ToInt32(readAddress.ToString(), 8) + 61512;
+                        break;
+                    default:
+                        return new IoTResult<string>().AddError("不支持的类型：" + ty);
+                }
+
+                return new IoTResult<string>(readAddress.ToString());
+            }
+            catch (Exception ex)
+            {
+                return new IoTResult<string>().AddError(ex.Message);
             }
 
-            return readAddress.ToString();
         }
     }
 }

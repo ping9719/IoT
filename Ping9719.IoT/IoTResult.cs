@@ -20,7 +20,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 创建实例
         /// </summary>
-        public static IoTResult<T> Create<T>(T data) => new IoTResult<T>(data);
+        public static IoTResult<T> Create<T>(T value) => new IoTResult<T>(value);
 
         /// <summary>
         /// 是否成功
@@ -103,11 +103,6 @@ namespace Ping9719.IoT
         /// 转为有值的结果
         /// </summary>
         public IoTResult<T> ToVal<T>() => new IoTResult<T>(this);
-
-        /// <summary>
-        /// 转为有值的结果
-        /// </summary>
-        public IoTResult<T> ToVal<T>(T data) => new IoTResult<T>(this, data);
     }
 
     /// <summary>
@@ -116,9 +111,9 @@ namespace Ping9719.IoT
     public class IoTResult<T> : IoTResult
     {
         public IoTResult() { }
-        public IoTResult(T data) : this(null, data) { }
+        public IoTResult(T value) : this(null, value) { }
         public IoTResult(IoTResult result) : this(result, default) { }
-        public IoTResult(IoTResult result, T data)
+        public IoTResult(IoTResult result, T value)
         {
             if (result != null)
             {
@@ -130,7 +125,7 @@ namespace Ping9719.IoT
                 Error = result.Error.ToList();
             }
 
-            Value = data;
+            this.Value = value;
         }
 
         /// <summary>
@@ -169,9 +164,19 @@ namespace Ping9719.IoT
         /// <summary>
         /// 转为有值的结果
         /// </summary>
+        /// <typeparam name="T1">新的值的类型</typeparam>
+        /// <param name="value">新的值</param>
+        /// <param name="isValNull">是否原先的值为null就不采用新的值</param>
+        /// <returns></returns>
+        public IoTResult<T1> ToVal<T1>(T1 value, bool isValNull = false) => (isValNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, value);
+
+        /// <summary>
+        /// 转为有值的结果
+        /// </summary>
         /// <typeparam name="T1">转换的类型</typeparam>
         /// <param name="func">把原来的值转为新的值</param>
+        /// <param name="isValNull">是否原先的值为null就不采用新的值</param>
         /// <returns></returns>
-        public IoTResult<T1> ToVal<T1>(Func<T, T1> func) => new IoTResult<T1>(this, func.Invoke(Value));
+        public IoTResult<T1> ToVal<T1>(Func<T, T1> func, bool isValNull = false) => (isValNull && Value is null) ? this.ToVal<T1>() : new IoTResult<T1>(this, func.Invoke(Value));
     }
 }

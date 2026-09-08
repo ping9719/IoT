@@ -38,40 +38,40 @@ namespace Ping9719.IoT
                 switch (ts)
                 {
                     case "bool":
-                        return Read<bool>(address).ToVal<object>(o => (object)o);
+                        return Read<bool>(address).ToVal<object>(o => (object)o, true);
                     case "byte":
-                        return Read<byte>(address).ToVal<object>(o => (object)o);
+                        return Read<byte>(address).ToVal<object>(o => (object)o, true);
                     case "int16":
                     case "short":
-                        return Read<Int16>(address).ToVal<object>(o => (object)o);
+                        return Read<Int16>(address).ToVal<object>(o => (object)o, true);
                     case "int32":
                     case "int":
-                        return Read<Int32>(address).ToVal<object>(o => (object)o);
+                        return Read<Int32>(address).ToVal<object>(o => (object)o, true);
                     case "int64":
                     case "long":
-                        return Read<Int64>(address).ToVal<object>(o => (object)o);
+                        return Read<Int64>(address).ToVal<object>(o => (object)o, true);
                     case "uint16":
                     case "ushort":
-                        return Read<UInt16>(address).ToVal<object>(o => (object)o);
+                        return Read<UInt16>(address).ToVal<object>(o => (object)o, true);
                     case "uint32":
                     case "uint":
-                        return Read<UInt32>(address).ToVal<object>(o => (object)o);
+                        return Read<UInt32>(address).ToVal<object>(o => (object)o, true);
                     case "uint64":
                     case "ulong":
-                        return Read<UInt64>(address).ToVal<object>(o => (object)o);
+                        return Read<UInt64>(address).ToVal<object>(o => (object)o, true);
                     case "float":
                     case "single":
-                        return Read<float>(address).ToVal<object>(o => (object)o);
+                        return Read<float>(address).ToVal<object>(o => (object)o, true);
                     case "double":
-                        return Read<double>(address).ToVal<object>(o => (object)o);
+                        return Read<double>(address).ToVal<object>(o => (object)o, true);
                     case "string":
-                        return Read<string>(address).ToVal<object>(o => (object)o);
+                        return Read<string>(address).ToVal<object>(o => (object)o, true);
                     case "datatime":
-                        return Read<DateTime>(address).ToVal<object>(o => (object)o);
+                        return Read<DateTime>(address).ToVal<object>(o => (object)o, true);
                     case "timespan":
-                        return Read<TimeSpan>(address).ToVal<object>(o => (object)o);
+                        return Read<TimeSpan>(address).ToVal<object>(o => (object)o, true);
                     case "char":
-                        return Read<Char>(address).ToVal<object>(o => (object)o);
+                        return Read<Char>(address).ToVal<object>(o => (object)o, true);
                     default:
                         return IoTResult.Create<object>().AddError($"不支持的类型[{type}]").ToEnd();
                 }
@@ -96,40 +96,40 @@ namespace Ping9719.IoT
                 switch (ts)
                 {
                     case "bool":
-                        return Read<bool>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<bool>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "byte":
-                        return Read<byte>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<byte>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "int16":
                     case "short":
-                        return Read<Int16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<Int16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "int32":
                     case "int":
-                        return Read<Int32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<Int32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "int64":
                     case "long":
-                        return Read<Int64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<Int64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "uint16":
                     case "ushort":
-                        return Read<UInt16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<UInt16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "uint32":
                     case "uint":
-                        return Read<UInt32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<UInt32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "uint64":
                     case "ulong":
-                        return Read<UInt64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<UInt64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "float":
                     case "single":
-                        return Read<float>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<float>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "double":
-                        return Read<double>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<double>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "string":
-                        return Read<string>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<string>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "datatime":
-                        return Read<DateTime>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<DateTime>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "timespan":
-                        return Read<TimeSpan>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<TimeSpan>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "char":
-                        return Read<Char>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
+                        return Read<Char>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     default:
                         return IoTResult.Create<IEnumerable<object>>().AddError($"不支持的类型[{type}]").ToEnd();
                 }

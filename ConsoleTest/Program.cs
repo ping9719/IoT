@@ -49,25 +49,40 @@ namespace ConsoleTest
 
         private static async Task Main(string[] args)
         {
-            var aaa = new byte[] { 1, 2 };
-            var memory = new MemoryStream(aaa);
 
-var formData = new MultipartFormDataContent();
-var filePath = @"D:\123.png";
-formData.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));
-var p = HttpClient.Default.Post<ApiResult<string>>("http://127.0.0.1/a/b", content: formData);
+            InovanceModbusTcpClient inovanceModbusTcpClient = new InovanceModbusTcpClient("127.0.0.1", 502);
+            //inovanceModbusTcpClient.Client.Open();
 
-var md5 = p.Value.Data;
+            var aa = inovanceModbusTcpClient.Read<short>("D100",10);
+            var aa1 = inovanceModbusTcpClient.Read("short", "D100");
 
+            var aa2 = inovanceModbusTcpClient.Write<short>("D100", new short[] { 10,20,30,40});
+            var aa3 = inovanceModbusTcpClient.Write("short", "D100", 11);
 
-            //Content-Type: application/octet-stream
-            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 });
-            //Content-Type: application/octet-stream
-            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new MemoryStream(new byte[] { 1, 2 }));
-            //Content-Type: application/json; charset=utf-8
-            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 }.ToList());
-            //Content-Type: application/json; charset=utf-8
-            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new { a = 1, b = 2 });
+            var aa4 = inovanceModbusTcpClient.Read<short>("D100");
+            var aa5 = inovanceModbusTcpClient.Read<short>("D100");
+
+            //            JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            //            JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+
+            //            var aaa = new byte[] { 1, 2 };
+            //            var memory = new MemoryStream(aaa);
+
+            //var formData = new MultipartFormDataContent();
+            //var filePath = @"D:\123.png";
+            //formData.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));
+            //var p = HttpClient.Default.Post<ApiResult<string>>("http://47.93.58.45:29501/api/uploadFile", content: formData);
+
+            //var md5 = p.Value.Data;
+
+            //            //Content-Type: application/octet-stream
+            //            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 });
+            //            //Content-Type: application/octet-stream
+            //            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new MemoryStream(new byte[] { 1, 2 }));
+            //            //Content-Type: application/json; charset=utf-8
+            //            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new byte[] { 1, 2 }.ToList());
+            //            //Content-Type: application/json; charset=utf-8
+            //            HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new { a = 1, b = 2 });
 
             //JBCWeld jBCWeld = new JBCWeld("COM5");
             //jBCWeld.Client.Open();

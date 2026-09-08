@@ -4,7 +4,10 @@
 
 ## v0.12.0（...） 
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
-2.[新增]JsonParse默认使用函数
+2.[新增]JsonParse默认使用函数   
+3.[新增]Write(string type)支持更多情况   
+4.[优化]汇川可能读写解析错误的情况   
+5.[优化]框架继承后重写不在出现内部调用错误问题   
 ## v0.11.0（26-08-26） 
 1.[优化]`HttpClient` body自动判断类型     
 2.[新增] HttpContent  
