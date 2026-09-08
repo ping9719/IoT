@@ -27,7 +27,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 读取
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，single，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <returns>结果</returns>
         public virtual IoTResult<object> Read(string type, string address)
@@ -42,16 +42,22 @@ namespace Ping9719.IoT
                     case "byte":
                         return Read<byte>(address).ToVal<object>(o => (object)o);
                     case "int16":
+                    case "short":
                         return Read<Int16>(address).ToVal<object>(o => (object)o);
                     case "int32":
+                    case "int":
                         return Read<Int32>(address).ToVal<object>(o => (object)o);
                     case "int64":
+                    case "long":
                         return Read<Int64>(address).ToVal<object>(o => (object)o);
                     case "uint16":
+                    case "ushort":
                         return Read<UInt16>(address).ToVal<object>(o => (object)o);
                     case "uint32":
+                    case "uint":
                         return Read<UInt32>(address).ToVal<object>(o => (object)o);
                     case "uint64":
+                    case "ulong":
                         return Read<UInt64>(address).ToVal<object>(o => (object)o);
                     case "float":
                     case "single":
@@ -78,7 +84,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 读取多个
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，single，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="number">数量</param>
         /// <returns>结果</returns>
@@ -94,16 +100,22 @@ namespace Ping9719.IoT
                     case "byte":
                         return Read<byte>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "int16":
+                    case "short":
                         return Read<Int16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "int32":
+                    case "int":
                         return Read<Int32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "int64":
+                    case "long":
                         return Read<Int64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "uint16":
+                    case "ushort":
                         return Read<UInt16>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "uint32":
+                    case "uint":
                         return Read<UInt32>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "uint64":
+                    case "ulong":
                         return Read<UInt64>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2));
                     case "float":
                     case "single":
@@ -126,13 +138,13 @@ namespace Ping9719.IoT
             {
                 return IoTResult.Create<IEnumerable<object>>().AddError(ex);
             }
-            
+
         }
 
         /// <summary>
         /// 写入
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，single，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="value">写入的值。大部分进行<see cref="Convert"/>转换</param>
         /// <returns>结果</returns>
@@ -140,6 +152,10 @@ namespace Ping9719.IoT
         {
             try
             {
+                //是否为数组或集合
+                if (value is IEnumerable enumerable && !(value is string))
+                    return WriteIn(type, address, enumerable.Cast<object>());
+
                 var ts = type.Trim().ToLower();
                 switch (ts)
                 {
@@ -148,16 +164,22 @@ namespace Ping9719.IoT
                     case "byte":
                         return Write<byte>(address, Convert.ToByte(value));
                     case "int16":
+                    case "short":
                         return Write<Int16>(address, Convert.ToInt16(value));
                     case "int32":
+                    case "int":
                         return Write<Int32>(address, Convert.ToInt32(value));
                     case "int64":
+                    case "long":
                         return Write<Int64>(address, Convert.ToInt64(value));
                     case "uint16":
+                    case "ushort":
                         return Write<UInt16>(address, Convert.ToUInt16(value));
                     case "uint32":
+                    case "uint":
                         return Write<UInt32>(address, Convert.ToUInt32(value));
                     case "uint64":
+                    case "ulong":
                         return Write<UInt64>(address, Convert.ToUInt64(value));
                     case "float":
                     case "single":
@@ -184,11 +206,16 @@ namespace Ping9719.IoT
         /// <summary>
         /// 写入多个
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，single，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="values">写入的值。大部分进行<see cref="Convert"/>转换</param>
         /// <returns>结果</returns>
         public virtual IoTResult Write(string type, string address, IEnumerable<object> values)
+        {
+            return WriteIn(type, address, values);
+        }
+
+        private IoTResult WriteIn(string type, string address, IEnumerable<object> values)
         {
             try
             {
@@ -200,16 +227,22 @@ namespace Ping9719.IoT
                     case "byte":
                         return Write<byte>(address, values.Select(o => Convert.ToByte(o)).ToArray());
                     case "int16":
+                    case "short":
                         return Write<Int16>(address, values.Select(o => Convert.ToInt16(o)).ToArray());
                     case "int32":
+                    case "int":
                         return Write<Int32>(address, values.Select(o => Convert.ToInt32(o)).ToArray());
                     case "int64":
+                    case "long":
                         return Write<Int64>(address, values.Select(o => Convert.ToInt64(o)).ToArray());
                     case "uint16":
+                    case "ushort":
                         return Write<UInt16>(address, values.Select(o => Convert.ToUInt16(o)).ToArray());
                     case "uint32":
+                    case "uint":
                         return Write<UInt32>(address, values.Select(o => Convert.ToUInt32(o)).ToArray());
                     case "uint64":
+                    case "ulong":
                         return Write<UInt64>(address, values.Select(o => Convert.ToUInt64(o)).ToArray());
                     case "float":
                     case "single":
