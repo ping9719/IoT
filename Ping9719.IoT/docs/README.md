@@ -15,7 +15,7 @@
     - [TcpClient](#TcpClient)
     - [TcpServer](#TcpServer)
     - [UdpClient](#UdpClient)
-    - [SerialPortClient (串口)](#SerialPortClient)
+    - [SerialPortClient ; SerialClient (串口)](#SerialPortClient)
     - [UsbHidClient (USB)](#UsbHidClient)
     - [BleClient (蓝牙)](#BleClient)
     - [HttpClient](#HttpClient)
@@ -368,9 +368,23 @@ var info2 = client.SendReceive("abc");//发送并等待接收
 client.Close();
 ```
 
-## SerialPortClient <a id="SerialPortClient"></a>
+## SerialPortClient ; SerialClient <a id="SerialPortClient"></a>
 `SerialPortClient : ClientBase`   
+`SerialClient : ClientBase`  
 > 串口是点到点传输，所以只有 `SerialPortClient` 没有 `SerialPortService` 。使用2个`SerialPortClient` 即可。
+
+区别对照表   
+
+|名称|包|依赖|优缺点|
+|--|--|--|--|
+|SerialPortClient|Ping9719.IoT|System.IO.Ports|.Net官方维护支持|
+|SerialClient|Ping9719.IoT.Hid|HidSharp|可解决Liunx有些串口打不开的情况|
+
+在Liunx中需要加入用户组
+>sudo usermod -a -G dialout $USER   
+>sudo usermod -a -G uucp $USER
+
+使用方式一致，这里以`SerialPortClient`为例：
 ```CSharp
 var client1 = new SerialPortClient("COM1", 9600);
 
@@ -387,7 +401,7 @@ client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的�
 client1.Open();
 
 //所有发送和接收和TcpClient一样，这里不在重复
-```
+``` 
 
 ## HttpClient <a id="HttpClient"></a>
 `HttpClient : ClientBase`   
