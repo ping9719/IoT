@@ -1,36 +1,37 @@
-﻿## Ping9719.IoT   
-工业互联网通讯库协议实现，包括主流协议：ModBus、S7、CIP、MC、FINS......等常用协议和PLC。可通过不同的方式：TCP、UDP、MQTT、USB、蓝牙...等进行简易方便的交换数据。
+﻿## 
+## Ping9719.IoT   
+这是一个工业通讯库。包含主流的通讯方式（TCP、UDP、MQTT、USB、蓝牙...）和主流的通讯协议（ModBus、S7、CIP、MC、FINS...）开箱即可简单、方便的使用。
 
-### 语言选择：
+### 语言选择
 [简体中文](README.md) || [English](README_en-US.md)    
 
-### 开源源代码：
+### 开源源代码
 主库：[Github](https://github.com/ping9719/IoT)   
 备库：[Gitee](https://gitee.com/ping9719/IoT)    
 
-### 文档入口：<a id="DocMain"></a>
+### 文档入口 <a id="DocMain"></a>
 从这里进入到详细文档：[点我进入文档](Ping9719.IoT/docs/README.md) || [点我进入版本文档](Ping9719.IoT/docs/VERSION.md)
 
-### 项目框架图：
+### 项目框架图
 ![](img/frame.png)
 
 ## 如何安装？
 ![](img/bao.png)
 
-## 包名&介绍：
+## 包名&介绍
 
 | 包名（NuGet）         |  环境                            		|  介绍                      | 
-|-----------------------|-------------------------				|----------------------------|
-| Ping9719.IoT          | net45 ; netstandard2.0            	|跨平台的库。包含基础、通信(TCP，UDP，串口... )、协议(ModBus，MC，FINS... )、算法(CRC，LRC...)、设备控制|
-| Ping9719.IoT.Hid      | net45 ; netstandard2.0        		|跨平台库。对IoT进行的扩充，支持在windows、安卓、苹果的手机、平板、电脑上进行USB和蓝牙发送和接收数据 |
-| Ping9719.IoT.WPF</br>(暂未发布)      | net45 ; net8.0-windows |在windows平台上的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备|
-| Ping9719.IoT.Avalonia</br>(暂未发布) | net8.0 ; netstandard2.0|跨平台的界面UI库。提供众多方便可直接使用的控件可快速调试IoT中的各种协议和设备 | 
+|-----------------------|---------------------------------------|----------------------------|
+| Ping9719.IoT          | net45 ; netstandard2.0 ; net8.0     	|工业通讯库。包含基础的通信方式、通信协议、常用算法、常用设备协议|
+| Ping9719.IoT.Hid      | net45 ; netstandard2.0 ; net8.0       |Hid扩展库。包含不常用的通信方式（USB，蓝牙，串口） |
+| Ping9719.IoT.WPF</br>(暂未发布)      | net45 ; net8.0-windows |控件库。对通信方式、通信协议、常用算法实现的控件|
+| Ping9719.IoT.Avalonia</br>(暂未发布) | net8.0 ; netstandard2.0|控件库。对通信方式、通信协议、常用算法实现的控件| 
 
-## 亮点介绍：
+## 四大亮点
 > 这里是项目亮点介绍，不是详细文档！！！详细文档在上面的“文档入口”中。   
 > 假如你找不到，你可以点击：（[跳转到文档入口](#DocMain)）（[跳转到IoT文档](Ping9719.IoT/docs/README.md)）
 
-1.<b>常用协议</b>实现 `IClientData`或`IReadWrite`，可通过泛型方式进行读或写。  
+### 一 <b>常用协议</b>实现 `IClientData`或`IReadWrite`，可通过泛型方式进行读或写。  
 ```CSharp
 client.Read<bool>("abc");//读1个
 client.Read<bool>("abc", 5);//读5个
@@ -38,7 +39,7 @@ client.Write<bool>("abc", true);//写1个
 client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 ```
 
-2.<b>所有客户端协议</b>可快速的切换为不同的方式，比如从`TCP`切换为`USB` 
+### 二 <b>所有客户端协议</b>可快速的切换为不同的方式，比如从`TCP`切换为`USB` 
 > 这里以`ModbusRtu`举列，默认只支持串口。但是如果你想实现`ModbusRtuOverTcpClient`（使用TCP的方式走`ModbusRtu`协议）其他的都是同理。 
 
 ```CSharp
@@ -52,7 +53,7 @@ var client2 = new ModbusRtuClient(usbHidClient);//使用Usb方式，ModbusRtuOve
 client0.Client.Open();//打开
 ```
 
-3.客户端`ClientBase`包含丰富的功能，且代码一致性高。   
+### 三 客户端`ClientBase`包含丰富的功能，且代码一致性高。   
 >以下代码所有通用，包含 `TcpClient`、`SerialPortClient`、`UsbHidClient` 等...
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);//Tcp方式
@@ -87,7 +88,7 @@ client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
 ```
 
-4.返回类型统一为 `IoTResult`，不需要在单独使用`Try`来处理异常信息。
+### 四 返回类型统一为 `IoTResult`，不需要在单独使用`Try`来处理异常信息。
 > `IoTResult<T>`包含`Value`，`IoTResult`不包含 
 ```CSharp
 var info = client.Read<bool>("abc");
