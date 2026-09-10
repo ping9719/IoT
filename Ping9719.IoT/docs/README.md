@@ -381,8 +381,10 @@ client.Close();
 |SerialClient|Ping9719.IoT.Hid|HidSharp|可解决Liunx有些串口打不开的情况|
 
 在Liunx中需要加入用户组
->sudo usermod -a -G dialout $USER   
->sudo usermod -a -G uucp $USER
+```
+sudo usermod -a -G dialout $USER   
+sudo usermod -a -G uucp $USER
+```
 
 使用方式一致，这里以`SerialPortClient`为例：
 ```CSharp
