@@ -1,18 +1,20 @@
 ﻿## 
-## Ping9719.IoT   
-这是一个工业通讯库。包含主流的通讯方式（TCP、UDP、MQTT、USB、蓝牙...）和主流的通讯协议（ModBus、S7、CIP、MC、FINS...）开箱即可简单、方便的使用。
 
-### 语言选择
+## Ping9719.IoT   
+跨平台工业通讯库。包含主流的通讯方式（TCP、UDP、MQTT、USB、蓝牙...）和主流的通讯协议（ModBus、S7、CIP、MC、FINS...）开箱即可简单、方便的使用。
+
+## 语言选择
 [简体中文](README.md) || [English](README_en-US.md)    
 
-### 开源源代码
-主库：[Github](https://github.com/ping9719/IoT)   
-备库：[Gitee](https://gitee.com/ping9719/IoT)    
+## 资料链接  <a id="DocMain"></a>
+[进入文档](Ping9719.IoT/docs/README.md)    
+[版本记录](Ping9719.IoT/docs/VERSION.md)    
 
-### 文档入口 <a id="DocMain"></a>
-从这里进入到详细文档：[点我进入文档](Ping9719.IoT/docs/README.md) || [点我进入版本文档](Ping9719.IoT/docs/VERSION.md)
+[源代码（主库 Github）](https://github.com/ping9719/IoT)   
+[源代码（备库 Gitee）](https://gitee.com/ping9719/IoT)    
+[去提交问题、提交BUG](https://github.com/ping9719/IoT/issues)    
 
-### 项目框架图
+## 项目框架图
 ![](img/frame.png)
 
 ## 如何安装？
@@ -22,14 +24,12 @@
 
 | 包名（NuGet）         |  环境                            		|  介绍                      | 
 |-----------------------|---------------------------------------|----------------------------|
-| Ping9719.IoT          | net45 ; netstandard2.0 ; net8.0     	|工业通讯库。包含基础的通信方式、通信协议、常用算法、常用设备协议|
-| Ping9719.IoT.Hid      | net45 ; netstandard2.0 ; net8.0       |Hid扩展库。包含不常用的通信方式（USB，蓝牙，串口） |
+| Ping9719.IoT          | net45 ; netstandard2.0 ; net8.0     	|跨平台工业通讯库。包含基础的通信方式、通信协议、常用算法、常用设备协议|
+| Ping9719.IoT.Hid      | net45 ; netstandard2.0 ; net8.0       |跨平台工业通讯库Hid扩展库。包含不常用的通信方式（USB，蓝牙，串口） |
 | Ping9719.IoT.WPF</br>(暂未发布)      | net45 ; net8.0-windows |控件库。对通信方式、通信协议、常用算法实现的控件|
 | Ping9719.IoT.Avalonia</br>(暂未发布) | net8.0 ; netstandard2.0|控件库。对通信方式、通信协议、常用算法实现的控件| 
 
 ## 四大亮点
-> 这里是项目亮点介绍，不是详细文档！！！详细文档在上面的“文档入口”中。   
-> 假如你找不到，你可以点击：（[跳转到文档入口](#DocMain)）（[跳转到IoT文档](Ping9719.IoT/docs/README.md)）
 
 ### 一 <b>常用协议</b>实现 `IClientData`或`IReadWrite`，可通过泛型方式进行读或写。  
 ```CSharp
