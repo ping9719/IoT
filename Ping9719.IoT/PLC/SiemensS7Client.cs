@@ -1287,12 +1287,12 @@ namespace Ping9719.IoT.PLC
                 }
                 else if (tType == typeof(DateTime))
                 {
-                    var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).Reverse()).SelectMany(o => o).ToArray();
+                    var data2 = value.Select(o => (DateTime)(object)o).Select(o => BitConverter.GetBytes(Convert.ToUInt16((o - new DateTime(1990, 1, 1)).TotalDays)).AsEnumerable().Reverse()).SelectMany(o => o).ToArray();
                     return WriteByte(address, data2, false);
                 }
                 else if (tType == typeof(TimeSpan))
                 {
-                    var data = value.Select(o => BitConverter.GetBytes(Convert.ToUInt32(((TimeSpan)(object)o).TotalMilliseconds)).Reverse()).SelectMany(o => o).ToArray();
+                    var data = value.Select(o => BitConverter.GetBytes(Convert.ToUInt32(((TimeSpan)(object)o).TotalMilliseconds)).AsEnumerable().Reverse()).SelectMany(o => o).ToArray();
                     return WriteByte(address, data, false);
                 }
                 else if (tType == typeof(Char))

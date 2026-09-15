@@ -195,7 +195,7 @@ namespace Ping9719.IoT.Modbus
                     var rCount = DataHelp.GetWordCount<T>();
                     rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
-                    result.AddRange(BitConverter.GetBytes(rCount).Reverse());
+                    result.AddRange(BitConverter.GetBytes(rCount).AsEnumerable().Reverse());
                     result[7] = (byte)functionCode;
                     FunctionCode = functionCode;
                 }
@@ -378,7 +378,7 @@ namespace Ping9719.IoT.Modbus
                     }
                     else if (isDan == false)
                     {
-                        result.AddRange(BitConverter.GetBytes(vCount).Reverse());
+                        result.AddRange(BitConverter.GetBytes(vCount).AsEnumerable().Reverse());
                         result.Add(Convert.ToByte(list1.Length));
                         result.AddRange(list1);
                         var sl2 = BitConverter.GetBytes(Convert.ToUInt16(result.Count() - 6));
@@ -446,7 +446,7 @@ namespace Ping9719.IoT.Modbus
                     else
                         rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
-                    result.AddRange(BitConverter.GetBytes(rCount).Reverse());
+                    result.AddRange(BitConverter.GetBytes(rCount).AsEnumerable().Reverse());
                     result[1] = (byte)functionCode;
                     FunctionCode = functionCode;
                 }
@@ -629,7 +629,7 @@ namespace Ping9719.IoT.Modbus
                     }
                     else if (isDan == false)
                     {
-                        result.AddRange(BitConverter.GetBytes(vCount).Reverse());
+                        result.AddRange(BitConverter.GetBytes(vCount).AsEnumerable().Reverse());
                         result.Add(Convert.ToByte(list1.Length));
                         result.AddRange(list1);
                         var sl2 = BitConverter.GetBytes(Convert.ToUInt16(result.Count() - 6));

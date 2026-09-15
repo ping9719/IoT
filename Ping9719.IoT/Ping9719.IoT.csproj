@@ -4,7 +4,7 @@
     <TargetFrameworks>net45;netstandard2.0;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	<LangVersion>12</LangVersion>
+	<LangVersion>latest</LangVersion>
     <Authors>Ping9719</Authors>
     <Description>跨平台工业通讯库。包含主流的通讯方式（TCP、UDP、MQTT、USB、蓝牙...）和主流的通讯协议（ModBus、S7、CIP、MC、FINS...）开箱即可简单、方便的使用。
 Cross-platform Industrial Communication Library. It includes mainstream communication methods (TCP, UDP, MQTT, USB, Bluetooth...) and mainstream communication protocols (ModBus, S7, CIP, MC, FINS...). It is simple and convenient to use out of the box.

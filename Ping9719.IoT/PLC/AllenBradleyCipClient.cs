@@ -631,7 +631,7 @@ namespace Ping9719.IoT.PLC
                     //0x01,0x00,0x01,0x00//最后一位是PLC的槽号
                 };
                 CipMessage.AddRange(addData);//标签名
-                CipMessage.AddRange(BitConverter.GetBytes((ushort)typeCode).Reverse());//数据类型
+                CipMessage.AddRange(BitConverter.GetBytes((ushort)typeCode).AsEnumerable().Reverse());//数据类型
                 CipMessage.AddRange(new byte[] { 0x01, 0x00 });//服务命令指定数据
                 CipMessage.AddRange(value);//数据
                 CipMessage.AddRange(new byte[] { 0x01, 0x00, 0x01, Slot });//服务命令指定数据
@@ -697,7 +697,7 @@ namespace Ping9719.IoT.PLC
                     //0x01,0x00,0x01,0x00//最后一位是PLC的槽号
                 };
                 CipMessage.AddRange(addData);//标签名
-                CipMessage.AddRange(BitConverter.GetBytes((ushort)typeCode).Reverse());//数据类型
+                CipMessage.AddRange(BitConverter.GetBytes((ushort)typeCode).AsEnumerable().Reverse());//数据类型
                 CipMessage.AddRange(new byte[] { 0x01, 0x00 });//服务命令指定数据
                 CipMessage.AddRange(value);//数据
                 CipMessage.AddRange(new byte[] { 0x01, 0x00, 0x01, Slot });//服务命令指定数据

@@ -152,7 +152,7 @@ namespace Ping9719.IoT.Device.Rfid
                     }
                     else
                     {
-                        var val = aa.Value.SelectMany(t => BitConverter.GetBytes(t).Reverse()).ToArray();
+                        var val = aa.Value.SelectMany(t => BitConverter.GetBytes(t).AsEnumerable().Reverse()).ToArray();
                         var val2 = encoding.GetString(val);
                         return aa.ToVal<string>(val2);
                     }

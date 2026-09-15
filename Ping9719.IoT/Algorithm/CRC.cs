@@ -148,7 +148,7 @@ namespace Ping9719.IoT.Algorithm
             }
             crc = ref_out ? Reverse16(crc) : (ushort)(crc >> shift);
             var crc16 = (ushort)(crc ^ xor_out);
-            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc16) : BitConverter.GetBytes(crc16).Reverse();
+            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc16) : BitConverter.GetBytes(crc16).AsEnumerable().Reverse();
             return data.Skip(start_index).Take(len).Concat(crc16byte).ToArray();
         }
 
@@ -212,7 +212,7 @@ namespace Ping9719.IoT.Algorithm
             }
             crc = ref_out ? Reverse32(crc) : crc;
             var crc32 = crc ^ xor_out;
-            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc32) : BitConverter.GetBytes(crc32).Reverse();
+            var crc16byte = (is_little_endian && BitConverter.IsLittleEndian) ? BitConverter.GetBytes(crc32) : BitConverter.GetBytes(crc32).AsEnumerable().Reverse();
             return data.Skip(start_index).Take(len).Concat(crc16byte).ToArray();
         }
 

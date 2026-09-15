@@ -427,7 +427,7 @@ namespace Ping9719.IoT.PLC
             command[18] = typeCode[0];//数据类型
             command[19] = (byte)(length % 256);
             command[20] = (byte)(length / 256); //长度
-            data.Reverse().ToArray().CopyTo(command, 21);
+            data.AsEnumerable().Reverse().ToArray().CopyTo(command, 21);
             return command;
         }
 
@@ -457,7 +457,7 @@ namespace Ping9719.IoT.PLC
             command[9] = typeCode[0];        //数据类型
             command[10] = (byte)(length % 256);
             command[11] = (byte)(length / 256);
-            data.Reverse().ToArray().CopyTo(command, 12);
+            data.AsEnumerable().Reverse().ToArray().CopyTo(command, 12);
             return command;
         }
 
