@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 
-namespace Ping9719.IoT.Robot
+namespace Ping9719.IoT.Device.Robot
 {
     /// <summary>
     /// 爱普生机器人

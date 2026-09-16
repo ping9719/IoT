@@ -1,62 +1,63 @@
 ﻿
-# 语言选择：   
+# 语言选择
 [简体中文](README.md) || [English](README_en-US.md) 
 
+# 目录
 <!-- TOC-->
 - [字节数据(ByteData) `beta`](#字节数据bytedata-beta)
-- [内置转换器](#内置转换器)
-- [自定义转换器<a id="IByteConverter0"></a>](#自定义转换器)
-- [通讯 (Communication) <a id="Communication"></a>](#通讯-communication)
-  - [客户端基类(ClientBase)  <a id="ClientBase"></a>](#客户端基类clientbase)
-    - [1.链接模式 <a id="ConnectionMode"></a>](#1链接模式)
-    - [2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>](#2接收模式receivemode)
-    - [3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>](#3数据处理器idataprocessor)
-    - [4.心跳（Heartbeat） <a id="Heartbeat"></a>](#4心跳heartbeat)
-  - [TcpClient <a id="TcpClient"></a>](#tcpclient)
-  - [TcpServer   <a id="TcpServer"></a>](#tcpserver)
-  - [UdpClient   <a id="UdpClient"></a>](#udpclient)
-  - [SerialPortClient ; SerialClient <a id="SerialPortClient"></a>](#serialportclient--serialclient)
-  - [HttpClient <a id="HttpClient"></a>](#httpclient)
-  - [HttpServer <a id="HttpServer"></a>](#httpserver)
-  - [UsbHidClient (USB) <a id="UsbHidClient"></a>](#usbhidclient-usb)
-  - [BleClient (蓝牙) <a id="BleClient"></a>](#bleclient-蓝牙)
-- [Modbus <a id="Modbus"></a>](#modbus)
-- [PLC <a id="PLC"></a>](#plc)
-  - [常用plc类型对照表 <a id="PlcType"></a>](#常用plc类型对照表)
-  - [罗克韦尔 (AllenBradleyCipClient) <a id="AllenBradleyCipClient"></a>](#罗克韦尔-allenbradleycipclient)
-  - [基恩士 (KeyenceHostLinkClient) <a id="KeyenceHostLinkClient"></a>](#基恩士-keyencehostlinkclient)
-  - [汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>](#汇川-inovancemodbustcpclient)
-  - [三菱 (MitsubishiMcClient) <a id="MitsubishiMcClient"></a>](#三菱-mitsubishimcclient)
-  - [欧姆龙 (OmronFinsClient) <a id="OmronFinsClient"></a>](#欧姆龙-omronfinsclient)
+  - [用字节数据批量解析PLC的数据](#用字节数据批量解析plc的数据)
+  - [转换器](#转换器)
+- [通讯 (Communication)](#通讯-communication)
+  - [客户端基类(ClientBase)（建议必读！！！）](#客户端基类clientbase建议必读)
+    - [1. 链接模式](#1-链接模式)
+    - [2. 接收模式（ReceiveMode）](#2-接收模式receivemode)
+    - [3. 数据处理器(IDataProcessor)](#3-数据处理器idataprocessor)
+    - [4. 心跳（Heartbeat）](#4-心跳heartbeat)
+  - [TcpClient](#tcpclient)
+  - [TcpServer](#tcpserver)
+  - [UdpClient](#udpclient)
+  - [SerialPortClient ; SerialClient（串口）](#serialportclient--serialclient串口)
+  - [HttpClient](#httpclient)
+  - [HttpServer](#httpserver)
+  - [UsbHidClient (USB)](#usbhidclient-usb)
+  - [BleClient (蓝牙)](#bleclient-蓝牙)
+- [协议（Protocol）](#协议protocol)
+  - [Modbus](#modbus)
+  - [PLC类型对照表](#plc类型对照表)
+  - [罗克韦尔 (AllenBradleyCipClient)](#罗克韦尔-allenbradleycipclient)
+  - [基恩士 (KeyenceHostLinkClient)](#基恩士-keyencehostlinkclient)
+  - [汇川 (InovanceModbusTcpClient)](#汇川-inovancemodbustcpclient)
+  - [三菱 (MitsubishiMcClient)](#三菱-mitsubishimcclient)
+  - [欧姆龙 (OmronFinsClient)](#欧姆龙-omronfinsclient)
   - [欧姆龙 (OmronCipClient)](#欧姆龙-omroncipclient)
-  - [西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>](#西门子-siemenss7client)
-- [机器人 (Robot) <a id="Robot"></a>](#机器人-robot)
-  - [爱普生 (EpsonRobot)](#爱普生-epsonrobot)
-- [算法 (Algorithm) <a id="Algorithm"></a>](#算法-algorithm)
-  - [仿射变换（AffineTransform） <a id="AffineTransform"></a>](#仿射变换affinetransform)
-  - [平均点位（AveragePoint） <a id="AveragePoint"></a>](#平均点位averagepoint)
-  - [CRC <a id="CRC"></a>](#crc)
-  - [LRC <a id="LRC"></a>](#lrc)
-  - [傅立叶滤波(FFTFilter) <a id="FFTFilter"></a>](#傅立叶滤波fftfilter)
-  - [稳定婚姻配对(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>](#稳定婚姻配对galeshapleyalgorithm)
-  - [线性回归(LinearRegression) <a id="LinearRegression"></a>](#线性回归linearregression)
-- [设备和仪器 (Device) <a id="Device"></a>](#设备和仪器-device)
-  - [科斯莫气密检测 (CosmoAirtight) <a id="CosmoAirtight"></a>](#科斯莫气密检测-cosmoairtight)
-  - [激光刻印 (Mark) <a id="Mark"></a>](#激光刻印-mark)
-  - [无线射频 (Rfid) <a id="Rfid"></a>](#无线射频-rfid)
-  - [扫码枪 (Scanner) <a id="Scanner"></a>](#扫码枪-scanner)
-  - [螺丝机 (Screw) <a id="Screw"></a>](#螺丝机-screw)
-  - [焊接机 (Weld) <a id="Weld"></a>](#焊接机-weld)
-  - [其他列表 <a id="EstsList"></a>](#其他列表)
-- [常见问题 <a id="Issue"></a>](#常见问题)
-  - [1.如何使用自定义协议？ <a id="UserProtocol"></a>](#1如何使用自定义协议)
-  - [2.如何自定义Json解析？ <a id="UserJson"></a>](#2如何自定义json解析)
+  - [西门子 (SiemensS7Client)](#西门子-siemenss7client)
+- [算法 (Algorithm)](#算法-algorithm)
+  - [仿射变换（AffineTransform）](#仿射变换affinetransform)
+  - [平均点位（AveragePoint）](#平均点位averagepoint)
+  - [CRC](#crc)
+  - [LRC](#lrc)
+  - [傅立叶滤波(FFTFilter)](#傅立叶滤波fftfilter)
+  - [稳定婚姻配对(GaleShapleyAlgorithm)](#稳定婚姻配对galeshapleyalgorithm)
+  - [线性回归(LinearRegression)](#线性回归linearregression)
+- [设备和仪器 (Device)](#设备和仪器-device)
+  - [气密检测 (Airtight)](#气密检测-airtight)
+  - [激光刻印 (Mark)](#激光刻印-mark)
+  - [无线射频 (Rfid)](#无线射频-rfid)
+  - [机器人 (Robot)](#机器人-robot)
+  - [扫码枪 (Scanner)](#扫码枪-scanner)
+  - [螺丝机 (Screw)](#螺丝机-screw)
+  - [焊接机 (Weld)](#焊接机-weld)
+- [常见问题](#常见问题)
+  - [1.如何使用自定义协议？](#1如何使用自定义协议)
+  - [2.如何自定义Json解析？](#2如何自定义json解析)
 <!-- TOC -->
 
 # 字节数据(ByteData) `beta`
 > 请注意：字节数据功能为`beta`版本，可能会有较大改动。
 
-可用在字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具。比如批量解析理plc的原始报文，可以显著提升效率。   
+字节数据是字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具。    
+
+常用列子：
 ```CSharp
 public class test
 {
@@ -91,7 +92,7 @@ var bs = ByteData.ToBytes(obj, EndianFormat.ABCD);//[0,1,0,2]
 var bools = ByteData.GetValues<bool>(testArr, 1, EndianFormat.ABCD, converterDict);//[F,F,F,F,F,F,F,F]
 ```
 
-举例，在plc中使用：
+## 用字节数据批量解析PLC的数据
 ```CSharp
 var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
 var plcdata = client.Read<byte>("BD100.0.0", 100);//读100个原始数据
@@ -102,10 +103,11 @@ var v2 = byteD.GetValue<Int16>(2);//读第2个数据
 var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 ```
 
-# 内置转换器
-内置转换器分为"基础的"和"特殊的"。基础的在`ByteData`初始化的时候自带,特殊的不自带，你可以通过`byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())`此方式加入。   
+## 转换器
+内置转换器分为"基础的"和"特殊的"。  
+基础的在`ByteData`初始化的时候自带；特殊的不自带。     
 
-> 基础的
+**基础的：**
 
 | 名称 | 说明   | 
 | ----------------  | --------- |
@@ -120,7 +122,8 @@ var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 | SingleByteConverter | Single  |
 | DoubleByteConverter | Double  |
 
-> 特殊的
+**特殊的：**
+>需通过`byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())`此方式加入。
 
 | 名称 | 说明   | 
 | ----------------------- | --------- |
@@ -128,9 +131,10 @@ var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 | BoolBitByteConverter | 1byte = 8bool |
 | StringByteConverter | 字符串转换器，Encoding 为 null 则使用十六进制字符串 |
 
-# 自定义转换器<a id="IByteConverter0"></a>
-需要你的类实现接口`IByteConverter`。   
+**自定义转换器：**
+
 ```CSharp
+//类实现接口`IByteConverter`
 //示例：Int16的转换器
 public class Int16ByteConverter : IByteConverter
 {
@@ -139,7 +143,7 @@ public class Int16ByteConverter : IByteConverter
     public byte[] ToBytes(object data, EndianFormat format) => DataConvert.EndianToNet(BitConverter.GetBytes((short)data), format);
 }
 ```
-使用：
+~使用：~
 ```CSharp
 var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
 ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
@@ -147,24 +151,23 @@ ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
 byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 ```
 
-# 通讯 (Communication) <a id="Communication"></a>
-使用指定的方式进行交互信息。
-## 客户端基类(ClientBase)  <a id="ClientBase"></a>
-`TcpClient`或`SerialPortClient`都是实现于`ClientBase`，他们的使用方式都是一样的。
+# 通讯 (Communication)
+## 客户端基类(ClientBase)（建议必读！！！）
+大部分通讯都实现于`ClientBase`比如`TcpClient`、`SerialPortClient`...等，下面的都是通用的。
 
-### 1.链接模式 <a id="ConnectionMode"></a>    
+### 1. 链接模式
 
-三种链接模式：   
+**三种链接模式**
 > 1.手动（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
 2.自动打开（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
 3.自动断线重连（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
 
-自动断线重连规则：   
+**自动断线重连介绍**
 > 1.当断开链接后进行尝试重连，第一次需等待1秒。   
 > 2.如没有成功就继续增加一秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
 > 3.直到重连成功，或用户手动调用关闭(`Close()`)。   
 
-链接模式列子：  
+**普通列子**
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
 client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。
@@ -173,7 +176,7 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-进阶（使用 `IsAutoClose` 来发送或接受消息）：  
+**进阶列子（使用 `IsAutoClose` 来发送或接受消息）**
 > `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。   
 使用场景：需要在短连接或不知道什么链接情况下连续发送或接收消息。
 ```CSharp
@@ -192,8 +195,7 @@ client.IsAutoClose = true;
 client.SendReceive("3/3"); // 发→收→关闭
 ```
 
-### 2.接收模式（ReceiveMode）  <a id="ReceiveMode"></a>
-数据接收介绍 
+### 2. 接收模式（ReceiveMode）
 在客户端中有2处可以接收到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接收到数据了，事件将不会再接收到。
 ```CSharp
 //在方法中的默认方式
@@ -214,13 +216,13 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 | `ReceiveMode.ParseTime(10)`          | ab\r\n    | 读取达到指定的时间间隔后没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
 | `ReceiveMode.ParseToEnd("\r\n") ` | ab\r\n    | 读取到指定的信息后结束 | 知道每一帧的结尾的情况下 | 
 
-### 3.数据处理器(IDataProcessor) <a id="IDataProcessor"></a>
-介绍  
-> 1.在发送数据时可以对数据进行统一的处理后在发送 </br>
-> 2.在接收数据后可以对数据进行处理后在转发出去  </br>
-> 3.数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
+### 3. 数据处理器(IDataProcessor)
+**介绍**  
+1. 在发送数据时可以对数据进行统一的处理后在发送 </br>
+2. 在接收数据后可以对数据进行处理后在转发出去  </br>
+3. 数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
 
-内置的数据处理器  <a id="IDataProcessorIn"></a>
+**内置数据处理器**
 
 | 名称| 说明 |
 | ----------- | -------------- |
@@ -234,20 +236,20 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 | TrimEndDataProcessor   | 移除结尾指定的匹配项。 |
 | TrimStartDataProcessor | 移除开头指定的匹配项。 |
 
-自定义数据处理器   
-1. 只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+**自定义数据处理器**   
 
-2. 开始使用自定义数据处理器
+>只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
+
+使用自定义数据处理器：
 ```CSharp
 client1.SendDataProcessors.Add(new MyCalss());
 client1.ReceivedDataProcessors.Add(new MyCalss());
 ```
-### 4.心跳（Heartbeat） <a id="Heartbeat"></a>
+### 4. 心跳（Heartbeat）
 > 注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
 
-心跳分为主动心跳和被动心跳。  
-
-主动心跳：主动发送（循环）- 接收=》ok   
+**主动心跳：**  
+>主动发送（循环）- 接收=》ok   
 ```CSharp
 client1.HeartbeatTime = 5000;//间隔。设置为0可以暂停发送心跳
 //每次发送“1”并告知心跳结果。
@@ -259,13 +261,14 @@ client1.Heartbeat = (a) =>
 
 client1.Open();//打开，在打开前处理属性和事件
 ```
-被动心跳：被动接收=》ok  
+**被动心跳：**   
+>被动接收=》ok  
 ```CSharp
 client1.HeartbeatReceiveTime = 5000;//检测间隔。
 client1.Open();//打开，在打开前处理属性和事件
 ```
 
-## TcpClient <a id="TcpClient"></a>
+## TcpClient
 `TcpClient : ClientBase`
 ```CSharp
 ClientBase client1 = new TcpClient("127.0.0.1", 502);
@@ -300,7 +303,7 @@ client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
 client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
 ```
 
-## TcpServer   <a id="TcpServer"></a>   
+## TcpServer
 `TcpServer : ServiceBase`
 ```CSharp
 var service = new TcpService("127.0.0.1", 8005);
@@ -327,11 +330,13 @@ service.Open();
 if (service.Clients.Any())
 {
     //给第一个客户端发送信息，这里和'TcpClient'使用方式一样，可参考'TcpClient'文档
-    service.Clients[0].Send("123");
+    service.Clients[0].Send("abc");//发送
+    service.Clients[0].Receive();//接收。（服务端接受推荐在事件中处理）
+    service.Clients[0].SendReceive("abc", 3000);//发送并等待接收数据，3秒超时。（服务端接受推荐在事件中处理）
 }
 ```
 
-## UdpClient   <a id="UdpClient"></a>   
+## UdpClient
 `UdpClient : ClientBase`
 ```CSharp
 //远程发送为：10.10.1.69:8001
@@ -356,7 +361,7 @@ var info2 = client.SendReceive("abc");//发送并等待接收
 client.Close();
 ```
 
-## SerialPortClient ; SerialClient <a id="SerialPortClient"></a>
+## SerialPortClient ; SerialClient（串口）
 `SerialPortClient : ClientBase`   
 `SerialClient : ClientBase`  
 > 串口是点到点传输，所以只有 `SerialPortClient` 没有 `SerialPortService` 。使用2个`SerialPortClient` 即可。
@@ -393,7 +398,7 @@ client1.Open();
 //所有发送和接收和TcpClient一样，这里不在重复
 ``` 
 
-## HttpClient <a id="HttpClient"></a>
+## HttpClient
 `HttpClient : ClientBase`   
 
 > 想JSON解析自定义？请参考 [如何自定义Json解析？](#UserJson)。
@@ -430,7 +435,7 @@ formData.Add(new StringContent("18"), "age");//在年龄的字符串
 HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", content: formData);
 ```
 
-## HttpServer <a id="HttpServer"></a>
+## HttpServer
 `HttpServer : ServiceBase`   
 
 1.使用`System.Net.HttpListener`实现，某些情况下需要管理员权限运行。   
@@ -475,7 +480,7 @@ service.Received = (request, response, data) =>
 service.Open();
 ```
 
-## UsbHidClient (USB) <a id="UsbHidClient"></a>
+## UsbHidClient (USB)
 `UsbHidClient : ClientBase`   
 
 > 需要安装包 `Ping9719.IoT.Hid`    
@@ -501,7 +506,7 @@ var client = new UsbHidClient(names[0]);//访问第一个设备
 }
 ```
 
-## BleClient (蓝牙) <a id="BleClient"></a>
+## BleClient (蓝牙)
 `UsbHidClient : ClientBase`  
 
 > 需要安装包 `Ping9719.IoT.Hid` 
@@ -510,7 +515,8 @@ var names = BleClient.GetNames;//获取所有蓝牙设备
 var client = new BleClient(names[0]);//访问第一个设备
 ```
 
-# Modbus <a id="Modbus"></a>
+# 协议（Protocol）
+## Modbus
 `ModbusRtuClient : IClientData`   
 `ModbusTcpClient : IClientData`   
 `ModbusAsciiClient : IClientData`   
@@ -541,8 +547,7 @@ client.ReadString("100", 5, null);//读字符串，以16进制的方式
 client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0时且不足会自动在结尾补充0X00在结尾
 ```
 
-# PLC <a id="PLC"></a>
-## 常用plc类型对照表 <a id="PlcType"></a>
+## PLC类型对照表
 > 带 * 号的为常用类型，一般情况下没有特殊说明就是全部支持的。
 
 | C#</br>.Net | 西门子S7</br>SiemensS7 | 三菱MC</br>MitsubishiMc | 欧姆龙Fins</br>OmronFins |欧姆龙Cip</br>OmronCip |汇川</br>Inovance |
@@ -562,7 +567,7 @@ client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0�
 | TimeSpan    |Time|||||
 | Char        |Char|||||
 
-## 罗克韦尔 (AllenBradleyCipClient) <a id="AllenBradleyCipClient"></a>
+## 罗克韦尔 (AllenBradleyCipClient)
 `AllenBradleyCipClient : IClientData`  
 
 此协议目前测试较少，请测试后在用于生产环境使用。    
@@ -576,7 +581,7 @@ client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 ```
 
-## 基恩士 (KeyenceHostLinkClient) <a id="KeyenceHostLinkClient"></a>
+## 基恩士 (KeyenceHostLinkClient)
 `KeyenceHostLinkClient : IClientData`  
 
 ```CSharp
@@ -588,7 +593,7 @@ client.Read<bool>("B0");//读
 client.Write<bool>("B0",true);//写
 ```
 
-## 汇川 (InovanceModbusTcpClient) <a id="InovanceModbusTcpClient"></a>
+## 汇川 (InovanceModbusTcpClient)
 `InovanceModbusTcpClient : IClientData`  
 ```CSharp
 var client = new InovanceModbusTcpClient("127.0.0.1");
@@ -601,7 +606,7 @@ client.Write<bool>("M1",true);//写
 client.Write<Int16>("D1",new Int16[]{1,2});//写多个
 ```
 
-## 三菱 (MitsubishiMcClient) <a id="MitsubishiMcClient"></a>
+## 三菱 (MitsubishiMcClient)
 `MitsubishiMcClient : IClientData`  
 测试覆盖表
 
@@ -627,9 +632,8 @@ client.Write<Int16>("D1",new Int16[]{1,2});//写多个
 > GX Works3为示例：   
 > [参数]-[模块参数]-[以太网端口] 这里检查ip端口
 
-
-
 ```CSharp
+//
 var client = new MitsubishiMcClient(MitsubishiVersion.Qna_3E, "127.0.0.1");
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
 client.Client.Open();//打开
@@ -640,7 +644,7 @@ client.Write<Int16>("W0",10);//写
 client.Write<Int16>("W0",new Int16[]{1,2});//写多个
 ```
 
-## 欧姆龙 (OmronFinsClient) <a id="OmronFinsClient"></a>
+## 欧姆龙 (OmronFinsClient)
 `OmronFinsClient : IClientData`  
 ```CSharp
 OmronFinsClient client = new OmronFinsClient("127.0.0.1");
@@ -672,7 +676,7 @@ client.Read<bool[]>("abc",5);//读数组，并截取前5个
 client.Write<Int16>("abc", new Int16[] { 1, 2, 0, 5,2 });//必须类型+长度和plc中一致
 ```
 
-## 西门子 (SiemensS7Client) <a id="SiemensS7Client"></a>
+## 西门子 (SiemensS7Client)
 `SiemensS7Client : IClientData` 
 ```CSharp
 var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
@@ -700,21 +704,9 @@ client.ReadString("BD100.0.0", 3, Encoding.ASCII);
 client.WriteString("BD100.0.0", "abc", 3, Encoding.ASCII);
 ```
 
-# 机器人 (Robot) <a id="Robot"></a>
-## 爱普生 (EpsonRobot)
-`EpsonRobot : IClient` 
-```CSharp
-EpsonRobot client = new EpsonRobot("127.0.0.1");
-client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
-client.Client.Open();//打开
-
-client.Start();
-client.Pause();
-```
-
-# 算法 (Algorithm) <a id="Algorithm"></a>
-## 仿射变换（AffineTransform） <a id="AffineTransform"></a>
-仿射变换坐标转换器，可用于相机坐标和机器人坐标之间的双向转换
+# 算法 (Algorithm)
+## 仿射变换（AffineTransform）
+>一般用于相机坐标和机器人坐标之间的双向转换
 ```CSharp
 var converter = new AffineTransform();
 // 添加标定坐标对（相机坐标xy + 机器人坐标xy）
@@ -729,10 +721,10 @@ var p1 = converter.Transform(250, 300);
 var p2 = converter.TransformInverse(125, 150);                  
 ```
 
-## 平均点位（AveragePoint） <a id="AveragePoint"></a>
+## 平均点位（AveragePoint）
 使用场景：   
-1.机器人均匀的放/取场景   
-2.伺服均匀的移动场景
+1. 机器人均匀的放/取场景   
+2. 伺服均匀的移动场景
 
 > 假如：已知开头为2；结尾为8；共4个点    
 > 2--[?]--[?]--8    
@@ -750,10 +742,7 @@ var aaa1 = AveragePoint.Start(2, 8, 4);
 var aaa2 = AveragePoint.Start("1,2", "4,8", 4);
 ```
 
-## CRC <a id="CRC"></a>
-使用场景：   
-1.协议校验正确性场景   
-
+## CRC
 ```CSharp
 byte[] bytes = new byte[] { 1, 2 };
 //CRC 算法
@@ -777,16 +766,13 @@ CRC.CheckCrc32(c7);
 CRC.CheckCrc32Q(c8);
 CRC.CheckCrc32Sata(c9);
 ```
-## LRC <a id="LRC"></a>
-使用场景：   
-1.协议校验正确性场景   
-
+## LRC
 ```CSharp
 LRC.GetLRC(bytes);
 LRC.CheckLRC(bytes);
 ```
 
-## 傅立叶滤波(FFTFilter) <a id="FFTFilter"></a>
+## 傅立叶滤波(FFTFilter)
 傅立叶滤波（自动并行） 100W个点耗时430ms 
 ```CSharp
 double[] result1 = FFTFilterOptimized.FilterFFT(data, 0.005);    //使用默认并行数6
@@ -795,7 +781,7 @@ double[] result3 = FFTFilterOptimized.FilterFFT(data, 0.005, 1); //禁用并行�
 ```
 
 
-## 稳定婚姻配对(GaleShapleyAlgorithm) <a id="GaleShapleyAlgorithm"></a>
+## 稳定婚姻配对(GaleShapleyAlgorithm)
 使用场景：   
 1.将相似的物品进行配对的场景   
 
@@ -827,7 +813,7 @@ foreach (var item in msi)
 ```
 
 
-## 线性回归(LinearRegression) <a id="LinearRegression"></a>
+## 线性回归(LinearRegression)
 使用场景：   
 1.传感器（温度、压力、流量）输出值与真实值的转换   
 >温度传感器：电压值(mV) → 温度(°C)   
@@ -845,26 +831,22 @@ double result = regression.Project(20);//50
 ```
 
 
-# 设备和仪器 (Device) <a id="Device"></a>
+# 设备和仪器 (Device)
 
-各种仪器需要长链接必须打开 `dev1.Client.Open();` 需要自动打开请设置 `dev1.Client.ConnectionMode = ConnectionMode.AutoOpen;` 以下列子中不在重复对客户端相关的描述或设置，非常重要或不一致除外。
-   
+>各种仪器需要长链接必须打开 `dev1.Client.Open();` 需要自动打开请设置 `dev1.Client.ConnectionMode = ConnectionMode.AutoOpen;` 。
 
-
-## 科斯莫气密检测 (CosmoAirtight) <a id="CosmoAirtight"></a>
+## 气密检测 (Airtight)
 ```CSharp
-CosmoAirtight dev1 = new CosmoAirtight("COM1");//科斯莫
+//科斯莫气密检测
+CosmoAirtight dev1 = new CosmoAirtight("COM1");
 ```
 
-## 激光刻印 (Mark) <a id="Mark"></a>
+## 激光刻印 (Mark)
 ```CSharp
 DaZhuMark dev1 = new DaZhuMark("127.0.0.1");//大族
 HuaPuMark dev2 = new HuaPuMark("127.0.0.1");//华普
 ```
-## 无线射频 (Rfid) <a id="Rfid"></a>
-<details><summary style="padding:10px;border:1px solid silver;border-radius:4px;">🚀 C#</summary>
-<div style="padding:5px;margin-top:8px;border:1px solid silver;border-radius:4px;">
-
+## 无线射频 (Rfid)
 ```CSharp
 BeiJiaFuRfid rfid1 = new BeiJiaFuRfid("127.0.0.1");//倍加福
 DongJiRfid rfid2 = new DongJiRfid("127.0.0.1");//东集
@@ -875,8 +857,6 @@ WanQuanRfid rfid4 = new WanQuanRfid("127.0.0.1");//万全
 rfid4.ReadString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), 2, EncodingEnum.ASCII.GetEncoding());
 rfid4.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A001", 2, EncodingEnum.ASCII.GetEncoding());
 ```
-
-</div></details>
 
 <details><summary style="padding:10px;border:1px solid silver;border-radius:4px;">🖥️ WPF</summary>
 <div style="padding:5px;margin-top:8px;border:1px solid silver;border-radius:4px;">
@@ -891,17 +871,29 @@ xmlns:piIoT="https://github.com/ping9719/IoT"
 
 </div></details>
 
-## 扫码枪 (Scanner) <a id="Scanner"></a>
+## 机器人 (Robot)
+`EpsonRobot : IClient` 
+```CSharp
+//爱普生机器人
+EpsonRobot client = new EpsonRobot("127.0.0.1");
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
+client.Client.Open();//打开
+
+client.Start();
+client.Pause();
+```
+
+## 扫码枪 (Scanner)
 ```CSharp
 HoneywellScanner dev1 = new HoneywellScanner("127.0.0.1");//霍尼韦尔
 MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
 ```
-## 螺丝机 (Screw) <a id="Screw"></a>
+## 螺丝机 (Screw)
 ```CSharp
 MiLeScrew dev1 = new MiLeScrew("127.0.0.1");//米勒
 ```
 
-## 焊接机 (Weld) <a id="Weld"></a>
+## 焊接机 (Weld)
 ```CSharp
 //JBC焊接机
 JBCWeld jBCWeld = new JBCWeld("COM5");
@@ -914,18 +906,8 @@ while (true)
 }
 ```
 
-## 其他列表 <a id="EstsList"></a>
-
-| 对象名 | 功能 | 推荐(1-5) | WPF |Avalonia | |
-| ----------- | ---------------------- | ----------------------- | ------------------------ | --------------------- | ---------------- |
-| KuaiKeDeskScrew |快克螺丝机桌面式|2||||
-| KuaiKeScrew        |快克螺丝机|2||||
-| KuaiKeTcpScrew     |快克螺丝机电批|2||||
-| KuaiKeTemperatureControl    |快克温控|2||||
-| KuaiKeWeld    |快克焊接|3||||
-
-# 常见问题 <a id="Issue"></a>
-## 1.如何使用自定义协议？ <a id="UserProtocol"></a>
+# 常见问题
+## 1.如何使用自定义协议？
 ```CSharp
 //XXX协议实现
 public class XXX
@@ -969,7 +951,7 @@ client.Client.Open();
 var info = client.ReadXXX();
 ```
 
-## 2.如何自定义Json解析？ <a id="UserJson"></a>
+## 2.如何自定义Json解析？
 1.Json解析优先采用用户自定义的   
 2.在`NET8`中采用`System.Text.Json`   
 3.非`NET8`中优先采用`Newtonsoft.Json`失败后采用`System.Runtime.Serialization.Json`  

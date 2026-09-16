@@ -2,7 +2,7 @@
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 using System;
 using System.Collections;
 using System.Collections.Generic;

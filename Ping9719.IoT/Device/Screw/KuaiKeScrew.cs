@@ -1,5 +1,5 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Ping9719.IoT.Device.Screw
 {
     /// <summary>
-    /// 快克螺丝机
+    /// 快克螺丝机（不推荐使用此设备）
     /// Modbus指令整理.xlsx
     /// </summary>
     public class KuaiKeScrew : ModbusRtuClient, IClientData

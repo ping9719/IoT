@@ -6,9 +6,29 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using Ping9719.IoT.Communication;
+using Ping9719.IoT.Protocol.Models;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol
 {
+    /// <summary>
+    /// 三菱型号版本
+    /// </summary>
+    public enum MitsubishiVersion : byte
+    {
+        /// <summary>
+        /// 未定义
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// 三菱 MC A-1E帧
+        /// </summary>
+        A_1E = 1,
+        /// <summary>
+        /// 三菱 MC Qna-3E帧
+        /// </summary>
+        Qna_3E = 2,
+    }
+
     /// <summary>
     /// 三菱客户端（MC协议）.
     /// 已测试单个元素读写：bool,short,int32,float,double,string
@@ -19,7 +39,7 @@ namespace Ping9719.IoT.PLC
         /// <summary>
         /// 版本
         /// </summary>
-        public MitsubishiVersion Version { get; private set; }
+        public MitsubishiVersion type { get; private set; }
 
         /// <summary>
         /// 字符串编码格式。默认ASCII
@@ -32,7 +52,7 @@ namespace Ping9719.IoT.PLC
         /// 初始化
         /// </summary>
         /// <param name="client">客户端</param>
-        public MitsubishiMcClient(MitsubishiVersion version, ClientBase client)
+        public MitsubishiMcClient(MitsubishiVersion type, ClientBase client)
         {
             Client = client;
             //Client.TimeOut = timeout;
@@ -40,7 +60,7 @@ namespace Ping9719.IoT.PLC
             Client.Encoding = Encoding.ASCII;
             //Client.ConnectionMode = ConnectionMode.AutoReconnection;
 
-            this.Version = version;
+            this.type = type;
         }
 
         /// <summary>
@@ -48,7 +68,7 @@ namespace Ping9719.IoT.PLC
         /// </summary>
         /// <param name="ip">ip地址</param>
         /// <param name="port">端口</param>
-        public MitsubishiMcClient(MitsubishiVersion version, string ip, int port = 1500) : this(version, new TcpClient(ip, port)) { }
+        public MitsubishiMcClient(MitsubishiVersion type, string ip, int port = 1500) : this(type, new TcpClient(ip, port)) { }
 
         #region 读
 
@@ -68,7 +88,7 @@ namespace Ping9719.IoT.PLC
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
 
-                switch (Version)
+                switch (type)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -81,7 +101,7 @@ namespace Ping9719.IoT.PLC
                         break;
                 }
 
-                switch (Version)
+                switch (type)
                 {
                     case MitsubishiVersion.A_1E:
                         var lenght = command[10] + command[11] * 256;
@@ -102,7 +122,7 @@ namespace Ping9719.IoT.PLC
                 var bufferLength = length;
                 byte[] responseValue = null;
 
-                switch (Version)
+                switch (type)
                 {
                     case MitsubishiVersion.A_1E:
                         responseValue = new byte[dataPackage.Length - 2];
@@ -250,7 +270,7 @@ namespace Ping9719.IoT.PLC
                 //发送写入信息
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
-                switch (Version)
+                switch (type)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -263,7 +283,7 @@ namespace Ping9719.IoT.PLC
                         break;
                 }
 
-                switch (Version)
+                switch (type)
                 {
                     case MitsubishiVersion.A_1E:
                         result = Client.SendReceive(command, ReceiveMode.ParseByte(2));

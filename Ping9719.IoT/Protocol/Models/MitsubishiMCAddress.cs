@@ -1,6 +1,6 @@
-﻿
+﻿using System;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol.Models
 {
     /// <summary>
     /// 三菱解析后的地址信息

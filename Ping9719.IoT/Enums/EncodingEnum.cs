@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Enums
+namespace Ping9719.IoT
 {
     /// <summary>
     /// 字符串编码

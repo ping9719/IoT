@@ -7,9 +7,45 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Ping9719.IoT.Communication;
+using Ping9719.IoT.Protocol.Models;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol
 {
+    /// <summary>
+    /// 西门子型号版本
+    /// </summary>
+    public enum SiemensVersion : byte
+    {
+        /// <summary>
+        /// 未定义
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// 西门子S7-200 【需要配置网络模块】
+        /// </summary>
+        S7_200 = 1,
+        /// <summary>
+        /// 西门子S7-200Smar
+        /// </summary>
+        S7_200Smart = 2,
+        /// <summary>
+        /// 西门子S7-300
+        /// </summary>
+        S7_300 = 3,
+        /// <summary>
+        /// 西门子S7-400
+        /// </summary>
+        S7_400 = 4,
+        /// <summary>
+        /// 西门子S7-1200
+        /// </summary>
+        S7_1200 = 5,
+        /// <summary>
+        /// 西门子S7-1500
+        /// </summary>
+        S7_1500 = 6,
+    }
+
     /// <summary>
     /// 西门子客户端（S7协议）
     /// http://www.360doc.cn/mip/763580999.html
@@ -19,7 +55,7 @@ namespace Ping9719.IoT.PLC
         /// <summary>
         /// CPU版本
         /// </summary>
-        public SiemensVersion Version { get; private set; }
+        public SiemensVersion Type { get; private set; }
         /// <summary>
         /// 插槽号 
         /// </summary>
@@ -37,14 +73,14 @@ namespace Ping9719.IoT.PLC
         /// <summary>
         /// 西门子客户端
         /// </summary>
-        /// <param name="version">版本</param>
+        /// <param name="type">版本</param>
         /// <param name="client">客户端</param>
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
-        public SiemensS7Client(SiemensVersion version, ClientBase client, byte slot = 0x00, byte rack = 0x00)
+        public SiemensS7Client(SiemensVersion type, ClientBase client, byte slot = 0x00, byte rack = 0x00)
         {
             EndianFormat = EndianFormat.ABCD;
-            Version = version;
+            this.Type = type;
             Client = client;
             Slot = slot;
             Rack = rack;
@@ -59,7 +95,7 @@ namespace Ping9719.IoT.PLC
                 var Command1 = SiemensConstant.Command1;
                 var Command2 = SiemensConstant.Command2;
 
-                switch (version)
+                switch (type)
                 {
                     case SiemensVersion.S7_200:
                         Command1 = SiemensConstant.Command1_200;
@@ -115,12 +151,12 @@ namespace Ping9719.IoT.PLC
         /// <summary>
         /// 西门子客户端,以网络的方式
         /// </summary>
-        /// <param name="version">版本</param>
+        /// <param name="type">版本</param>
         /// <param name="ip">ip</param>
         /// <param name="port">端口</param>
         /// <param name="slot">插槽号</param>
         /// <param name="rack">机架号</param>
-        public SiemensS7Client(SiemensVersion version, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00) : this(version, new TcpClient(ip, port), slot, rack) { }
+        public SiemensS7Client(SiemensVersion type, string ip, int port = 102, byte slot = 0x00, byte rack = 0x00) : this(type, new TcpClient(ip, port), slot, rack) { }
 
         #region Read 
         /// <summary>

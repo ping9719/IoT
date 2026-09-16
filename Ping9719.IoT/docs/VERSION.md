@@ -2,6 +2,10 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
+## v0.13.0（...） 
+*1.[更名]plc属性Version改为Type    
+*3.[更改]plc和modbus归于Protocol名称空间   
+*4.[删除]MengXunFct   
 ## v0.12.0（26-09-08） 
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
 2.[新增]JsonParse默认使用函数   

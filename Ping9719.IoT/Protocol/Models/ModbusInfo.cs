@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT.Modbus
+namespace Ping9719.IoT.Protocol.Models
 {
     /// <summary>
     /// Modbus信息

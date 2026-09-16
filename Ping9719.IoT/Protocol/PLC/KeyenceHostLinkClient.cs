@@ -4,9 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using TcpClient = Ping9719.IoT.Communication.TcpClient;
 
-namespace Ping9719.IoT.PLC;
+namespace Ping9719.IoT.Protocol;
 
 /// <summary>
 /// 基恩士客户端（KV HostLink 上位链路协议）

@@ -1,5 +1,6 @@
 ﻿using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
+using Ping9719.IoT.Protocol.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol
 {
     /// <summary>
     /// (AB)罗克韦尔客户端
@@ -173,7 +174,7 @@ namespace Ping9719.IoT.PLC
                 var count = BitConverter.ToUInt16(dataPackage, 42);//数据总长度
                 var hNum = BitConverter.ToUInt16(dataPackage, 44);//发送编号
                 var isok = BitConverter.ToUInt16(dataPackage, 47);//合格
-                var dTypt = (CipVariableType)dataPackage.ElementAtOrDefault(50);//类型
+                var dTypt = (CipDataType)dataPackage.ElementAtOrDefault(50);//类型
                 //var dLeng = (CipVariableType)dataPackage.ElementAtOrDefault(51);//长度或格式
                 var data = dataPackage.Skip(52).ToArray();//数据
 
@@ -187,57 +188,57 @@ namespace Ping9719.IoT.PLC
 
                 var staIndex = cpiadd.Index.FirstOrDefault();
 
-                if (dTypt == CipVariableType.BOOL)
+                if (dTypt == CipDataType.BOOL)
                 {
                     var v1 = data.Chunk(2).Select(o => BitConverter.ToBoolean(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.BYTE)
+                else if (dTypt == CipDataType.BYTE)
                 {
                     var v1 = data.Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.REAL)
+                else if (dTypt == CipDataType.REAL)
                 {
                     var v1 = data.Chunk(4).Select(o => BitConverter.ToSingle(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.LREAL)
+                else if (dTypt == CipDataType.LREAL)
                 {
                     var v1 = data.Chunk(8).Select(o => BitConverter.ToDouble(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.INT)
+                else if (dTypt == CipDataType.INT)
                 {
                     var v1 = data.Chunk(2).Select(o => BitConverter.ToInt16(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.DINT)
+                else if (dTypt == CipDataType.DINT)
                 {
                     var v1 = data.Chunk(4).Select(o => BitConverter.ToInt32(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.LINT)
+                else if (dTypt == CipDataType.LINT)
                 {
                     var v1 = data.Chunk(8).Select(o => BitConverter.ToInt64(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.UINT)
+                else if (dTypt == CipDataType.UINT)
                 {
                     var v1 = data.Chunk(2).Select(o => BitConverter.ToUInt16(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.UDINT)
+                else if (dTypt == CipDataType.UDINT)
                 {
                     var v1 = data.Chunk(4).Select(o => BitConverter.ToUInt32(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.ULINT)
+                else if (dTypt == CipDataType.ULINT)
                 {
                     var v1 = data.Chunk(8).Select(o => BitConverter.ToUInt64(o.ToArray(), 0)).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
                 }
-                else if (dTypt == CipVariableType.STRING)
+                else if (dTypt == CipDataType.STRING)
                 {
                     var v1 = data.Chunk(100).Select(o => Encoding.GetString(o.ToArray(), 2, BitConverter.ToUInt16(o.ToArray(), 0))).Skip(staIndex);
                     result.Value = len <= 1 ? v1.First() : v1.Take(len).ToArray();
@@ -468,7 +469,7 @@ namespace Ping9719.IoT.PLC
         #endregion
 
         #region Write
-        private IoTResult WriteIn(string address, CipVariableType typeCode, byte[] data)
+        private IoTResult WriteIn(string address, CipDataType typeCode, byte[] data)
         {
             IoTResult result = new IoTResult();
             try
@@ -579,7 +580,7 @@ namespace Ping9719.IoT.PLC
         /// <param name="typeCode"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        protected byte[] GetWriteCommand2(string address, CipVariableType typeCode, byte[] value)
+        protected byte[] GetWriteCommand2(string address, CipDataType typeCode, byte[] value)
         {
             var addData = Encoding.GetBytes(address).ToList();
             byte length = (byte)addData.Count;
@@ -650,7 +651,7 @@ namespace Ping9719.IoT.PLC
             return aadd;
         }
 
-        protected byte[] GetWriteCommand3(string address, CipVariableType typeCode, byte[] value)
+        protected byte[] GetWriteCommand3(string address, CipDataType typeCode, byte[] value)
         {
             var addData = Encoding.GetBytes(address).ToList();
             byte length = (byte)addData.Count;
@@ -741,49 +742,49 @@ namespace Ping9719.IoT.PLC
             {
                 if (value is bool boolv)
                 {
-                    return WriteIn(address, CipVariableType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
+                    return WriteIn(address, CipDataType.BOOL, boolv ? BoolTrueByteVal : new byte[] { 0x00, 0x00 });
                 }
                 else if (value is byte bytev)
                 {
-                    return WriteIn(address, CipVariableType.BYTE, new byte[] { bytev, 0x00 });
+                    return WriteIn(address, CipDataType.BYTE, new byte[] { bytev, 0x00 });
                 }
                 else if (value is float Singlev)
                 {
-                    return WriteIn(address, CipVariableType.REAL, BitConverter.GetBytes(Singlev));
+                    return WriteIn(address, CipDataType.REAL, BitConverter.GetBytes(Singlev));
                 }
                 else if (value is double doublev)
                 {
-                    return WriteIn(address, CipVariableType.LREAL, BitConverter.GetBytes(doublev));
+                    return WriteIn(address, CipDataType.LREAL, BitConverter.GetBytes(doublev));
                 }
                 else if (value is short Int16v)
                 {
-                    return WriteIn(address, CipVariableType.INT, BitConverter.GetBytes(Int16v));
+                    return WriteIn(address, CipDataType.INT, BitConverter.GetBytes(Int16v));
                 }
                 else if (value is int Int32v)
                 {
-                    return WriteIn(address, CipVariableType.DINT, BitConverter.GetBytes(Int32v));
+                    return WriteIn(address, CipDataType.DINT, BitConverter.GetBytes(Int32v));
                 }
                 else if (value is long Int64v)
                 {
-                    return WriteIn(address, CipVariableType.LINT, BitConverter.GetBytes(Int64v));
+                    return WriteIn(address, CipDataType.LINT, BitConverter.GetBytes(Int64v));
                 }
                 else if (value is ushort UInt16v)
                 {
-                    return WriteIn(address, CipVariableType.UINT, BitConverter.GetBytes(UInt16v));
+                    return WriteIn(address, CipDataType.UINT, BitConverter.GetBytes(UInt16v));
                 }
                 else if (value is uint UInt32v)
                 {
-                    return WriteIn(address, CipVariableType.UDINT, BitConverter.GetBytes(UInt32v));
+                    return WriteIn(address, CipDataType.UDINT, BitConverter.GetBytes(UInt32v));
                 }
                 else if (value is ulong UInt64v)
                 {
-                    return WriteIn(address, CipVariableType.ULINT, BitConverter.GetBytes(UInt64v));
+                    return WriteIn(address, CipDataType.ULINT, BitConverter.GetBytes(UInt64v));
                 }
                 else if (value is string stringv)
                 {
                     var valueBytes = Encoding.GetBytes(stringv);
                     var data = BitConverter.GetBytes((ushort)valueBytes.Length).Concat(valueBytes).ToArray();
-                    return WriteIn(address, CipVariableType.STRING, data);
+                    return WriteIn(address, CipDataType.STRING, data);
                 }
                 else
                     throw new NotImplementedException("暂不支持的类型");

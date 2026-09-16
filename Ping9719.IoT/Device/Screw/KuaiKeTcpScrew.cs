@@ -1,5 +1,5 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Ping9719.IoT.Device.Screw
 {
     /// <summary>
-    /// 快克螺丝机（智能电批）
+    /// 快克螺丝机（智能电批）（不推荐使用此设备）
     /// 设置IP方式：开机按住屏幕-网络设置
     /// Quick--Modbus TCP智能电批.xls
     /// </summary>

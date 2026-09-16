@@ -5,17 +5,19 @@ using System.Linq;
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT;
 using Ping9719.IoT.Communication;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
+using Ping9719.IoT.Protocol.Models;
 
-namespace Ping9719.IoT.Modbus
+namespace Ping9719.IoT.Protocol
 {
     /// <summary>
-    /// ModbusAscii
+    /// ModbusRtu协议客户端
     /// </summary>
-    public class ModbusAsciiClient : ReadWriteBase, IClientData
+    public class ModbusRtuClient : ReadWriteBase, IClientData
     {
         internal byte stationNumber = 1;
+
         public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
@@ -24,7 +26,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="client">客户端</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public ModbusAsciiClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
+        public ModbusRtuClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
         {
             Client = client;
             //Client.TimeOut = 1500;
@@ -46,7 +48,7 @@ namespace Ping9719.IoT.Modbus
         /// <param name="stopBits"></param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public ModbusAsciiClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
+        public ModbusRtuClient(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
             : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits), format, stationNumber) { }
 
         #region IReadWrite
@@ -78,18 +80,15 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm.ToVal<string>();
 
-                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
-                sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
+                var sVal = CRC.Crc16Modbus(comm.Value);
 
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<string>();
 
-                sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
-                if (!LRC.CheckLRC(sendResult.Value))
+                if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<string>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2])).ToVal<string>();
@@ -118,7 +117,6 @@ namespace Ping9719.IoT.Modbus
         {
             return ReadIn<T>(address, number);
         }
-
 
         /// <summary>
         /// 写入
@@ -167,6 +165,7 @@ namespace Ping9719.IoT.Modbus
             return WriteIn(address, value);
         }
 
+
         private IoTResult<IEnumerable<T>> ReadIn<T>(string address, int number)
         {
             try
@@ -179,18 +178,15 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm.ToVal<IEnumerable<T>>();
 
-                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
-                sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
+                var sVal = CRC.Crc16Modbus(comm.Value);
 
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<IEnumerable<T>>();
 
-                sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
-                if (!LRC.CheckLRC(sendResult.Value))
+                if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<IEnumerable<T>>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2])).ToVal<IEnumerable<T>>();
@@ -270,18 +266,15 @@ namespace Ping9719.IoT.Modbus
                 if (!comm.IsSucceed)
                     return comm;
 
-                var sVal = LRC.GetLRC(comm.Value).BytesToAsciiBytes();
-                sVal = new byte[] { 0x3A }.Concat(sVal).Concat(new byte[] { 0x0D, 0x0A }).ToArray();//增加头尾
+                var sVal = CRC.Crc16Modbus(comm.Value);
 
                 //获取响应报文
                 var sendResult = Client.SendReceive(sVal);
                 if (!sendResult.IsSucceed)
                     return sendResult.AddError($"写入[{result.Value}]失败。");
 
-                sendResult.Value = sendResult.Value.Skip(1).Take(sendResult.Value.Length - 3).ToArray();//去头去尾
-                sendResult.Value = DataConvert.AsciiBytesToBytes(sendResult.Value);
                 //验证
-                if (!LRC.CheckLRC(sendResult.Value))
+                if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"写入[{result.Value}]失败。响应结果校验失败");
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[2]));

@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading;
 using Ping9719.IoT.Communication;
 using Ping9719.IoT;
+using Ping9719.IoT.Protocol.Models;
 
-namespace Ping9719.IoT.Modbus
+namespace Ping9719.IoT.Protocol
 {
     /// <summary>
     /// ModbusTcp协议客户端

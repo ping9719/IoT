@@ -1,5 +1,6 @@
 ﻿using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
+using Ping9719.IoT.Protocol.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol
 {
     /// <summary>
     /// 欧姆龙客户端（Fins协议）

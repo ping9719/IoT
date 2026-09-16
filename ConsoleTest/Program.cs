@@ -2,12 +2,10 @@
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
-using Ping9719.IoT.Device.Fct;
 using Ping9719.IoT.Device.Rfid;
 using Ping9719.IoT.Device.Weld;
 using Ping9719.IoT.Hid;
-using Ping9719.IoT.Modbus;
-using Ping9719.IoT.PLC;
+using Ping9719.IoT.Protocol;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -50,7 +48,7 @@ namespace ConsoleTest
         private static async Task Main(string[] args)
         {
 
-            InovanceModbusTcpClient inovanceModbusTcpClient = new InovanceModbusTcpClient("127.0.0.1", 502);
+            ModbusRtuClient inovanceModbusTcpClient = new ModbusRtuClient("127.0.0.1", 502);
             //inovanceModbusTcpClient.Client.Open();
 
             var aa = inovanceModbusTcpClient.Read<short>("D100",10);

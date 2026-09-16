@@ -7,12 +7,12 @@ using System.Net.Sockets;
 using System.Text;
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 
 namespace Ping9719.IoT.Device.Screw
 {
     /// <summary>
-    /// 快克螺丝机（新协议）（桌面式）
+    /// 快克螺丝机（新协议）（桌面式）（不推荐使用此设备）
     /// 螺丝机运动平台通讯协议(对外)-20200106.pdf
     /// </summary>
     public class KuaiKeDeskScrew : ModbusRtuClient, IClientData

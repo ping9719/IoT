@@ -1,5 +1,5 @@
 ﻿using Ping9719.IoT;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;

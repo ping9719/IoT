@@ -7,12 +7,12 @@ using System.Net.Sockets;
 using System.Text;
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT;
-using Ping9719.IoT.Modbus;
+using Ping9719.IoT.Protocol;
 
 namespace Ping9719.IoT.Device.Weld
 {
     /// <summary>
-    /// 快克焊接机
+    /// 快克焊接机（不推荐使用此设备）
     /// PLC与主板通信持续整理.doc
     /// </summary>
     public class KuaiKeWeld : ModbusRtuClient, IClientData

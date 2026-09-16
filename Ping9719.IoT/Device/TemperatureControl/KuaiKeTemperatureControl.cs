@@ -13,7 +13,7 @@ using Ping9719.IoT;
 namespace Ping9719.IoT.Device.TemperatureControl
 {
     /// <summary>
-    /// 快克温控（支持378FA等）（请注意站点地址！）
+    /// 快克温控（支持378FA等）（请注意站点地址！）（不推荐使用此设备）
     /// 378FA通讯协议.docx
     /// 快克_通用串口通讯协议.docx
     /// </summary>

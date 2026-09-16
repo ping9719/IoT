@@ -1,10 +1,8 @@
-﻿
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 using System.Linq;
 
-namespace Ping9719.IoT.PLC
+namespace Ping9719.IoT.Protocol.Models
 {
     /// <summary>
     /// 西门子解析后的地址信息
