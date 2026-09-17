@@ -118,7 +118,7 @@ namespace Ping9719.IoT.Communication
             tcpClient1.openData = new OpenClientData(tcpClient.Client);
             tcpClient1.ReconnectionCount = 0;
 
-            tcpClient1.IsUserClose = false;
+            //tcpClient1.IsUserClose = false;
             tcpClient1.GoRun();
             //tcpClient1.Opened?.Invoke(tcpClient1);
             return tcpClient1;

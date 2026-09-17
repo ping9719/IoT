@@ -20,7 +20,6 @@ namespace Ping9719.IoT.Communication
     {
         protected object obj1 = new object();
         protected bool IsOpen2 = false;
-        protected bool IsUserClose = false;//是否用户关闭
         protected bool isSendReceive = false;//是否正在发送和接收中
 
         protected OpenClientData openData;
@@ -35,6 +34,10 @@ namespace Ping9719.IoT.Communication
         /// 是否打开
         /// </summary>
         public virtual bool IsOpen { get => IsOpen2 && !IsUserClose; }
+        /// <summary>
+        /// 是否已经调用了 Close 方法。如何为true将不会进行断线重连，这个属性主要判断是否需要继续断线重连。
+        /// </summary>
+        public bool IsUserClose { get; private set; } = false;
         /// <summary>
         /// 链接模式
         /// </summary>
