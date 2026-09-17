@@ -13,9 +13,8 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 东集
     /// </summary>
-    public class DongJiRfid : IClient
+    public class DongJiRfid : ClientHostBase
     {
-        public ClientBase Client { get; private set; }
         public DongJiRfid(ClientBase client)
         {
             Client = client;

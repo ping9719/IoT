@@ -50,7 +50,7 @@ namespace Ping9719.IoT.Protocol
     /// 西门子客户端（S7协议）
     /// http://www.360doc.cn/mip/763580999.html
     /// </summary>
-    public class SiemensS7Client : ReadWriteBase, IClientData
+    public class SiemensS7Client : ClientDataBase
     {
         /// <summary>
         /// CPU版本
@@ -69,7 +69,6 @@ namespace Ping9719.IoT.Protocol
         /// </summary>
         public ushort ReadWriteByteNum { get; set; } = 200;
 
-        public ClientBase Client { get; private set; }
         /// <summary>
         /// 西门子客户端
         /// </summary>

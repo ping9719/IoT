@@ -13,10 +13,8 @@ namespace Ping9719.IoT.Device.Weld
     /// JBC焊接台
     /// 下载驱动：https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers
     /// </summary>
-    public class JBCWeld : IClient
+    public class JBCWeld : ClientHostBase
     {
-        public ClientBase Client { get; private set; }//通讯管道
-
         static byte[] stx = new byte[] { 0x10, 0x02 };//帧头
         static byte[] etx = new byte[] { 0x10, 0x03 };//帧尾
 

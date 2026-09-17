@@ -5,14 +5,15 @@
 # 目录
 <!-- TOC-->
 - [字节数据(ByteData) `beta`](#字节数据bytedata-beta)
-  - [用字节数据批量解析PLC的数据](#用字节数据批量解析plc的数据)
-  - [转换器](#转换器)
+  - [批量解析PLC的数据](#批量解析plc的数据)
+  - [字节转换器](#字节转换器)
 - [通讯 (Communication)](#通讯-communication)
   - [客户端基类(ClientBase)（建议必读！！！）](#客户端基类clientbase建议必读)
-    - [1. 链接模式](#1-链接模式)
-    - [2. 接收模式（ReceiveMode）](#2-接收模式receivemode)
-    - [3. 数据处理器(IDataProcessor)](#3-数据处理器idataprocessor)
-    - [4. 心跳（Heartbeat）](#4-心跳heartbeat)
+    - [三种链接模式（ConnectionMode）](#三种链接模式connectionmode)
+    - [接收数据与接收模式（ReceiveMode）](#接收数据与接收模式receivemode)
+    - [收发数据与数据处理器(IDataProcessor)](#收发数据与数据处理器idataprocessor)
+    - [主动心跳与被动心跳（Heartbeat）](#主动心跳与被动心跳heartbeat)
+  - [服务端基类(ServiceBase) `beta`](#服务端基类servicebase-beta)
   - [TcpClient](#tcpclient)
   - [TcpServer](#tcpserver)
   - [UdpClient](#udpclient)
@@ -50,6 +51,7 @@
 - [常见问题](#常见问题)
   - [1.如何使用自定义协议？](#1如何使用自定义协议)
   - [2.如何自定义Json解析？](#2如何自定义json解析)
+  - [3.如何在运行中切换通讯方式？](#3如何在运行中切换通讯方式)
 <!-- TOC -->
 
 # 字节数据(ByteData) `beta`
@@ -92,7 +94,7 @@ var bs = ByteData.ToBytes(obj, EndianFormat.ABCD);//[0,1,0,2]
 var bools = ByteData.GetValues<bool>(testArr, 1, EndianFormat.ABCD, converterDict);//[F,F,F,F,F,F,F,F]
 ```
 
-## 用字节数据批量解析PLC的数据
+## 批量解析PLC的数据
 ```CSharp
 var client = new SiemensS7Client(SiemensVersion.S7_1200, "127.0.0.1");
 var plcdata = client.Read<byte>("BD100.0.0", 100);//读100个原始数据
@@ -103,7 +105,7 @@ var v2 = byteD.GetValue<Int16>(2);//读第2个数据
 var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 ```
 
-## 转换器
+## 字节转换器
 内置转换器分为"基础的"和"特殊的"。  
 基础的在`ByteData`初始化的时候自带；特殊的不自带。     
 
@@ -155,12 +157,11 @@ byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 ## 客户端基类(ClientBase)（建议必读！！！）
 大部分通讯都实现于`ClientBase`比如`TcpClient`、`SerialPortClient`...等，下面的都是通用的。
 
-### 1. 链接模式
+### 三种链接模式（ConnectionMode）
 
-**三种链接模式**
-> 1.手动（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
-2.自动打开（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
-3.自动断线重连（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
+1. ==手动==（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
+2. ==自动打开==（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
+3. ==自动断线重连==（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
 
 **自动断线重连介绍**
 > 1.当断开链接后进行尝试重连，第一次需等待1秒。   
@@ -176,7 +177,7 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-**进阶列子（使用 `IsAutoClose` 来发送或接受消息）**
+**进阶列子（使用 `IsAutoClose` 来发送或接收消息）**
 > `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。   
 使用场景：需要在短连接或不知道什么链接情况下连续发送或接收消息。
 ```CSharp
@@ -195,18 +196,28 @@ client.IsAutoClose = true;
 client.SendReceive("3/3"); // 发→收→关闭
 ```
 
-### 2. 接收模式（ReceiveMode）
-在客户端中有2处可以接收到数据，1是事件`Received`，2是方法`Receive()`或`SendReceive()`。其中方法的优先级大于事件，方法如果接收到数据了，事件将不会再接收到。
+### 接收数据与接收模式（ReceiveMode）
+**接收数据：**   
+在客户端中有2处可以接收到数据，事件`Received`和方法`Receive()`、`SendReceive()`。其中方法的优先级大于事件，==方法接收到了数据则事件将不会再接收到==。
 ```CSharp
+//全局设置接收模式
 //在方法中的默认方式
 client.ReceiveMode = ReceiveMode.ParseByteAll();
 //在事件中的默认方式
 client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 ```
+
+**接收模式：**   
 接收的数据先通过‘接收模式’进行分开每一帧，在经过‘数据处理器’处理数据   
 > 假如对方给你发送字符串“ab\r\n”和“cd\r\n”他们之间间隔了100毫秒。   
 > 这里“ab\r\n”为一帧，“a”为一位的意思。    
 > 假如每一帧之间相距100ms，每一位之间相距1ms。    
+
+```CSharp
+//本次接收不采用默认方式，采用指定的方式
+client.SendReceive("state", ReceiveMode.ParseToEnd("\r\n"));
+client.Receive(ReceiveMode.ParseToEnd("\r\n"));
+```
 
 | 代码                                 | 结果      | 说明 | 推荐场景 | 
 | ------------------------------------ | --------- |------------ | ------------ | 
@@ -216,14 +227,19 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 | `ReceiveMode.ParseTime(10)`          | ab\r\n    | 读取达到指定的时间间隔后没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
 | `ReceiveMode.ParseToEnd("\r\n") ` | ab\r\n    | 读取到指定的信息后结束 | 知道每一帧的结尾的情况下 | 
 
-### 3. 数据处理器(IDataProcessor)
-**介绍**  
+### 收发数据与数据处理器(IDataProcessor)
+**收发数据**  
 1. 在发送数据时可以对数据进行统一的处理后在发送 </br>
 2. 在接收数据后可以对数据进行处理后在转发出去  </br>
 3. 数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
 
-**内置数据处理器**
-
+**数据处理器**
+```CSharp
+//为发送添加数据处理器
+client.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client.Encoding));
+//为接收添加数据处理器
+client.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client.Encoding));
+```
 | 名称| 说明 |
 | ----------- | -------------- |
 | EndAddValueDataProcessor   | 向结尾添加固定的值。比如结尾添加回车换行 |
@@ -238,17 +254,24 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 
 **自定义数据处理器**   
 
->只需要你的类实现接口`IDataProcessor`就行了，比如：`public class MyCalss : IDataProcessor`。   
-
-使用自定义数据处理器：
 ```CSharp
-client1.SendDataProcessors.Add(new MyCalss());
-client1.ReceivedDataProcessors.Add(new MyCalss());
+//实现接口`IDataProcessor`
+//一个没有任何处理的数据处理器
+public class NullDataProcessor : IDataProcessor
+{
+    public byte[] DataProcess(byte[] data) => data;
+}
 ```
-### 4. 心跳（Heartbeat）
+
+使用：
+```CSharp
+client1.SendDataProcessors.Add(new NullDataProcessor());
+client1.ReceivedDataProcessors.Add(new NullDataProcessor());
+```
+### 主动心跳与被动心跳（Heartbeat）
 > 注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
 
-**主动心跳：**  
+**主动心跳**  
 >主动发送（循环）- 接收=》ok   
 ```CSharp
 client1.HeartbeatTime = 5000;//间隔。设置为0可以暂停发送心跳
@@ -261,12 +284,32 @@ client1.Heartbeat = (a) =>
 
 client1.Open();//打开，在打开前处理属性和事件
 ```
-**被动心跳：**   
+**被动心跳**   
 >被动接收=》ok  
 ```CSharp
 client1.HeartbeatReceiveTime = 5000;//检测间隔。
 client1.Open();//打开，在打开前处理属性和事件
 ```
+
+## 服务端基类(ServiceBase) `beta`
+
+**属性**
+
+| 名称   | 说明  |
+| ------ | --------- |
+| Encoding | 字符串编码，默认UTF8 |
+| TimeOut | 超时（发送、接收、链接）（毫秒）-1永久，默认3000 |
+| ReceiveMode | 接收数据的方式 |
+| ReceiveModeReceived | 接收数据的方式，在事件 Received 下。 |
+
+
+**方法**
+
+| 名称   | 说明  |
+| ------ | --------- |
+| Open | 打开 |
+| Close | 关闭 |
+
 
 ## TcpClient
 `TcpClient : ClientBase`
@@ -331,8 +374,8 @@ if (service.Clients.Any())
 {
     //给第一个客户端发送信息，这里和'TcpClient'使用方式一样，可参考'TcpClient'文档
     service.Clients[0].Send("abc");//发送
-    service.Clients[0].Receive();//接收。（服务端接受推荐在事件中处理）
-    service.Clients[0].SendReceive("abc", 3000);//发送并等待接收数据，3秒超时。（服务端接受推荐在事件中处理）
+    service.Clients[0].Receive();//接收。（服务端接收推荐在事件中处理）
+    service.Clients[0].SendReceive("abc", 3000);//发送并等待接收数据，3秒超时。（服务端接收推荐在事件中处理）
 }
 ```
 
@@ -832,8 +875,28 @@ double result = regression.Project(20);//50
 
 
 # 设备和仪器 (Device)
+1. 请先读取`客户端基类(ClientBase)`目录里面的内容。   
+2. 请先打开后在使用，或者设置自动打开模式。   
+3. 提供特殊的无协议设备`RawDevice`，可用来加载不同的管道收发数据。
 
->各种仪器需要长链接必须打开 `dev1.Client.Open();` 需要自动打开请设置 `dev1.Client.ConnectionMode = ConnectionMode.AutoOpen;` 。
+
+```CSharp
+//无协议设备`RawDevice`的简单使用
+RawDevice rd = new RawDevice(new TcpClient("127.0.0.1", 502));
+rd.Client.Encoding = Encoding.UTF8;
+rd.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+rd.Client.Received += (a, b) =>
+{
+    //切换前后不影响接收数据
+    Console.WriteLine(a.Encoding.GetString(b));
+};
+rd.Client.Open();
+rd.Client.Send("123");
+
+//运行中切换为串口在发送数据
+rd.SetClient(new SerialPortClient("COM2", 9600));
+rd.Client.Send("123");
+```
 
 ## 气密检测 (Airtight)
 ```CSharp
@@ -908,47 +971,38 @@ while (true)
 
 # 常见问题
 ## 1.如何使用自定义协议？
+以设备海康通用扫码枪为例：
 ```CSharp
-//XXX协议实现
-public class XXX
+/// <summary>
+/// 海康通用扫码枪
+/// </summary>
+public class ScanCode : ClientHostBase
 {
-    public ClientBase Client { get; private set; }//通讯管道
-
-    public XXX(ClientBase client)
+    public ScanCode(ClientBase client)
     {
         Client = client;
-        //Client.ReceiveMode = ReceiveMode.ParseTime();
-        Client.Encoding = Encoding.ASCII;
-        //Client.ConnectionMode = ConnectionMode.AutoOpen;
+        Client.Encoding = Encoding.UTF8;
     }
 
-    //默认使用TcpClient
-    public XXX(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
-    //默认使用SerialPortClient
-    //public XXX(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, Handshake handshake = Handshake.None) : this(new SerialPortClient(portName, baudRate, parity, dataBits, stopBits, handshake)) { }
+    public ScanCode(string ip, int port = 1500) : this(new TcpClient(ip, port)) { }
 
-    //这是一个示例，他发送“info1\r\n” 并等待返回字符串的结果
-    public IoTResult ReadXXX()
+    public IoTResult<string> ReadCode()
     {
-        string comm = $"info1\r\n";
-        try
-        {
-            return Client.SendReceive(comm);
-        }
-        catch (Exception ex)
-        {
-            return IoTResult.Create().AddError(ex);
-        }
+        //读码：发送start
+        //成功“码内容”，失败“NoRead”
+        var code = Client.SendReceive("start");
+        return code.IsSucceed && code.Value == "NoRead" ? code.AddError(code.Value) : code;
     }
-
 }
+```
+使用：
+```CSharp
+ScanCode scanCode = new ScanCode("192.168.0.1", 5200);
+scanCode.Client.ConnectionMode = ConnectionMode.AutoOpen;//扫码枪不需要断线重连
+//scanCode.Client.Open();//自动打开模式下不需要手动打开
 
-//使用
-var client = new XXX("127.0.0.1");
-client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
-client.Client.Open();
-
-var info = client.ReadXXX();
+//读取码内容
+scanCode.ReadCode();
 ```
 
 ## 2.如何自定义Json解析？
@@ -961,5 +1015,18 @@ var info = client.ReadXXX();
 //在程序入口处设置，只需要设置一次就可以了
 JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
 JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+```
+
+## 3.如何在运行中切换通讯方式？
+>只要是继承了`ClientProviderBase`都可以进行切换
+```CSharp
+//采用串口方式来进行ModbusRtu协议通信
+var client = new ModbusRtuClient(new SerialPortClient("COM1", 9600));
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+client.Client.Open();
+
+//切换为Tcp方式来进行ModbusRtu协议通信。
+//会采用旧的属性，如果旧的打开了会自动关闭旧的，打开新的
+client.SetClient(new TcpClient("127.0.0.1", 502));
 ```
 

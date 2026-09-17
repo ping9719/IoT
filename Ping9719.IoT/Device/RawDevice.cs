@@ -5,16 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ping9719.IoT
+namespace Ping9719.IoT.Device
 {
     /// <summary>
-    /// 客户端接口
+    /// 无协议设备
     /// </summary>
-    public interface IClient
+    public class RawDevice : ClientHostBase
     {
-        /// <summary>
-        /// 客户端
-        /// </summary>
-        ClientBase Client { get; }
+        public RawDevice() : base() { }
+        public RawDevice(ClientBase client) : base(client) { }
     }
 }

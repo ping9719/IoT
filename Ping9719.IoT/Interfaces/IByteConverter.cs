@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Ping9719.IoT
 {
     /// <summary>
-    /// byte转换器接口
+    /// 字节转换器接口
     /// </summary>
     public interface IByteConverter
     {

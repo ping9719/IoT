@@ -16,7 +16,7 @@ namespace Ping9719.IoT.Protocol
     /// https://blog.csdn.net/lishiming0308/article/details/85243041
     /// https://www.cnblogs.com/ChuFeiFan/p/10868241.html
     /// </summary>
-    public class AllenBradleyCipClient : ReadWriteBase, IClientData
+    public class AllenBradleyCipClient : ClientDataBase
     {
         /// <summary>
         /// 插槽
@@ -32,7 +32,6 @@ namespace Ping9719.IoT.Protocol
 
         public byte[] BoolTrueByteVal = new byte[] { 0xFF, 0xFF };
 
-        public ClientBase Client { get; private set; }
         public AllenBradleyCipClient(ClientBase client, byte slot = 0)
         {
             Client = client;

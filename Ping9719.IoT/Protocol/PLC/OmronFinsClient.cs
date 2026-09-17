@@ -14,7 +14,7 @@ namespace Ping9719.IoT.Protocol
     /// 欧姆龙客户端（Fins协议）
     /// https://flat2010.github.io/2020/02/23/Omron-Fins%E5%8D%8F%E8%AE%AE/
     /// </summary>
-    public class OmronFinsClient : ReadWriteBase, IClientData
+    public class OmronFinsClient : ClientDataBase
     {
         /// <summary>
         /// 基础命令
@@ -42,8 +42,6 @@ namespace Ping9719.IoT.Protocol
         /// DA1 服务器节点编号
         /// </summary>
         private byte DA1 { get; set; } = 0x01;
-
-        public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
         /// 初始化

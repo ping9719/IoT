@@ -17,7 +17,7 @@ namespace Ping9719.IoT.Device.Mark
     /// <summary>
     /// 华普激光刻印
     /// </summary>
-    public class HuaPuMark : IClient
+    public class HuaPuMark : ClientHostBase
     {
         private static readonly Dictionary<byte, string> errCode = new Dictionary<byte, string>()
         {
@@ -43,7 +43,6 @@ namespace Ping9719.IoT.Device.Mark
             {31,"重码" },
             {32,"接收错误的消息" },
         };
-        public ClientBase Client { get; private set; }
         public HuaPuMark(ClientBase client)
         {
             Client = client;

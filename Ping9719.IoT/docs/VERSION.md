@@ -6,6 +6,12 @@
 *1.[更名]plc属性Version改为Type    
 *3.[更改]plc和modbus归于Protocol名称空间   
 *4.[删除]MengXunFct   
+*5.[删除]IReadWrite   
+*6.[更名]`IClient`更名`IClientHost`   
+7.[新增]ClientDataBase  
+8.[新增]可在运行中切换客户端     
+9.[新增]`ClientBase`中的`IsUserClose`   
+10.[新增]RawDevice   
 ## v0.12.0（26-09-08） 
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
 2.[新增]JsonParse默认使用函数   

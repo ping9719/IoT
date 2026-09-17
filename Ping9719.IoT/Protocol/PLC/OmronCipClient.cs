@@ -15,7 +15,7 @@ namespace Ping9719.IoT.Protocol
     /// <summary>
     /// 欧姆龙客户端（Cip协议）
     /// </summary>
-    public class OmronCipClient : ReadWriteBase, IClientData
+    public class OmronCipClient : ClientDataBase
     {
         /// <summary>
         /// 插槽
@@ -30,7 +30,6 @@ namespace Ping9719.IoT.Protocol
 
         byte[] BoolTrueByteVal = new byte[] { 0x01, 0x00 };
 
-        public ClientBase Client { get; private set; }
         public OmronCipClient(ClientBase client, byte slot = 0)
         {
             Client = client;

@@ -500,7 +500,7 @@ namespace Ping9719.IoT.Communication
         #region 其他
         protected virtual void GoRun()
         {
-            //接受数据、断开重连线程
+            //接收数据、断开重连线程
             task = Task.Factory.StartNew(async (a) =>
             {
                 var cc = (ClientBase)a;
@@ -578,7 +578,7 @@ namespace Ping9719.IoT.Communication
                         {
                             cc.ReconnectionCount++;
                             var tz = Math.Min(cc.ReconnectionCount * 1000, cc.MaxReconnectionTime * 1000);
-                            System.Threading.Thread.Sleep(tz);
+                            System.Threading.Thread.Sleep(tz);//???这里有用户关闭了，但是要等很久的问题?
 
                             if (cc.IsUserClose)
                                 break;

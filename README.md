@@ -43,49 +43,48 @@ client.Write<int>("abc", new int[] { 10, 20, 30 });//写多个
 > 这里以`ModbusRtu`举列，默认只支持串口。但是如果你想实现`ModbusRtuOverTcpClient`（使用TCP的方式走`ModbusRtu`协议）其他的都是同理。 
 
 ```CSharp
-var serialPortClient = new SerialPortClient("COM1", 9600);
-var tcpClient = new TcpClient("127.0.0.1", 502);
-var usbHidClient = new UsbHidClient(UsbHidClient.GetNames[0]);
+var client = new ModbusRtuClient(new SerialPortClient("COM1", 9600));//使用串口方式，默认 
+client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502));//也可直接使用Tcp方式，ModbusRtuOverTcpClient
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+client.Client.Open();//打开
 
-var client0 = new ModbusRtuClient(serialPortClient);//使用串口方式，默认 
-var client1 = new ModbusRtuClient(tcpClient);//使用Tcp方式，ModbusRtuOverTcpClient
-var client2 = new ModbusRtuClient(usbHidClient);//使用Usb方式，ModbusRtuOverUsbClient
-client0.Client.Open();//打开
+//切换为USB方式。会采用旧的属性，如果旧的打开了会自动关闭旧的，打开新的
+client.SetClient(new UsbHidClient(UsbHidClient.GetNames[0]));
 ```
 
 ### 三 客户端`ClientBase`包含丰富的功能，且代码一致性高。   
 >以下代码所有通用，包含 `TcpClient`、`SerialPortClient`、`UsbHidClient` 等...
 ```CSharp
-ClientBase client1 = new TcpClient("127.0.0.1", 502);//Tcp方式
-client1.Encoding = Encoding.UTF8;
+ClientBase client = new TcpClient("127.0.0.1", 502);//Tcp方式
+client.Encoding = Encoding.UTF8;
 
 //1：连接模式。断线重连使用得比较多
-client1.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
-client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
+client.ConnectionMode = ConnectionMode.Manual;//手动。需要自己去打开和关闭，此方式比较灵活。
+client.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
+client.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
 
 //2：接收模式。以您以为的最好的方式来处理粘包问题
-client1.ReceiveMode = ReceiveMode.ParseByteAll();
-client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();
+client.ReceiveMode = ReceiveMode.ParseByteAll();
+client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 
 //3：数据处理器。可在发送时加入换行，接收时去掉换行，也可自定义
-client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
-client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
+client.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Encoding));
+client.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 
 //4：事件驱动。
-client1.Opened += (a) => { Console.WriteLine("链接成功。"); };
-client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。关闭代码：{b}"); };
-client1.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
+client.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client.Closed += (a, b) => { Console.WriteLine($"关闭成功。关闭代码：{b}"); };
+client.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
-client1.Open();//打开，在打开前处理属性和事件
+client.Open();//打开，在打开前处理属性和事件
 
 //5：简单的发送、接收和发送等待操作。 
-client1.Send("abc");//发送
-client1.Receive();//接收
-client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收\n字符串结尾的，超时为3秒 
-client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
+client.Send("abc");//发送
+client.Receive();//接收
+client.Receive(3000);//接收，3秒超时
+client.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收\n字符串结尾的，超时为3秒 
+client.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
+client.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
 ```
 
 ### 四 返回类型统一为 `IoTResult`，不需要在单独使用`Try`来处理异常信息。

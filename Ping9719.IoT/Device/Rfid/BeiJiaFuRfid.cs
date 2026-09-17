@@ -12,9 +12,8 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 倍加福Rfid。支持B17等
     /// </summary>
-    public class BeiJiaFuRfid : IClient
+    public class BeiJiaFuRfid : ClientHostBase
     {
-        public ClientBase Client { get; private set; }
         public BeiJiaFuRfid(ClientBase client)
         {
             Client = client;

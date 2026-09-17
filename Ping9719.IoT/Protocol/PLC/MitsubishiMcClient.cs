@@ -34,7 +34,7 @@ namespace Ping9719.IoT.Protocol
     /// 已测试单个元素读写：bool,short,int32,float,double,string
     /// 已测试数组元素读写：bool(循环写入速度较慢),short,int32,float,double,string
     /// </summary>
-    public class MitsubishiMcClient : ReadWriteBase, IClientData
+    public class MitsubishiMcClient : ClientDataBase
     {
         /// <summary>
         /// 版本
@@ -45,8 +45,6 @@ namespace Ping9719.IoT.Protocol
         /// 字符串编码格式。默认ASCII
         /// </summary>
         public Encoding Encoding { get; set; } = Encoding.ASCII;
-
-        public ClientBase Client { get; private set; }//通讯管道
 
         /// <summary>
         /// 初始化

@@ -11,9 +11,8 @@ namespace Ping9719.IoT.Protocol;
 /// 基恩士客户端（KV HostLink 上位链路协议）
 /// 支持Float/Int/Bool/Short/UShort/UInt/ULong/Double/String的读写
 /// </summary>
-public class KeyenceHostLinkClient : ReadWriteBase, IClientData
+public class KeyenceHostLinkClient : ClientDataBase
 {
-    public ClientBase Client { get; private set; }
     /// <summary>
     /// 站号（默认01）
     /// </summary>

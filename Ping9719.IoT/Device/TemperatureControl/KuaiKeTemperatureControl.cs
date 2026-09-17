@@ -17,12 +17,11 @@ namespace Ping9719.IoT.Device.TemperatureControl
     /// 378FA通讯协议.docx
     /// 快克_通用串口通讯协议.docx
     /// </summary>
-    public class KuaiKeTemperatureControl : IClient
+    public class KuaiKeTemperatureControl : ClientHostBase
     {
         protected EndianFormat format;
         private byte stationNumber = 1;
 
-        public ClientBase Client { get; private set; }
         public KuaiKeTemperatureControl(ClientBase client, EndianFormat format = EndianFormat.BADC, byte stationNumber = 20)
         {
             Client = client;

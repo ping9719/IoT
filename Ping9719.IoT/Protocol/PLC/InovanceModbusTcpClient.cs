@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Protocol
     /// <summary>
     /// 汇川plc
     /// </summary>
-    public class InovanceModbusTcpClient : ModbusTcpClient, IClientData
+    public class InovanceModbusTcpClient : ModbusTcpClient
     {
         /// <summary>
         /// 

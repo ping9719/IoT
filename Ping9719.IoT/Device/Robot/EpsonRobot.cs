@@ -12,9 +12,8 @@ namespace Ping9719.IoT.Device.Robot
     /// <summary>
     /// 爱普生机器人
     /// </summary>
-    public class EpsonRobot : IClient
+    public class EpsonRobot : ClientHostBase
     {
-        public ClientBase Client { get; private set; }
         public EpsonRobot(ClientBase client)
         {
             Client = client;

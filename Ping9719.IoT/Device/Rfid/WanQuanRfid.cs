@@ -18,13 +18,12 @@ namespace Ping9719.IoT.Device.Rfid
     /// <summary>
     /// 万全Rfid
     /// </summary>
-    public class WanQuanRfid : ModbusTcpClient, IClientData
+    public class WanQuanRfid : ModbusTcpClient
     {
         WanQuanRfidVer ver;
-        public ClientBase Client { get; private set; }
         public WanQuanRfid(WanQuanRfidVer ver, ClientBase client, byte stationNumber = 0x01) : base(client, stationNumber: stationNumber)
         {
-            Client = client;
+            //Client = client;
             //Client.TimeOut = timeout;
             //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;

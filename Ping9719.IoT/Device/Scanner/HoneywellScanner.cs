@@ -18,9 +18,8 @@ namespace Ping9719.IoT.Device.Scanner
     /// 文档：https://prod-edam.honeywell.com/content/dam/honeywell-edam/sps/ppr/en-us/public/products/barcode-scanners/fixed-mount/hf800/sps-ppr-hf800-en-qs.pdf?download=false
     /// 下载软件：https://hsmftp.honeywell.com/
     /// </summary>
-    public class HoneywellScanner : IScannerBase, IClient
+    public class HoneywellScanner : ClientHostBase, IScannerBase
     {
-        public ClientBase Client { get; private set; }
         public HoneywellScanner(ClientBase client)
         {
             Client = client;
