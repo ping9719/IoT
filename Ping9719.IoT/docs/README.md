@@ -1,5 +1,4 @@
-﻿
-# 语言选择
+﻿# 语言选择
 [简体中文](README.md) || [English](README_en-US.md) 
 
 # 目录
@@ -9,7 +8,7 @@
   - [字节转换器](#字节转换器)
 - [通讯 (Communication)](#通讯-communication)
   - [客户端基类(ClientBase)（建议必读！！！）](#客户端基类clientbase建议必读)
-    - [三种链接模式（ConnectionMode）](#三种链接模式connectionmode)
+    - [三种连接模式（ConnectionMode）](#三种连接模式connectionmode)
     - [接收数据与接收模式（ReceiveMode）](#接收数据与接收模式receivemode)
     - [收发数据与数据处理器(IDataProcessor)](#收发数据与数据处理器idataprocessor)
     - [主动心跳与被动心跳（Heartbeat）](#主动心跳与被动心跳heartbeat)
@@ -55,11 +54,11 @@
 <!-- TOC -->
 
 # 字节数据(ByteData) `beta`
-> 请注意：字节数据功能为`beta`版本，可能会有较大改动。
+> 请注意：字节数据功能为 `beta` 版本，可能会有较大改动。
 
-字节数据是字节数组（byte[]）和各种数据（数字、类、数组等）之间互相转换的工具。    
+字节数据是字节数组（`byte[]`）和各种数据（数字、类、数组等）之间互相转换的工具。
 
-常用列子：
+常用例子：
 ```CSharp
 public class test
 {
@@ -106,8 +105,8 @@ var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 ```
 
 ## 字节转换器
-内置转换器分为"基础的"和"特殊的"。  
-基础的在`ByteData`初始化的时候自带；特殊的不自带。     
+内置转换器分为“基础的”和“特殊的”。  
+基础的会在 `ByteData` 初始化时自带；特殊的不会自带。
 
 **基础的：**
 
@@ -125,7 +124,7 @@ var v3 = byteD.GetValue<Int16>(4);//读第3个数据
 | DoubleByteConverter | Double  |
 
 **特殊的：**
->需通过`byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())`此方式加入。
+>需通过 `byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter())` 这种方式加入。
 
 | 名称 | 说明   | 
 | ----------------------- | --------- |
@@ -145,7 +144,8 @@ public class Int16ByteConverter : IByteConverter
     public byte[] ToBytes(object data, EndianFormat format) => DataConvert.EndianToNet(BitConverter.GetBytes((short)data), format);
 }
 ```
-~使用：~
+
+使用：
 ```CSharp
 var testArr = new byte[] { 0, 1, 0, 2, 0, 3, 0, 4 };
 ByteData byteData = new ByteData(testArr, EndianFormat.CDAB);
@@ -155,20 +155,20 @@ byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 
 # 通讯 (Communication)
 ## 客户端基类(ClientBase)（建议必读！！！）
-大部分通讯都实现于`ClientBase`比如`TcpClient`、`SerialPortClient`...等，下面的都是通用的。
+大部分通讯都实现于 `ClientBase`，比如 `TcpClient`、`SerialPortClient` 等，下面的内容都是通用的。
 
-### 三种链接模式（ConnectionMode）
+### 三种连接模式（ConnectionMode）
 
-1. ==手动==（通用场景）。需要自己去打开和关闭，此方式比较灵活。     
-2. ==自动打开==（适用短链接）。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。    
-3. ==自动断线重连==（适用长链接）。在执行了Open()后，如果检测到断开后会自动尝试断线重连，比较合适需要长链接的场景。调用Close()将不再重连。   
+1. ==手动==（通用场景）。需要自己打开和关闭，此方式比较灵活。     
+2. ==自动打开==（适用短连接）。没有执行 `Open()` 时，每次发送和接收会自动打开和关闭，比较适合需要短连接的场景；如需要临时的长连接，也可以调用 `Open()` 后再 `Close()`。    
+3. ==自动断线重连==（适用长连接）。在执行了 `Open()` 后，如果检测到断开，会自动尝试断线重连，比较适合需要长连接的场景。调用 `Close()` 后将不再重连。   
 
 **自动断线重连介绍**
-> 1.当断开链接后进行尝试重连，第一次需等待1秒。   
-> 2.如没有成功就继续增加一秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
-> 3.直到重连成功，或用户手动调用关闭(`Close()`)。   
+> 1. 当断开连接后进行尝试重连，第一次需等待 1 秒。   
+> 2. 如没有成功，就继续增加 1 秒等待时间，直到达到最大重连时间（`MaxReconnectionTime`）。   
+> 3. 直到重连成功，或用户手动调用关闭（`Close()`）。
 
-**普通列子**
+**普通例子**
 ```CSharp
 var client1 = new TcpClient("127.0.0.1", 8080);
 client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。
@@ -177,9 +177,9 @@ client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。
 client1.MaxReconnectionTime = 10;//最大重连时间，单位秒。默认10秒。
 ```
 
-**进阶列子（使用 `IsAutoClose` 来发送或接收消息）**
-> `IsAutoClose` 默认true。只有在为 `AutoOpen` 时生效。   
-使用场景：需要在短连接或不知道什么链接情况下连续发送或接收消息。
+**进阶例子（使用 `IsAutoClose` 来发送或接收消息）**
+> `IsAutoClose` 默认 `true`。只有在 `AutoOpen` 时生效。   
+使用场景：需要在短连接或不知道什么连接情况下连续发送或接收消息。
 ```CSharp
 client1.ConnectionMode = ConnectionMode.AutoOpen;
 
@@ -198,7 +198,7 @@ client.SendReceive("3/3"); // 发→收→关闭
 
 ### 接收数据与接收模式（ReceiveMode）
 **接收数据：**   
-在客户端中有2处可以接收到数据，事件`Received`和方法`Receive()`、`SendReceive()`。其中方法的优先级大于事件，==方法接收到了数据则事件将不会再接收到==。
+在客户端中有 2 处可以接收到数据：事件 `Received` 和方法 `Receive()`、`SendReceive()`。其中方法的优先级高于事件，==如果方法接收到了数据，事件将不会再接收到==。
 ```CSharp
 //全局设置接收模式
 //在方法中的默认方式
@@ -208,10 +208,10 @@ client.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 ```
 
 **接收模式：**   
-接收的数据先通过‘接收模式’进行分开每一帧，在经过‘数据处理器’处理数据   
-> 假如对方给你发送字符串“ab\r\n”和“cd\r\n”他们之间间隔了100毫秒。   
-> 这里“ab\r\n”为一帧，“a”为一位的意思。    
-> 假如每一帧之间相距100ms，每一位之间相距1ms。    
+接收的数据先通过“接收模式”拆分成每一帧，再经过“数据处理器”处理数据。
+> 假如对方给你发送字符串“ab\r\n”和“cd\r\n”，它们之间间隔了 100 毫秒。   
+> 这里“ab\r\n”为一帧，“a”为一位。    
+> 假如每一帧之间相距 100ms，每一位之间相距 1ms。    
 
 ```CSharp
 //本次接收不采用默认方式，采用指定的方式
@@ -221,17 +221,17 @@ client.Receive(ReceiveMode.ParseToEnd("\r\n"));
 
 | 代码                                 | 结果      | 说明 | 推荐场景 | 
 | ------------------------------------ | --------- |------------ | ------------ | 
-| `ReceiveMode.ParseByte(2)`           | ab        | 读取指定的字节数量 | 在通信协议里面已经指定了一帧是固定长度的情况下或已知道剩余接收的长度的情况下 | 
-| `ReceiveMode.ParseByteAll()`         | a或ab\r\n | 读取所有立即可用的字节 | 需要高效率又什么都不知道的情况下。tcp等协议一般一帧是全部信息，串口一般一帧是一位信息 | 
+| `ReceiveMode.ParseByte(2)`           | ab        | 读取指定的字节数量 | 在通信协议里面已经指定了一帧是固定长度的情况下，或已知道剩余接收长度的情况下 | 
+| `ReceiveMode.ParseByteAll()`         | a或ab\r\n | 读取所有立即可用的字节 | 需要高效率又什么都不知道的情况下。TCP 等协议一般一帧是全部信息，串口一般一帧是一位信息 | 
 | `ReceiveMode.ParseChar(1)`         | a         | 读取指定的字符数量 | 同 `ParseByte()` | 
-| `ReceiveMode.ParseTime(10)`          | ab\r\n    | 读取达到指定的时间间隔后没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
+| `ReceiveMode.ParseTime(10)`          | ab\r\n    | 在指定时间间隔内没有新消息后结束 | 在什么都不知道的情况下又想获取完整信息的妥协方案，代价是牺牲指定的时间，一般在串口中默认 | 
 | `ReceiveMode.ParseToEnd("\r\n") ` | ab\r\n    | 读取到指定的信息后结束 | 知道每一帧的结尾的情况下 | 
 
 ### 收发数据与数据处理器(IDataProcessor)
 **收发数据**  
-1. 在发送数据时可以对数据进行统一的处理后在发送 </br>
-2. 在接收数据后可以对数据进行处理后在转发出去  </br>
-3. 数据处理器可以多个叠加，先添加的先处理（所以某些情况下接收的处理器应该发送的处理器的是倒序）。
+1. 在发送数据时，可以对数据进行统一处理后再发送。  
+2. 在接收数据后，可以对数据进行处理后再转发出去。  
+3. 数据处理器可以多个叠加，先添加的先处理（因此某些情况下，接收处理器与发送处理器的顺序应相反）。
 
 **数据处理器**
 ```CSharp
@@ -269,7 +269,7 @@ client1.SendDataProcessors.Add(new NullDataProcessor());
 client1.ReceivedDataProcessors.Add(new NullDataProcessor());
 ```
 ### 主动心跳与被动心跳（Heartbeat）
-> 注意：在`ConnectionMode.AutoOpen`模式下不生效心跳。
+> 注意：在 `ConnectionMode.AutoOpen` 模式下不生效心跳。
 
 **主动心跳**  
 >主动发送（循环）- 接收=》ok   
@@ -298,7 +298,7 @@ client1.Open();//打开，在打开前处理属性和事件
 | 名称   | 说明  |
 | ------ | --------- |
 | Encoding | 字符串编码，默认UTF8 |
-| TimeOut | 超时（发送、接收、链接）（毫秒）-1永久，默认3000 |
+| TimeOut | 超时（发送、接收、连接）（毫秒）-1永久，默认3000 |
 | ReceiveMode | 接收数据的方式 |
 | ReceiveModeReceived | 接收数据的方式，在事件 Received 下。 |
 
@@ -317,12 +317,12 @@ client1.Open();//打开，在打开前处理属性和事件
 ClientBase client1 = new TcpClient("127.0.0.1", 502);
 client1.Encoding = Encoding.UTF8;
 
-//1：连接模式。断线重连使用得比较多
+//1：连接模式。断线重连用得比较多
 client1.ConnectionMode = ConnectionMode.Manual;//手动，系统默认。需要自己去打开和关闭，此方式比较灵活。
-client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较合适需要短链接的场景，如需要临时的长链接也可以调用Open()后在Close()。
-client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较合适需要长链接的场景。调用Close()将不再重连。
+client1.ConnectionMode = ConnectionMode.AutoOpen;//自动打开。没有执行Open()时每次发送和接收会自动打开和关闭，比较适合需要短连接的场景，如需要临时的长连接也可以调用Open()后再Close()。
+client1.ConnectionMode = ConnectionMode.AutoReconnection;//自动断线重连。在执行了Open()后，如果检测到断开后会自动打开，比较适合需要长连接的场景。调用Close()将不再重连。
 
-//2：接收模式。以您以为的最好的方式来处理粘包问题
+//2：接收模式。以您认为最好的方式来处理粘包问题
 client1.ReceiveMode = ReceiveMode.ParseByteAll();
 client1.ReceiveModeReceived = ReceiveMode.ParseByteAll();
 
@@ -331,7 +331,7 @@ client1.SendDataProcessors.Add(new EndAddValueDataProcessor("\r\n", client1.Enco
 client1.ReceivedDataProcessors.Add(new EndClearValueDataProcessor("\r\n", client1.Encoding));
 
 //4：事件驱动。
-client1.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client1.Opened += (a) => { Console.WriteLine("连接成功。"); };
 client1.Closed += (a, b) => { Console.WriteLine($"关闭成功。关闭代码：{b}"); };
 client1.Received += (a, b) => { Console.WriteLine($"收到消息：{a.Encoding.GetString(b)}"); };
 
@@ -341,9 +341,9 @@ client1.Open();//打开，在打开前处理属性和事件
 client1.Send("abc");//发送
 client1.Receive();//接收
 client1.Receive(3000);//接收，3秒超时
-client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收\n字符串结尾的，超时为3秒 
+client1.Receive(ReceiveMode.ParseToEnd("\n", 3000));//接收以\n字符串结尾的数据，超时为3秒 
 client1.SendReceive("abc", 3000);//发送并等待接收数据，3秒超时
-client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收\n字符串结尾的，超时为3秒 
+client1.SendReceive("abc", ReceiveMode.ParseToEnd("\n", 3000));//发送并接收以\n字符串结尾的数据，超时为3秒 
 ```
 
 ## TcpServer
@@ -367,7 +367,7 @@ service.Received += (a, b) =>
     Console.WriteLine($"客户端[{(a as INetwork)?.Socket?.RemoteEndPoint}]收到消息：" + a.Encoding.GetString(b));
 };
 
-//打开链接，设置所有属性必须在打开前
+//打开连接，设置所有属性必须在打开前
 service.Open();
 
 if (service.Clients.Any())
@@ -386,9 +386,9 @@ if (service.Clients.Any())
 //本地监听为：10.10.1.69:8002
 var client = new UdpClient("10.10.1.69", 8001, 8002);
 client.Encoding = Encoding.UTF8;
-client.ConnectionMode = ConnectionMode.Manual;//Udp不要使用断线重连模式（AutoReconnection）
+client.ConnectionMode = ConnectionMode.Manual;//UDP不要使用断线重连模式（AutoReconnection）
 
-client.Opened += (a) => { Console.WriteLine("链接成功。"); };
+client.Opened += (a) => { Console.WriteLine("连接成功。"); };
 client.Closed += (a, b) => { Console.WriteLine($"关闭成功。错误代码：{b}"); };
 client.Received += (a, b) =>
 {
@@ -407,22 +407,22 @@ client.Close();
 ## SerialPortClient ; SerialClient（串口）
 `SerialPortClient : ClientBase`   
 `SerialClient : ClientBase`  
-> 串口是点到点传输，所以只有 `SerialPortClient` 没有 `SerialPortService` 。使用2个`SerialPortClient` 即可。
+> 串口是点到点传输，所以只有 `SerialPortClient`，没有 `SerialPortService`。使用 2 个 `SerialPortClient` 即可。
 
 区别对照表   
 
 |名称|包|依赖|优缺点|
 |--|--|--|--|
-|SerialPortClient|Ping9719.IoT|System.IO.Ports|.Net官方维护支持|
-|SerialClient|Ping9719.IoT.Hid|HidSharp|可解决Liunx有些串口打不开的情况|
+|SerialPortClient|Ping9719.IoT|System.IO.Ports|.NET 官方维护支持|
+|SerialClient|Ping9719.IoT.Hid|HidSharp|可解决 Linux 有些串口打不开的情况|
 
-在Liunx中需要加入用户组
+在 Linux 中需要加入用户组
 ```
 sudo usermod -a -G dialout $USER   
 sudo usermod -a -G uucp $USER
 ```
 
-使用方式一致，这里以`SerialPortClient`为例：
+使用方式一致，这里以 `SerialPortClient` 为例：
 ```CSharp
 var client1 = new SerialPortClient("COM1", 9600);
 
@@ -431,20 +431,20 @@ client1.ConnectionMode = ConnectionMode.Manual;//手动打开，串口使用断�
 client1.Encoding = Encoding.ASCII;//如何解析字符串
 client1.TimeOut = 3000;//超时时间
 client1.ReceiveMode = ReceiveMode.ParseTime();//方法“Receive()”的默认方式，串口根据时间来接收数据更好
-client1.ReceiveModeReceived = ReceiveMode.ParseTime();//时间“Received”的默认方式
+client1.ReceiveModeReceived = ReceiveMode.ParseTime();//事件“Received”的默认方式
 
-//所有事件和TcpClient一样，这里不在重复
+//所有事件和TcpClient一样，这里不再重复
 
-//打开链接，设置所有属性必须在打开前
+//打开连接，设置所有属性必须在打开前
 client1.Open();
 
-//所有发送和接收和TcpClient一样，这里不在重复
+//所有发送和接收和TcpClient一样，这里不再重复
 ``` 
 
 ## HttpClient
 `HttpClient : ClientBase`   
 
-> 想JSON解析自定义？请参考 [如何自定义Json解析？](#UserJson)。
+> 想自定义 JSON 解析？请参考 [如何自定义Json解析？](#2如何自定义json解析)。
 
 ```CSharp
 
@@ -473,7 +473,7 @@ HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", new { a = 1, b = 2 
 var formData = new MultipartFormDataContent();
 var filePath = @"D:\123.png";
 formData.Add(new StreamContent(File.OpenRead(filePath)), "file", Path.GetFileName(filePath));//上传名字为file的文件
-formData.Add(new StringContent("18"), "age");//在年龄的字符串
+formData.Add(new StringContent("18"), "age");//添加年龄字符串
 //提交
 HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", content: formData);
 ```
@@ -481,11 +481,11 @@ HttpClient.Default.Post<string>("http://127.0.0.1:8080/a/b", content: formData);
 ## HttpServer
 `HttpServer : ServiceBase`   
 
-1.使用`System.Net.HttpListener`实现，某些情况下需要管理员权限运行。   
+1. 使用 `System.Net.HttpListener` 实现，某些情况下需要管理员权限运行。   
 
 ```CSharp
 HttpService service = new HttpService(8090);
-//错误处理 (Received中的错误会在这里)
+//错误处理（Received中的错误会在这里）
 service.ReceivedException = (request, response, err) =>
 {
     return "{\"info\":\"" + err.Message + "\"}";
@@ -527,16 +527,16 @@ service.Open();
 `UsbHidClient : ClientBase`   
 
 > 需要安装包 `Ping9719.IoT.Hid`    
-> 获取报告信息 `UsbHidClient.GetReportDescriptor(UsbHidClient.GetNames[0])`    
+> 获取报告信息：`UsbHidClient.GetReportDescriptor(UsbHidClient.GetNames[0])`    
 >> 1.报告类型：Input, Output, Feature   
->> 2.报告ID：一般在帧头，默认值为 `0x00`。可以使用“消息处理器”来处理。    
->> 3.报告长度：要求的固定长度，不足一般末尾添加`0x00`补齐（低速8，全速64，高速1024）。可以使用“消息处理器”来处理。    
+>> 2.报告 ID：一般在帧头，默认值为 `0x00`。可以使用“数据处理器”来处理。    
+>> 3.报告长度：要求的固定长度，不足一般末尾添加 `0x00` 补齐（低速 8，全速 64，高速 1024）。可以使用“数据处理器”来处理。    
 
 ```CSharp
 var names = UsbHidClient.GetNames;//获取所有Usb设备
 var client = new UsbHidClient(names[0]);//访问第一个设备
 
-//使用消息处理器来处理报告
+//使用数据处理器来处理报告
 {
     //加入报告ID（实际需要看文档）
     client.SendDataProcessors.Add(new StartAddValueDataProcessor(0));
@@ -550,7 +550,7 @@ var client = new UsbHidClient(names[0]);//访问第一个设备
 ```
 
 ## BleClient (蓝牙)
-`UsbHidClient : ClientBase`  
+`BleClient : ClientBase`  
 
 > 需要安装包 `Ping9719.IoT.Hid` 
 ```CSharp
@@ -564,15 +564,15 @@ var client = new BleClient(names[0]);//访问第一个设备
 `ModbusTcpClient : IClientData`   
 `ModbusAsciiClient : IClientData`   
 
-Modbus Rtu : `站号` + `功能码` + `地址` + `长度` + `校验码`   
-Modbus Tcp : `消息号` + `0x0000` + `后续字节长度` + `站号` + `功能码` + `地址` + `长度`   
+Modbus RTU：`站号` + `功能码` + `地址` + `长度` + `校验码`   
+Modbus TCP：`消息号` + `0x0000` + `后续字节长度` + `站号` + `功能码` + `地址` + `长度`   
 
 ```CSharp
 var client = new ModbusRtuClient("COM1", 9600, format: EndianFormat.ABCD);
 var client = new ModbusRtuClient(new TcpClient("127.0.0.1", 502), format: EndianFormat.ABCD);//ModbusRtu协议走TCP
 var client = new ModbusTcpClient("127.0.0.1", 502, format: EndianFormat.ABCD);
 var client = new ModbusTcpClient(new SerialPortClient("COM1", 9600), format: EndianFormat.ABCD);//ModbusTcp协议走串口
-client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连。tcp推荐断线重连，串口推荐另外两种
+client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连。TCP推荐断线重连，串口推荐另外两种
 client.Client.Open();//打开
 
 client.Read<Int16>("100");//读寄存器
@@ -586,8 +586,8 @@ client.Write<Int16>("100", 100);//写寄存器
 client.Write<Int16>("100", 100, 110);//写多个寄存器
 
 client.ReadString("100", 5, Encoding.ASCII);//读字符串
-client.ReadString("100", 5, null);//读字符串，以16进制的方式
-client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0时且不足会自动在结尾补充0X00在结尾
+client.ReadString("100", 5, null);//读字符串，以十六进制方式
+client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0且不足时会自动在结尾补充0x00
 ```
 
 ## PLC类型对照表
@@ -613,8 +613,8 @@ client.WriteString("500", "abcd", 10, Encoding.ASCII);//写字符串，数量>0�
 ## 罗克韦尔 (AllenBradleyCipClient)
 `AllenBradleyCipClient : IClientData`  
 
-此协议目前测试较少，请测试后在用于生产环境使用。    
-发现部分型号也可使用`OmronCipClient`来替代。
+此协议目前测试较少，请测试后再用于生产环境。    
+发现部分型号也可使用 `OmronCipClient` 来替代。
 ```CSharp
 AllenBradleyCipClient client = new AllenBradleyCipClient("127.0.0.1");
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;//断线重连
@@ -662,18 +662,18 @@ client.Write<Int16>("D1",new Int16[]{1,2});//写多个
 | double       | ✔️               | ✔️            |
 | string       | ✔️               | ✔️            |
 
-> 注：bool数组批量写入采用循环单点写入方式，速度相对较慢。
+> 注：bool 数组批量写入采用循环单点写入方式，速度相对较慢。
 >
-> 还支持byte、sbyte、ushort、uint32、int64、uint64类型。由于用到的情况较少，请自行测试。
+> 还支持 byte、sbyte、ushort、uint32、int64、uint64 类型。由于用到的情况较少，请自行测试。
 >
-> 如果发现读写失败或超时可能是因为没有设置IP，端口或通信数据代码   
-> 以GX Works2为示例：   
-> [参数]-[PLC参数]-[内置以太网端口设置]-[IP地址设置] 这里检查ip   
-> [参数]-[PLC参数]-[内置以太网端口设置]-[打开设置] 这里检查端口   
-> [参数]-[PLC参数]-[内置以太网端口设置]-[通信数据代码设置] 必须勾选二进制码通信   
-> [参数]-[PLC参数]-[内置以太网端口设置]-[允许RUN中写入] 必须勾选   
-> GX Works3为示例：   
-> [参数]-[模块参数]-[以太网端口] 这里检查ip端口
+> 如果发现读写失败或超时，可能是因为没有设置 IP、端口或通信数据代码。   
+> 以 GX Works2 为例：   
+> [参数]-[PLC参数]-[内置以太网端口设置]-[IP地址设置] 这里检查 IP。   
+> [参数]-[PLC参数]-[内置以太网端口设置]-[打开设置] 这里检查端口。   
+> [参数]-[PLC参数]-[内置以太网端口设置]-[通信数据代码设置] 必须勾选二进制码通信。   
+> [参数]-[PLC参数]-[内置以太网端口设置]-[允许RUN中写入] 必须勾选。   
+> 以 GX Works3 为例：   
+> [参数]-[模块参数]-[以太网端口] 这里检查 IP、端口。
 
 ```CSharp
 //
@@ -712,11 +712,11 @@ client.Read<bool>("abc");//读
 client.Write<bool>("abc",true);//写
 
 //读写数组。
-//注意：plc的类型为‘ARRAY[0..4] OF INT’表示为长度为5的int16的数组，
-//注意：读必然是出来5个；写也必须写5个
+//注意：PLC的类型为‘ARRAY[0..4] OF INT’时，表示为长度为5的Int16数组，
+//注意：读必然会返回5个；写也必须写5个
 client.Read<Int16[]>("abc");
 client.Read<bool[]>("abc",5);//读数组，并截取前5个
-client.Write<Int16>("abc", new Int16[] { 1, 2, 0, 5,2 });//必须类型+长度和plc中一致
+client.Write<Int16>("abc", new Int16[] { 1, 2, 0, 5,2 });//类型和长度必须与PLC中一致
 ```
 
 ## 西门子 (SiemensS7Client)
@@ -736,12 +736,12 @@ client.Write<DateTime>("BD100.0.0",DateTime.Now);//写
 
 //支持超长的读和写
 client.Read<Int16>("BD100.0.0",9999);//连续读9999个数据，大概只需百毫秒
-client.Write<Int16>("BD100.0.0",new Int16[]{1,2,3});//连续写9999个数据，大概只需百毫秒
+client.Write<Int16>("BD100.0.0",new Int16[]{1,2,3});//连续写多个数据，大概只需百毫秒
 client.Write<bool>("BD100.0.0", new bool[] { true, false, true, true, false, false, false, false });//bool类型只支持8的整数倍
 
 //字符串说明
-client.Read<string>("BD100.0.0");//plc的类型必须为string，只支持字母数字等ASCII编码
-client.ReadString("BD100.0.0");//plc的类型必须为WString，支持中文等UTF16编码，
+client.Read<string>("BD100.0.0");//PLC的类型必须为string，只支持字母数字等ASCII编码
+client.ReadString("BD100.0.0");//PLC的类型必须为WString，支持中文等UTF16编码，
 //特殊PLC类型：String[3]
 client.ReadString("BD100.0.0", 3, Encoding.ASCII);
 client.WriteString("BD100.0.0", "abc", 3, Encoding.ASCII);
@@ -816,7 +816,7 @@ LRC.CheckLRC(bytes);
 ```
 
 ## 傅立叶滤波(FFTFilter)
-傅立叶滤波（自动并行） 100W个点耗时430ms 
+傅立叶滤波（自动并行）100W个点耗时430ms 
 ```CSharp
 double[] result1 = FFTFilterOptimized.FilterFFT(data, 0.005);    //使用默认并行数6
 double[] result2 = FFTFilterOptimized.FilterFFT(data, 0.005, 8); //使用8个并行任务
@@ -837,7 +837,7 @@ var ms = new string[] { "M0", "M1", "M2", "M3", "M4", };
 var ws = new string[] { "W0", "W1", "W2", "W3", "W4", };
 //2.转为项
 var msi = ms.Select(o => new GaleShapleyItem<string>(o)).ToList();
-var wsi = ms.Select(o => new GaleShapleyItem<string>(o)).ToList();
+var wsi = ws.Select(o => new GaleShapleyItem<string>(o)).ToList();
 //3.配置偏好列表。假如喜欢关系如下：（喜欢程度从高到低）
 //M0❤W1,W0   M1❤W0,W1   M2❤W0,W1,W2,W3,W4   M3❤W3   M4❤W3
 msi[0].Preferences = new List<GaleShapleyItem<string>>() { wsi[1], wsi[0] };
@@ -850,7 +850,7 @@ GaleShapleyAlgorithm.Run(msi);
 //5.打印结果
 foreach (var item in msi)
 {
-    //M0❤M1   M1❤M0   M2❤M2   M3❤M3   M4❤null
+    //M0❤W1   M1❤W0   M2❤W2   M3❤W3   M4❤null
     Console.Write($"{item.Item}❤{(item.Match?.Item) ?? "null"}   ");
 }
 ```
@@ -875,9 +875,9 @@ double result = regression.Project(20);//50
 
 
 # 设备和仪器 (Device)
-1. 请先读取`客户端基类(ClientBase)`目录里面的内容。   
-2. 请先打开后在使用，或者设置自动打开模式。   
-3. 提供特殊的无协议设备`RawDevice`，可用来加载不同的管道收发数据。
+1. 请先读取 `客户端基类(ClientBase)` 目录里面的内容。   
+2. 请先打开后再使用，或者设置自动打开模式。   
+3. 提供特殊的无协议设备 `RawDevice`，可用来加载不同的管道收发数据。
 
 
 ```CSharp
@@ -893,7 +893,7 @@ rd.Client.Received += (a, b) =>
 rd.Client.Open();
 rd.Client.Send("123");
 
-//运行中切换为串口在发送数据
+//运行中切换为串口再发送数据
 rd.SetClient(new SerialPortClient("COM2", 9600));
 rd.Client.Send("123");
 ```
@@ -925,7 +925,7 @@ rfid4.WriteString(RfidAddress.GetRfidAddressStr(RfidArea.ISO15693, null, 1), "A0
 <div style="padding:5px;margin-top:8px;border:1px solid silver;border-radius:4px;">
 
 ```CSharp
-//名称空间
+//命名空间
 xmlns:piIoT="https://github.com/ping9719/IoT"
 //假如是Rfid，则为：RfidView
 <piIoT:RfidView DeviceData="{Binding Dev1}" Area="ISO15693" IsReadPara="True" Encoding="ASCII" ReadCount="2" WriteVal="A001"/>
@@ -949,7 +949,7 @@ client.Pause();
 ## 扫码枪 (Scanner)
 ```CSharp
 HoneywellScanner dev1 = new HoneywellScanner("127.0.0.1");//霍尼韦尔
-MindeoScanner dev1 = new MindeoScanner("127.0.0.1");//民德
+MindeoScanner dev2 = new MindeoScanner("127.0.0.1");//民德
 ```
 ## 螺丝机 (Screw)
 ```CSharp
@@ -971,7 +971,7 @@ while (true)
 
 # 常见问题
 ## 1.如何使用自定义协议？
-以设备海康通用扫码枪为例：
+以海康通用扫码枪为例：
 ```CSharp
 /// <summary>
 /// 海康通用扫码枪
@@ -1006,11 +1006,11 @@ scanCode.ReadCode();
 ```
 
 ## 2.如何自定义Json解析？
-1.Json解析优先采用用户自定义的   
-2.在`NET8`中采用`System.Text.Json`   
-3.非`NET8`中优先采用`Newtonsoft.Json`失败后采用`System.Runtime.Serialization.Json`  
+1. Json解析优先采用用户自定义的   
+2. 在 `NET8` 中采用 `System.Text.Json`   
+3. 非 `NET8` 中优先采用 `Newtonsoft.Json`，失败后采用 `System.Runtime.Serialization.Json`  
 
-所以在非`NET8`中推荐自定义Json解析：
+所以在非 `NET8` 中推荐自定义 Json 解析：
 ```CSharp
 //在程序入口处设置，只需要设置一次就可以了
 JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
@@ -1018,15 +1018,14 @@ JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObj
 ```
 
 ## 3.如何在运行中切换通讯方式？
->只要是继承了`ClientProviderBase`都可以进行切换
+>只要是继承了 `ClientProviderBase` 的都可以进行切换
 ```CSharp
-//采用串口方式来进行ModbusRtu协议通信
+//采用串口方式来进行 ModbusRtu 协议通信
 var client = new ModbusRtuClient(new SerialPortClient("COM1", 9600));
 client.Client.ConnectionMode = ConnectionMode.AutoReconnection;
 client.Client.Open();
 
-//切换为Tcp方式来进行ModbusRtu协议通信。
+//切换为 TCP 方式来进行 ModbusRtu 协议通信。
 //会采用旧的属性，如果旧的打开了会自动关闭旧的，打开新的
 client.SetClient(new TcpClient("127.0.0.1", 502));
 ```
-

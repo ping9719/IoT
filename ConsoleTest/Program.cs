@@ -2,6 +2,7 @@
 using Ping9719.IoT.Algorithm;
 using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
+using Ping9719.IoT.Device;
 using Ping9719.IoT.Device.Rfid;
 using Ping9719.IoT.Device.Weld;
 using Ping9719.IoT.Hid;
@@ -47,18 +48,46 @@ namespace ConsoleTest
 
         private static async Task Main(string[] args)
         {
+            RawDevice rd = new RawDevice(new TcpClient("127.0.0.1", 502));
+            rd.Client.Encoding = Encoding.UTF8;
+            rd.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            rd.Client.Received += (a, b) =>
+            {
+                //切换前后不影响接受数据
+                Console.WriteLine(a.Encoding.GetString(b));
+            };
+            rd.Client.Open();
+            rd.Client.Send("123");
 
-            ModbusRtuClient inovanceModbusTcpClient = new ModbusRtuClient("127.0.0.1", 502);
-            //inovanceModbusTcpClient.Client.Open();
+            //运行中切换为串口在发送数据
+            rd.SetClient(new SerialPortClient("COM2", 9600));
+            rd.Client.Send("123");
 
-            var aa = inovanceModbusTcpClient.Read<short>("D100",10);
-            var aa1 = inovanceModbusTcpClient.Read("short", "D100");
+            rd.Client.SendReceive("state", ReceiveMode.ParseByteAll());
+            rd.Client.Receive(ReceiveMode.ParseByteAll());
+            Console.ReadKey();
+            rd.Client.Close();
+            //重新初始化
+            //mrc = new ModbusRtuClient("COM1", 9600);
+            //mrc.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            //var aa123 = mrc.Client.Open();
 
-            var aa2 = inovanceModbusTcpClient.Write<short>("D100", new short[] { 10,20,30,40});
-            var aa3 = inovanceModbusTcpClient.Write("short", "D100", 11);
+            //重新赋值
+            //mrc.Client = new SerialPortClient("COM1", 9600);
+            //mrc.Client.ConnectionMode = ConnectionMode.AutoReconnection;
+            //var aa123 = mrc.Client.Open();
 
-            var aa4 = inovanceModbusTcpClient.Read<short>("D100");
-            var aa5 = inovanceModbusTcpClient.Read<short>("D100");
+
+
+            while (true)
+            {
+                Console.ReadKey();
+            }
+            //var aa2 = inovanceModbusTcpClient.Write<short>("D100", new short[] { 10,20,30,40});
+            //var aa3 = inovanceModbusTcpClient.Write("short", "D100", 11);
+
+            //var aa4 = inovanceModbusTcpClient.Read<short>("D100");
+            //var aa5 = inovanceModbusTcpClient.Read<short>("D100");
 
             //            JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
             //            JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
