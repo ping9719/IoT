@@ -26,7 +26,6 @@ namespace Ping9719.IoT
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="client"></param>
         public ClientHostBase() { }
 
         /// <summary>

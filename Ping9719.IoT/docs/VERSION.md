@@ -12,6 +12,7 @@
 8.[新增]可在运行中切换客户端     
 9.[新增]`ClientBase`中的`IsUserClose`   
 10.[新增]RawDevice   
+11.[优化]`IClientHost`接受消息的速度提升3倍   
 ## v0.12.0（26-09-08） 
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
 2.[新增]JsonParse默认使用函数   

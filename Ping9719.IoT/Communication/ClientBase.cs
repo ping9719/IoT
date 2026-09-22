@@ -701,7 +701,7 @@ namespace Ping9719.IoT.Communication
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
 
-                        Thread.Sleep(10);
+                        Thread.Sleep(1);
                     }
                     value = dataEri?.Dequeue(countMax);
                 }
@@ -721,7 +721,7 @@ namespace Ping9719.IoT.Communication
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
 
-                        Thread.Sleep(10);
+                        Thread.Sleep(1);
                     }
                     value = dataEri?.DequeueAll();
                 }
@@ -745,7 +745,7 @@ namespace Ping9719.IoT.Communication
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
 
-                        Thread.Sleep(10);
+                        Thread.Sleep(1);
                     }
                     value = dataEri?.Dequeue(countMax);
                 }
@@ -798,7 +798,7 @@ namespace Ping9719.IoT.Communication
                         if (IsOutTime(beginTime, receiveMode.TimeOut))
                             throw new TimeoutException("已超时");
 
-                        Thread.Sleep(10);
+                        Thread.Sleep(1);
                     }
                     value = dataEri?.DequeueAll();
                 }
