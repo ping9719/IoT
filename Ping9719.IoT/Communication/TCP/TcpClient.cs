@@ -113,7 +113,7 @@ namespace Ping9719.IoT.Communication
             tcpClient.ReceiveTimeout = serviceBase.TimeOut;
             tcpClient.SendTimeout = serviceBase.TimeOut;
 
-            tcpClient1.IsOpen2 = true;
+            tcpClient1.OpenCts = new CancellationTokenSource();
             tcpClient1.tcpClient = tcpClient;
             tcpClient1.openData = new OpenClientData(tcpClient.Client);
             tcpClient1.ReconnectionCount = 0;

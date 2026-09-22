@@ -19,21 +19,21 @@ namespace Ping9719.IoT.Communication
     public abstract class ClientBase
     {
         protected object obj1 = new object();
-        protected bool IsOpen2 = false;
-        protected bool isSendReceive = false;//是否正在发送和接收中
 
+        protected bool isSendReceive = false;//是否正在发送和接收中
         protected OpenClientData openData;
         protected QueueByteFixed dataEri;
         protected Task task;
         protected Task task2;
         protected int ReconnectionCount = 0;
-        protected CancellationTokenSource flushCts;
+        protected CancellationTokenSource OpenCts;//连接状态，非null+未取消为打开状态
+        protected CancellationTokenSource flushCts;//接受模式为时间间隔的处理
         protected DateTime lastReceiveTime = DateTime.Now;//最后一次接收数据的时间，处理被动心跳
 
         /// <summary>
         /// 是否打开
         /// </summary>
-        public virtual bool IsOpen { get => IsOpen2 && !IsUserClose; }
+        public virtual bool IsOpen { get => OpenCts?.IsCancellationRequested == false && !IsUserClose; }
         /// <summary>
         /// 是否已经调用了 Close 方法。如何为true将不会进行断线重连，这个属性主要判断是否需要继续断线重连。
         /// </summary>
@@ -160,7 +160,7 @@ namespace Ping9719.IoT.Communication
                     }
 
                     dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-                    IsOpen2 = isOpenOk;
+                    SetOpenCts(isOpenOk);
                     IsUserClose = false;
                     ReconnectionCount = 0;
                     if (isOpenOk || ConnectionMode == ConnectionMode.AutoReconnection)
@@ -175,7 +175,7 @@ namespace Ping9719.IoT.Communication
             catch (Exception ex)
             {
                 result.AddError(ex);
-                IsOpen2 = false;
+                SetOpenCts(false);
             }
             return result.ToEnd();
         }
@@ -193,7 +193,7 @@ namespace Ping9719.IoT.Communication
 
                 IsAutoOpen = false;
                 IsUserClose = true;
-                IsOpen2 = false;
+                SetOpenCts(false);
                 dataEri = null;
                 Closed?.Invoke(this, 0);
                 CloseCore();
@@ -210,23 +210,22 @@ namespace Ping9719.IoT.Communication
             return result.ToEnd();
         }
 
-        /// <summary>
-        /// 内部关闭，非用户关闭
-        /// </summary>
+        //内部关闭，非用户关闭
         void CloseIn(int code)
         {
-            IsOpen2 = false;
+            SetOpenCts(false);
             dataEri = null;
             IsUserClose = false;
             Closed?.Invoke(this, code);
             CloseCore();
         }
 
+        //内部打开，非用户打开
         void OpenIn()
         {
             openData = OpenCore();
             dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-            IsOpen2 = true;
+            SetOpenCts(true);
             ReconnectionCount = 0;
             lastReceiveTime = DateTime.Now;
             Opened?.Invoke(this);
@@ -532,7 +531,7 @@ namespace Ping9719.IoT.Communication
                             //断开
                             if (readLength <= 0)
                             {
-                                if (cc.IsOpen2 || cc.IsOpen)
+                                if (cc.OpenCts?.IsCancellationRequested == false || cc.IsOpen)
                                 {
                                     cc.CloseIn(code);
                                 }
@@ -620,7 +619,8 @@ namespace Ping9719.IoT.Communication
 
                             if (cc.task.IsCompleted)
                                 break;
-                            if (!IsOpen2)
+                            //关闭下不进行心跳
+                            if (cc.OpenCts?.IsCancellationRequested == true)
                             {
                                 dt = DateTime.Now;
                                 continue;
@@ -832,6 +832,13 @@ namespace Ping9719.IoT.Communication
                 return win32Ex.NativeErrorCode;
 
             return ex.HResult;
+        }
+
+        void SetOpenCts(bool isOpen)
+        {
+            OpenCts?.Cancel();
+            if (isOpen)
+                OpenCts = new CancellationTokenSource();
         }
     }
 
