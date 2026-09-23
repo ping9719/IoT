@@ -31,9 +31,9 @@ namespace Ping9719.IoT.Communication
         protected DateTime lastReceiveTime = DateTime.Now;//最后一次接收数据的时间，处理被动心跳
 
         /// <summary>
-        /// 是否打开
+        /// 是否打开。在断线重连中为flase
         /// </summary>
-        public virtual bool IsOpen { get => OpenCts?.IsCancellationRequested == false && !IsUserClose; }
+        public virtual bool IsOpen { get => OpenCts?.IsCancellationRequested == false; }
         /// <summary>
         /// 是否已经调用了 Close 方法。如何为true将不会进行断线重连，这个属性主要判断是否需要继续断线重连。
         /// </summary>
@@ -269,6 +269,9 @@ namespace Ping9719.IoT.Communication
                     IsAutoOpen = true;
                 }
 
+                if (!IsOpen)
+                    return result.AddError("未打开链接").ToEnd();
+
                 var d2 = DataProcessors(data, true);
                 result.Requests.Add(d2);
                 lock (obj1)
@@ -328,6 +331,9 @@ namespace Ping9719.IoT.Communication
                     isHmOpen = true;
                     IsAutoOpen = true;
                 }
+
+                if (!IsOpen)
+                    return result.AddError("未打开链接").ToEnd();
 
                 lock (obj1)
                 {
@@ -396,6 +402,9 @@ namespace Ping9719.IoT.Communication
                     isHmOpen = true;
                     IsAutoOpen = true;
                 }
+
+                if (!IsOpen)
+                    return result.AddError("未打开链接").ToEnd();
 
                 lock (obj1)
                 {
@@ -531,7 +540,7 @@ namespace Ping9719.IoT.Communication
                             //断开
                             if (readLength <= 0)
                             {
-                                if (cc.OpenCts?.IsCancellationRequested == false || cc.IsOpen)
+                                if (cc.IsOpen)
                                 {
                                     cc.CloseIn(code);
                                 }
@@ -620,7 +629,7 @@ namespace Ping9719.IoT.Communication
                             if (cc.task.IsCompleted)
                                 break;
                             //关闭下不进行心跳
-                            if (cc.OpenCts?.IsCancellationRequested == true)
+                            if (!cc.IsOpen)
                             {
                                 dt = DateTime.Now;
                                 continue;
@@ -665,10 +674,7 @@ namespace Ping9719.IoT.Communication
 
         protected abstract OpenClientData OpenCore();
 
-        protected virtual void CloseCore()
-        {
-            openData.Close();
-        }
+        protected virtual void CloseCore() => openData.Close();
 
         protected virtual void SendCore(byte[] data, int offset = 0, int count = -1)
         {
