@@ -31,17 +31,17 @@ namespace Ping9719.IoT
         /// </summary>
         public List<byte[]> Requests { get; set; } = new List<byte[]>();
         /// <summary>
-        /// 请求报文字符串（回车+空格分割）
+        /// 请求16进制报文字符串（回车+空格分割）
         /// </summary>
-        public string RequestText { get => Requests == null ? string.Empty : string.Join(Environment.NewLine, Requests.Select(t => t == null ? string.Empty : string.Join(" ", t.Select(t2 => t2.ToString("X2"))))); }
+        public string RequestHexText { get => Requests == null ? string.Empty : string.Join(Environment.NewLine, Requests.Select(t => t == null ? string.Empty : string.Join(" ", t.Select(t2 => t2.ToString("X2"))))); }
         /// <summary>
         /// 响应报文（多组）
         /// </summary>
         public List<byte[]> Responses { get; set; } = new List<byte[]>();
         /// <summary>
-        /// 响应报文字符串（回车+空格分割）
+        /// 响应16进制报文字符串（回车+空格分割）
         /// </summary>
-        public string ResponseText { get => Responses == null ? string.Empty : string.Join(Environment.NewLine, Responses.Select(t => t == null ? string.Empty : string.Join(" ", t.Select(t2 => t2.ToString("X2"))))); }
+        public string ResponseHexText { get => Responses == null ? string.Empty : string.Join(Environment.NewLine, Responses.Select(t => t == null ? string.Empty : string.Join(" ", t.Select(t2 => t2.ToString("X2"))))); }
         /// <summary>
         /// 开始时间
         /// </summary>

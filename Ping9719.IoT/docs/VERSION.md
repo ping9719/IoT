@@ -3,106 +3,107 @@
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
 ## v0.13.0（...） 
-*1.[更名]plc属性Version改为Type    
-*3.[更改]plc和modbus归于Protocol名称空间   
-*4.[删除]MengXunFct   
-*5.[删除]IReadWrite   
-*6.[更名]`IClient`更名`IClientHost`   
-7.[新增]ClientDataBase  
-8.[新增]可在运行中切换客户端     
-9.[新增]`ClientBase`中的`IsUserClose`   
-10.[新增]RawDevice   
-11.[优化]`IClientHost`接受消息的速度提升3倍   
-## v0.12.0（26-09-08） 
-1.[优化]JsonParse会尝试寻找Newtonsoft.Json     
-2.[新增]JsonParse默认使用函数   
-3.[新增]Write(string type)支持更多情况   
-4.[优化]汇川可能读写解析错误的情况   
-5.[优化]框架继承后重写不在出现内部调用错误问题   
-6.[新增]IoTResult 增加 isSkipNull
+*1.[更名]plc属性Version改为Type  
+*3.[更改]plc和modbus归于Protocol名称空间  
+*4.[删除]MengXunFct  
+*5.[删除]IReadWrite  
+*6.[更名]`IClient`更名`IClientHost`  
+*7.[更名]`RequestText`更名`RequestHexText`  
+8.[新增]`ClientDataBase`  
+9.[新增]`client.SetClient()`在运行中切换客户端     
+10.[新增]`ClientBase`中的`IsUserClose`  
+11.[新增]`RawDevice `  
+12.[优化]提升`ClientBase`接收消息的速度  
+## v0.12.0（26-09-08）
+1.[优化]JsonParse会尝试寻找Newtonsoft.Json  
+2.[新增]JsonParse默认使用函数  
+3.[新增]Write(string type)支持更多情况  
+4.[优化]汇川可能读写解析错误的情况  
+5.[优化]框架继承后重写不在出现内部调用错误问题  
+6.[新增]IoTResult 增加 isSkipNull  
 ## v0.11.0（26-08-26） 
-1.[优化]`HttpClient` body自动判断类型     
+1.[优化]`HttpClient` body自动判断类型  
 2.[新增] HttpContent  
 ## v0.10.0（26-08-17） 
-*1.[更名]`BoolBitByteConverter` 更名 `BoolBitByteFirstConverter`   
-2.[新增]`BoolBitByteConverter`   
-3.[优化]`SiemensS7Client` 8的倍数大量bool写优化   
-*4.[更名]`Open2`更名`OpenCore`   
-5.[新增]客户端新增`IsAutoClose`属性   
-6.[优化]`TcpService`连接断开稳定性   
+*1.[更名]`BoolBitByteConverter` 更名 `BoolBitByteFirstConverter`  
+2.[新增]`BoolBitByteConverter`  
+3.[优化]`SiemensS7Client` 8的倍数大量bool写优化  
+*4.[更名]`Open2`更名`OpenCore`  
+5.[新增]客户端新增`IsAutoClose`属性  
+6.[优化]`TcpService`连接断开稳定性  
 ## v0.9.0（26-07-14） 
-1.[优化]`SiemensS7Client`bool支持写入8个倍数个   
-2.[优化]固定语言版本为12避免latest版本反转数组太激进的问题   
-3.[优化]`InovanceModbusTcpClient`读写循环引用的问题   
-## v0.8.1（26-05-19） 
-1.[优化]`TcpService`链接优化   
-1.[优化]`TcpService`断开优化   
-## v0.8.0（26-05-06） 
-1.[优化]部分PLC事件冲突优化为+=方式   
-*2.[优化]更改DataConvert部分方法名称   
-3.[新增]增加`SerialClient`   
-*4.[优化]优化`DataConvert`并部分方法更名   
-*5.[优化]优化`EndianConversion`并部分方法更删   
-*6.[删除]删除`EnumerableExtension.DistinctBy`   
-*7.[优化]类`WordHelp`重命名`DataHelp`   
-*8.[优化]优化`WordHelp`并部分方法更名   
-*9.[优化]`EndianConversion`更名`EndianConvert`   
-10.[新增]`ByteData`   
-11.[新增]接口`IReadWrite`新增`EndianFormat`   
-*12.[优化]部分协议中的`Format`更名为`EndianFormat`   
-13.[新增]`OmronCipClient`支持写数组   
-14.[新增]被动心跳   
-*15.[优化]`ClientBase.Closed`采用关闭码   
+1.[优化]`SiemensS7Client`bool支持写入8个倍数个  
+2.[优化]固定语言版本为12避免latest版本反转数组太激进的问题  
+3.[优化]`InovanceModbusTcpClient`读写循环引用的问题  
+## v0.8.1（26-05-19）
+1.[优化]`TcpService`链接优化  
+1.[优化]`TcpService`断开优化  
+## v0.8.0（26-05-06）
+1.[优化]部分PLC事件冲突优化为+=方式  
+*2.[优化]更改DataConvert部分方法名称  
+3.[新增]增加`SerialClient`  
+*4.[优化]优化`DataConvert`并部分方法更名  
+*5.[优化]优化`EndianConversion`并部分方法更删  
+*6.[删除]删除`EnumerableExtension.DistinctBy`  
+*7.[优化]类`WordHelp`重命名`DataHelp`  
+*8.[优化]优化`WordHelp`并部分方法更名  
+*9.[优化]`EndianConversion`更名`EndianConvert`  
+10.[新增]`ByteData`  
+11.[新增]接口`IReadWrite`新增`EndianFormat`  
+*12.[优化]部分协议中的`Format`更名为`EndianFormat`  
+13.[新增]`OmronCipClient`支持写数组  
+14.[新增]被动心跳  
+*15.[优化]`ClientBase.Closed`采用关闭码  
 16.[优化]`OmronFinsClient`0x40错误码处理  
-17.[新增]`KeyenceHostLinkClient`协议   
-18.[新增]`OmronFinsClient`支持bool多个读   
-*19.[新增]`Modbus`支持读寄存器多个的位   
-20.[新增]`JBCWeld`协议   
+17.[新增]`KeyenceHostLinkClient`协议  
+18.[新增]`OmronFinsClient`支持bool多个读  
+*19.[新增]`Modbus`支持读寄存器多个的位  
+20.[新增]`JBCWeld`协议  
 ## v0.7.0（26-03-16）
-1.[优化]`HttpClient`最低支持net45   
-*2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`   
+1.[优化]`HttpClient`最低支持net45  
+*2.[优化]`HttpClient`返回类型由`T`更改为`IoTResult<T>`  
 ## v0.6.0（26-01-23）
-1.[新增]支持西门子中的`String[num]`类型   
-2.[新增]`net8.0`   
-3.[新增]可自定义Json解析   
-4.[新增]仿射变换   
-5.[新增]UdpClient   
-6.[优化]忽略空错误   
-7.[优化]OmronFins错误和结束符处理   
-8.[新增]OmronFins支持批量连续读写   
-9.[新增]HttpClient   
-10.[优化]读写try优化   
+1.[新增]支持西门子中的`String[num]`类型  
+2.[新增]`net8.0`  
+3.[新增]可自定义Json解析  
+4.[新增]仿射变换  
+5.[新增]UdpClient  
+6.[优化]忽略空错误  
+7.[优化]OmronFins错误和结束符处理  
+8.[新增]OmronFins支持批量连续读写  
+9.[新增]HttpClient  
+10.[优化]读写try优化  
 ## v0.5.0（25-12-09）
-1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率   
-2.[新增]`HttpService`   
-3.[新增]算法：线性回归   
-4.[新增]算法：傅立叶滤波
+1.[优化]`TcpClient`客户端增加`OpenTimeOut`默认8秒提升网络较复杂下的成功率  
+2.[新增]`HttpService`  
+3.[新增]算法：线性回归  
+4.[新增]算法：傅立叶滤波  
 ## v0.4.0（25-10-29）
-*1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突   
-2.[新增]tcp支持更多的初始化方式    
-*3.[更改]TCP默认编码为UTF8   
-*4.[更改]协议中去掉默认的`ConnectionMode`   
-5.[优化]Open更改为先关闭在打开   
-6.[新增]客户端支持自定义心跳   
-7.[优化]部分退出后在`Receive2`中出现的while异常优化   
+*1.[更改]将`params T[]`替换为 `IEnumerable<T>` 避免重载冲突  
+2.[新增]tcp支持更多的初始化方式  
+*3.[更改]TCP默认编码为UTF8  
+*4.[更改]协议中去掉默认的`ConnectionMode`  
+5.[优化]Open更改为先关闭在打开  
+6.[新增]客户端支持自定义心跳  
+7.[优化]部分退出后在`Receive2`中出现的while异常优化  
 ## v0.3.0（25-08-31）
-*1.[更改]将`IIoT`更改为`IClientData`     
-2.[新增]增加`ReadWriteBase`对字符串类型进行实现   
-3.[新增]tcp和串口增加连接字符串构造函数   
-4.[修复]`ModbusRtu`写失败   
+*1.[更改]将`IIoT`更改为`IClientData`  
+2.[新增]增加`ReadWriteBase`对字符串类型进行实现  
+3.[新增]tcp和串口增加连接字符串构造函数  
+4.[修复]`ModbusRtu`写失败  
 ## v0.2.0（25-08-01）
-*1.[新增]更改内置处理器名称     
-2.[修复]byte[]开头结尾null判断     
-3.[新增]增加7种内置数据处理器   
-4.[新增]新增 平均点位算法`AveragePoint`   
-*5.[修复]客户端，可以打开失败也可以重连，优化线程池   
-6.[修复]客户端指定指定调度器，避免ui冲突    
-*7.[更改]接收模式ToString 更名 ToEnd   
-*8.[更改]最大重连时间单位ms变为s    
-9.[修复]客户端 IsOpen 优化   
-10.[新增]CRC 是否小端    
-11.[修复]客户端关闭异步等待优化    
-12.[修复]客户端异步读取超时为-1，解决usb读取等问题    
-13.[新增]`TcpServer`
+*1.[新增]更改内置处理器名称  
+2.[修复]byte[]开头结尾null判断  
+3.[新增]增加7种内置数据处理器  
+4.[新增]新增 平均点位算法`AveragePoint`  
+*5.[修复]客户端，可以打开失败也可以重连，优化线程池  
+6.[修复]客户端指定指定调度器，避免ui冲突  
+*7.[更改]接收模式ToString 更名 ToEnd  
+*8.[更改]最大重连时间单位ms变为s  
+9.[修复]客户端 IsOpen 优化  
+10.[新增]CRC 是否小端  
+11.[修复]客户端关闭异步等待优化  
+12.[修复]客户端异步读取超时为-1，解决usb读取等问题  
+13.[新增]`TcpServer`  
 ## v0.1.0（25-07-18）
-1.发布
+1.发布  
