@@ -47,6 +47,12 @@
   - [扫码枪 (Scanner)](#扫码枪-scanner)
   - [螺丝机 (Screw)](#螺丝机-screw)
   - [焊接机 (Weld)](#焊接机-weld)
+- [常用工具 (Common)](#常用工具-common)
+  - [数据转换 (DataConvert)](#数据转换-dataconvert)
+  - [数据帮助 (DataHelp)](#数据帮助-datahelp)
+  - [集合扩展 (EnumerableExtension)](#集合扩展-enumerableextension)
+  - [URL解析 (HttpUrl)](#url解析-httpurl)
+  - [JSON解析 (JsonParse)](#json解析-jsonparse)
 - [常见问题](#常见问题)
   - [1.如何使用自定义协议？](#1如何使用自定义协议)
   - [2.如何自定义Json解析？](#2如何自定义json解析)
@@ -967,6 +973,65 @@ while (true)
     Console.WriteLine(assa.IsSucceed ? assa.Value : assa.ErrorText);
     Thread.Sleep(200);
 }
+```
+
+# 常用工具 (Common)
+> 命名空间：`Ping9719.IoT.Common`　为静态工具类，直接调用即可。
+
+## 数据转换 (DataConvert)
+字节数组与十六进制、ASCII、二进制、大小端、基础类型之间的互相转换。
+
+| API | 说明 |
+|--|--|
+| `BytesToHexString(sepa = " ")` | 字节数组转16进制字符串 |
+| `HexStringToBytes(sepa = " ")` | 16进制字符串转字节数组 |
+| `Replace(oldBytes, newBytes)` | 替换字节数组中的片段 |
+| `AsciiBytesToBytes()` | ASCII字节数组转字节数组（如 30 31 → 00 01） |
+| `BytesToAsciiBytes()` | 字节数组转ASCII字节数组（如 00 01 → 30 31） |
+| `ByteToBin(...)` | Byte转二进制bool数组（支持单个字节/字节数组） |
+| `EndianToNet(format, offset, count)` | 目标字节顺序与Net顺序（DCBA）互转，支持2/4/8字节 |
+| `EndianToObj<T>(format, ...)` | 字节数组批量转指定类型数组（bool/byte/数字/浮点） |
+| `EndianToByte<T>(format)` | 指定类型数组批量转字节数组 |
+
+## 数据帮助 (DataHelp)
+类型尺寸查询、字节数组判断、位操作。
+
+| API | 说明 |
+|--|--|
+| `GetByteCount<T>()` | 获取类型占用的字节数（不支持的返回0） |
+| `GetWordCount<T>()` | 获取类型占用的字数（1字=2字节） |
+| `ArrayEquals(arr)` | 字节数组是否相等 |
+| `StartsWith(arr)` | 数组开头是否匹配 |
+| `EndsWith(arr)` | 数组结尾是否匹配 |
+| `GetBit(value, index)` | 取整数的某一位（自右至左，0-7） |
+| `SetBit(value, index, newValue)` | 将整数的某一位设为0或1 |
+
+## 集合扩展 (EnumerableExtension)
+IEnumerable 的分块扩展。
+
+| API | 说明 |
+|--|--|
+| `Chunk(size, isInsufficientDiscard)` | 按size分块，不足的块可丢弃 |
+| `ChunkSuppl(size, isSupplEnd, supplVal, isReverse)` | 按size分块，不足的块自动补默认值 |
+
+## URL解析 (HttpUrl)
+URL 路径与 Query 参数拼接。
+
+| API | 说明 |
+|--|--|
+| `AppendPathSegments(segments)` | 追加路径片段（自动处理 `/`） |
+| `SetQueryParams(values)` | 设置Query参数，支持字典和匿名对象 |
+
+## JSON解析 (JsonParse)
+1. Json解析优先采用用户自定义的   
+2. 在 `NET8` 中采用 `System.Text.Json`   
+3. 非 `NET8` 中优先采用 `Newtonsoft.Json`，失败后采用 `System.Runtime.Serialization.Json`  
+
+所以在非 `NET8` 中推荐自定义 Json 解析：
+```CSharp
+//在程序入口处设置，只需要设置一次就可以了
+JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
 ```
 
 # 常见问题
