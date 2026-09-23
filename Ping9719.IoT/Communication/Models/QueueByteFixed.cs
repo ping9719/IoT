@@ -53,6 +53,10 @@ namespace Ping9719.IoT.Communication
             get { lock (_syncRoot) { return _count == Capacity; } }
         }
         /// <summary>
+        /// 当有新数据入队时会调用Set()
+        /// </summary>
+        public ManualResetEventSlim EnqueueChange = new ManualResetEventSlim(false, 0);
+        /// <summary>
         /// 队列
         /// </summary>
         /// <param name="capacity">容量</param>
@@ -89,6 +93,7 @@ namespace Ping9719.IoT.Communication
                 _buffer[_tail] = data;
                 _tail = (_tail + 1) % Capacity;
                 _count = Math.Min(_count + 1, Capacity);
+                EnqueueChange.Set();
             }
         }
         /// <summary>
@@ -125,6 +130,7 @@ namespace Ping9719.IoT.Communication
                     _head = 0;
                     _tail = 0;
                     _count = Capacity;
+                    EnqueueChange.Set();
                     return;
                 }
 
@@ -155,6 +161,7 @@ namespace Ping9719.IoT.Communication
 
                 _tail = (_tail + actualSize) % Capacity;
                 _count = Math.Min(_count + actualSize, Capacity);
+                EnqueueChange.Set();
             }
         }
         /// <summary>
@@ -198,10 +205,7 @@ namespace Ping9719.IoT.Communication
                 Array.Copy(_buffer, _head, result, 0, firstPart);
 
                 if (firstPart < count)
-                {
-                    int secondPart = count - firstPart;
-                    Array.Copy(_buffer, 0, result, firstPart, secondPart);
-                }
+                    Array.Copy(_buffer, 0, result, firstPart, count - firstPart);
 
                 // 更新头指针和计数
                 _head = (_head + count) % Capacity;
@@ -305,6 +309,29 @@ namespace Ping9719.IoT.Communication
             }
         }
         /// <summary>
+        /// 尾部是否相等。
+        /// </summary>
+        /// <param name="suffix">要匹配的后缀</param>
+        public bool EndsWith(byte[] suffix)
+        {
+            if (suffix == null)
+                return false;
+
+            lock (_syncRoot)
+            {
+                if (_count < suffix.Length)
+                    return false;
+
+                for (int i = 1; i <= suffix.Length; i++)
+                {
+                    int bufIndex = (_tail - i + Capacity) % Capacity;
+                    if (_buffer[bufIndex] != suffix[suffix.Length - i])
+                        return false;
+                }
+                return true;
+            }
+        }
+        /// <summary>
         /// 转换为数组
         /// </summary>
         /// <returns></returns>
@@ -313,7 +340,7 @@ namespace Ping9719.IoT.Communication
             lock (_syncRoot)
             {
                 byte[] result = new byte[_count];
-                if (_count == 0) 
+                if (_count == 0)
                     return result;
 
                 if (_head < _tail)

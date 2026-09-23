@@ -194,7 +194,6 @@ namespace Ping9719.IoT.Communication
                 IsAutoOpen = false;
                 IsUserClose = true;
                 SetOpenCts(false);
-                dataEri = null;
                 Closed?.Invoke(this, 0);
                 CloseCore();
             }
@@ -206,18 +205,30 @@ namespace Ping9719.IoT.Communication
             {
                 task?.Wait();
                 task2?.Wait();
+                dataEri = null;
             }
             return result.ToEnd();
         }
 
         //内部关闭，非用户关闭
-        void CloseIn(int code)
+        bool CloseIn(int code)
         {
-            SetOpenCts(false);
-            dataEri = null;
+            try
+            {
             IsUserClose = false;
+                SetOpenCts(false);
             Closed?.Invoke(this, code);
             CloseCore();
+                return true;
+        }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally 
+            {
+                dataEri = null;
+            }
         }
 
         //内部打开，非用户打开
@@ -340,6 +351,7 @@ namespace Ping9719.IoT.Communication
                     if (IsAutoDiscard)
                         DiscardInBuffer();
 
+                    dataEri.EnqueueChange.Reset();
                     result.Value = DataProcessors(ReceiveCore(receiveMode), false);
                     result.Responses.Add(result.Value);
                 }
@@ -413,6 +425,7 @@ namespace Ping9719.IoT.Communication
 
                     var d1 = DataProcessors(data, true);
                     result.Requests.Add(d1);
+                    dataEri.EnqueueChange.Reset();
                     SendCore(d1);
                     result.Value = DataProcessors(ReceiveCore(receiveMode), false);
                     result.Responses.Add(result.Value);
@@ -504,6 +517,24 @@ namespace Ping9719.IoT.Communication
             return TimeOutVal < 0 ? false : DateTime.Now - beginTime > TimeSpan.FromMilliseconds(TimeOutVal);
         }
 
+        /// <summary>
+        /// 剩余时间
+        /// </summary>
+        /// <param name="beginTime">开始时间</param>
+        /// <param name="timeOut">超时（毫秒，-1永久）</param>
+        /// <returns></returns>
+        public int RemaTime(DateTime beginTime, int timeOut)
+        {
+            if (timeOut == -1)
+                return -1;
+
+            double elapsed = (DateTime.Now - beginTime).TotalMilliseconds;
+            double remain = timeOut - elapsed;
+            if (remain <= 0)
+                return 0;
+
+            return remain > int.MaxValue ? int.MaxValue : (int)remain;
+        }
 
         #region 其他
         protected virtual void GoRun()
@@ -686,28 +717,31 @@ namespace Ping9719.IoT.Communication
         protected virtual byte[] ReceiveCore(ReceiveMode receiveMode = null, bool isevent = false)
         {
             receiveMode ??= ReceiveMode;
+            var timeOut = receiveMode.TimeOut == -2 ? TimeOut : receiveMode.TimeOut;
             byte[] value = null;
             DateTime beginTime = DateTime.Now;
+
+            if (dataEri == null)
+            {
+                if (isevent) return null;
+                throw new Exception("链接被断开");
+            }
+
             if (receiveMode.Type == ReceiveModeEnum.Byte)
             {
                 var countMax = (int)receiveMode.Data;
                 if (isevent)
                 {
                     if (dataEri.Count >= countMax)
-                    {
                         value = dataEri.Dequeue(countMax);
-                    }
                 }
                 else
                 {
-                    while (dataEri != null && dataEri.Count < countMax)
+                    while (dataEri?.Count < countMax)
                     {
-                        if (!IsOpen)
-                            throw new Exception("链接被断开");
-                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                        if (!WaitSignal(RemaTime(beginTime, timeOut)))
                             throw new TimeoutException("已超时");
-
-                        Thread.Sleep(1);
+                        var aa = DateTime.Now;
                     }
                     value = dataEri?.Dequeue(countMax);
                 }
@@ -720,97 +754,117 @@ namespace Ping9719.IoT.Communication
                 }
                 else
                 {
-                    while (dataEri != null && dataEri.Count == 0)
+                    while (dataEri?.Count == 0)
                     {
-                        if (!IsOpen)
-                            throw new Exception("链接被断开");
-                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                        if (!WaitSignal(RemaTime(beginTime, timeOut)))
                             throw new TimeoutException("已超时");
-
-                        Thread.Sleep(1);
                     }
                     value = dataEri?.DequeueAll();
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Char)
             {
-                var countMax = (int)receiveMode.Data * 2;
+                var byteCount = Convert.ToInt32(receiveMode.Data) * 2;
                 if (isevent)
                 {
-                    if (dataEri.Count >= countMax)
+                    if (dataEri.Count >= byteCount)
                     {
-                        value = dataEri.Dequeue(countMax);
+                        value = dataEri.Dequeue(byteCount);
                     }
                 }
                 else
                 {
-                    while (dataEri != null && dataEri.Count < countMax)
+                    while (dataEri?.Count < byteCount)
                     {
-                        if (!IsOpen)
-                            throw new Exception("链接被断开");
-                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                        if (!WaitSignal(RemaTime(beginTime, timeOut)))
                             throw new TimeoutException("已超时");
-
-                        Thread.Sleep(1);
                     }
-                    value = dataEri?.Dequeue(countMax);
+                    value = dataEri?.Dequeue(byteCount);
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.Time)
             {
-                var countMax = (int)receiveMode.Data;
+                var idleTime = Convert.ToInt32(receiveMode.Data);
+                if (idleTime <= 0) 
+                    idleTime = 10;
+
                 if (isevent)
                 {
                     value = dataEri.DequeueAll();
                 }
                 else
                 {
-                    var tempBufferLength = dataEri.Count;
-                    while (dataEri != null && (dataEri.Count == 0 || tempBufferLength != dataEri.Count))
+                    //取第一次
+                    while (dataEri?.Count == 0)
                     {
-                        if (!IsOpen)
-                            throw new Exception("链接被断开");
-                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                        if (!WaitSignal(RemaTime(beginTime, timeOut)))
+                            throw new TimeoutException("已超时");
+                    }
+
+                    //有新数据
+                    while (true)
+                    {
+                        int remain = RemaTime(beginTime, timeOut);
+                        if (remain == 0)
                             throw new TimeoutException("已超时");
 
-                        tempBufferLength = dataEri.Count;
-                        Thread.Sleep(countMax);
+                        int waitMs = remain < 0 ? idleTime : Math.Min(idleTime, remain);
+                        if (!WaitSignal(waitMs))
+                            break;
                     }
+
                     value = dataEri?.DequeueAll();
                 }
             }
             else if (receiveMode.Type == ReceiveModeEnum.ToEnd)
             {
-                byte[] zfc;
+                byte[] terminator;
                 if (receiveMode.Data is string str)
-                    zfc = Encoding.GetBytes(str);
+                    terminator = Encoding.GetBytes(str);
                 else
-                    zfc = (byte[])receiveMode.Data;
+                    terminator = (byte[])receiveMode.Data;
 
                 if (isevent)
                 {
-                    if (dataEri.ToArray().EndsWith(zfc))
+                    if (dataEri.EndsWith(terminator))
                     {
                         value = dataEri.DequeueAll();
                     }
                 }
                 else
                 {
-
-                    while (dataEri != null && (dataEri.Count == 0 || !dataEri.ToArray().EndsWith(zfc)))
+                    while (dataEri?.EndsWith(terminator) == false)
                     {
-                        if (!IsOpen)
-                            throw new Exception("链接被断开");
-                        if (IsOutTime(beginTime, receiveMode.TimeOut))
+                        if (!WaitSignal(RemaTime(beginTime, timeOut)))
                             throw new TimeoutException("已超时");
-
-                        Thread.Sleep(1);
                     }
                     value = dataEri?.DequeueAll();
                 }
             }
 
             return value;
+        }
+
+        /// <summary>
+        /// 等待消息。true 成功，false 超时，异常 链接被断开
+        /// </summary>
+        bool WaitSignal(int waitMs)
+        {
+            if (dataEri == null)
+                throw new Exception("链接被断开");
+            if (waitMs == 0)
+                throw new TimeoutException("已超时");
+
+            try
+            {
+                bool signaled = dataEri.EnqueueChange.Wait(waitMs, OpenCts.Token);
+                dataEri?.EnqueueChange.Reset();// 若 Reset 与 Enqueue 之间发生数据，必须下一次循环的 Count 检查会兜住，不会丢数据
+                return signaled;
+            }
+            catch (OperationCanceledException)
+            {
+                throw new Exception("链接被断开");
+            }
         }
         #endregion
 
