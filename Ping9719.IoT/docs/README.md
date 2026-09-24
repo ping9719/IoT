@@ -163,7 +163,7 @@ byteData.ByteConverterDict.Add(typeof(Int16), new Int16ByteConverter());
 
 # 通讯 (Communication)
 ## 客户端基类(ClientBase)（建议必读！！！）
-大部分通讯都实现于 `ClientBase`，比如 `TcpClient`、`SerialPortClient` 等，下面的内容都是通用的。
+目前可用于`TcpClient`,`UdpClient`,`SerialPortClient`,`SerialClient`,`BleClient`,`UsbHidClient`,`HttpClient`。
 
 ### 三种连接模式（ConnectionMode）
 
@@ -301,22 +301,7 @@ client1.Open();//打开，在打开前处理属性和事件
 
 ## 服务端基类(ServiceBase) `beta`
 
-**属性**
-
-| 名称   | 说明  |
-| ------ | --------- |
-| Encoding | 字符串编码，默认UTF8 |
-| TimeOut | 超时（发送、接收、连接）（毫秒）-1永久，默认3000 |
-| ReceiveMode | 接收数据的方式 |
-| ReceiveModeReceived | 接收数据的方式，在事件 Received 下。 |
-
-
-**方法**
-
-| 名称   | 说明  |
-| Open | 打开 |
-| Close | 关闭 |
-
+目前可用于 `TcpServer` ，请参考他的文档。
 
 ## TcpClient
 `TcpClient : ClientBase`
