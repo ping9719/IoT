@@ -40,6 +40,7 @@
   - [稳定婚姻配对(GaleShapleyAlgorithm)](#稳定婚姻配对galeshapleyalgorithm)
   - [线性回归(LinearRegression)](#线性回归linearregression)
 - [设备和仪器 (Device)](#设备和仪器-device)
+  - [无协议设备(RawDevice)](#无协议设备rawdevice)
   - [气密检测 (Airtight)](#气密检测-airtight)
   - [激光刻印 (Mark)](#激光刻印-mark)
   - [无线射频 (Rfid)](#无线射频-rfid)
@@ -56,7 +57,8 @@
 - [常见问题](#常见问题)
   - [1.如何使用自定义协议？](#1如何使用自定义协议)
   - [2.如何自定义Json解析？](#2如何自定义json解析)
-  - [3.如何在运行中切换通讯方式？](#3如何在运行中切换通讯方式)
+  - [3.通讯的速度怎么样？](#3通讯的速度怎么样)
+  - [4.如何在运行中切换通讯方式？](#4如何在运行中切换通讯方式)
 <!-- TOC -->
 
 # 字节数据(ByteData) `beta`
@@ -883,8 +885,9 @@ double result = regression.Project(20);//50
 # 设备和仪器 (Device)
 1. 请先读取 `客户端基类(ClientBase)` 目录里面的内容。   
 2. 请先打开后再使用，或者设置自动打开模式。   
-3. 提供特殊的无协议设备 `RawDevice`，可用来加载不同的管道收发数据。
 
+## 无协议设备(RawDevice)
+>无协议设备 `RawDevice`，可用来加载不同的管道收发数据。
 
 ```CSharp
 //无协议设备`RawDevice`的简单使用
@@ -1082,7 +1085,19 @@ JsonParse.SerializeFunc = (obj) => Newtonsoft.Json.JsonConvert.SerializeObject(o
 JsonParse.DeserializeFunc = (json) => Newtonsoft.Json.JsonConvert.DeserializeObject(json);
 ```
 
-## 3.如何在运行中切换通讯方式？
+## 3.通讯的速度怎么样？
+1. 以下是通过TCP进行的ModbusTcp协议的速度对此，此方法可以测试基于`ClientBase`的设计能力
+2. 使用HslCommunicationDemo提供的Modbus Server作为服务端，各个客户端使用for循环读地址为100的寄存器int16类型1位，值越小越好
+
+通讯速度位于市场中间水平。
+| 框架                 | 版本     | 平均耗时(毫秒) |
+| ------------------ | ------ | -------- |
+| NModbus            | 3.0.83 | 0.17     |
+| HslCommunication   | 13.0.0 | 0.25     |
+| Ping9719.IoT       | 0.13.0 | 0.25     |
+| TouchSocket.Modbus | 4.3.9  | 0.44     |
+
+## 4.如何在运行中切换通讯方式？
 >只要是继承了 `ClientProviderBase` 的都可以进行切换
 ```CSharp
 //采用串口方式来进行 ModbusRtu 协议通信
