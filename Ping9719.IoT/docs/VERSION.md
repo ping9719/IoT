@@ -14,6 +14,7 @@
 10.[新增]`ClientBase`中的`IsUserClose`  
 11.[新增]`RawDevice `  
 12.[优化]提升`ClientBase`接收消息的速度  
+13.[优化]用户关闭可能等较久  
 ## v0.12.0（26-09-08）
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json  
 2.[新增]JsonParse默认使用函数  
