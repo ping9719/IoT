@@ -617,7 +617,15 @@ namespace Ping9719.IoT.Communication
                         {
                             cc.ReconnectionCount++;
                             var tz = Math.Min(cc.ReconnectionCount * 1000, cc.MaxReconnectionTime * 1000);
-                            System.Threading.Thread.Sleep(tz);//???这里有用户关闭了，但是要等很久的问题?
+
+                            //用户手动关闭提前退出
+                            var deadline = DateTime.Now.AddMilliseconds(tz);
+                            while (DateTime.Now < deadline)
+                            {
+                                if (cc.IsUserClose)
+                                    break;
+                                System.Threading.Thread.Sleep(100);
+                            }
 
                             if (cc.IsUserClose)
                                 break;
