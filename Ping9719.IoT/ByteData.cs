@@ -174,6 +174,8 @@ namespace Ping9719.IoT
                 {
                     if (offset >= data.Count())
                         break;
+                    if (results.Count() >= count)
+                        break;
 
                     var obj = v1.ToObject(data.Skip(offset + i * v1.ByteLength), endianFormat);
                     if (obj is T t1)
@@ -181,25 +183,32 @@ namespace Ping9719.IoT
                     else if (obj is IEnumerable<T> t2)
                         results.AddRange(t2);
                 }
-                return results;
+                return results.Take(count);
             }
             else if (isUseDefaultConverter && ByteDefaultConverters.TryGetValue(t, out var v2))
             {
                 for (int i = 0; i < count; i++)
                 {
+                    if (offset >= data.Count())
+                        break;
+                    if (results.Count() >= count)
+                        break;
+
                     var obj = v2.ToObject(data.Skip(offset + i * v2.ByteLength), endianFormat);
                     if (obj is T t1)
                         results.Add(t1);
                     else if (obj is IEnumerable<T> t2)
                         results.AddRange(t2);
                 }
-                return results;
+                return results.Take(count);
             }
             else if (t.IsClass || (t.IsValueType && !t.IsPrimitive && !t.IsEnum))
             {
                 for (int i = 0; i < count; i++)
                 {
                     if (offset >= data.Count())
+                        break;
+                    if (results.Count() >= count)
                         break;
 
                     var value = (T)GetValue(t, data, endianFormat, offset, converterDict, isUseDefaultConverter, out int ul);
@@ -208,7 +217,7 @@ namespace Ping9719.IoT
                     // 前进到下一项的起始偏移
                     offset += ul;
                 }
-                return results;
+                return results.Take(count);
             }
             else
             {
