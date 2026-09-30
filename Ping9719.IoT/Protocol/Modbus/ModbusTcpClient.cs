@@ -183,6 +183,7 @@ namespace Ping9719.IoT.Protocol
 
         private IoTResult<IEnumerable<T>> ReadIn<T>(string address, int number)
         {
+            IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
             try
             {
                 var result = ModbusAddress.Analysis(address, stationNumber);
@@ -194,7 +195,7 @@ namespace Ping9719.IoT.Protocol
                     return comm.ToVal<IEnumerable<T>>();
 
                 //获取响应报文
-                var sendResult = Client.SendReceive(comm.Value);
+                sendResult = Client.SendReceive(comm.Value);
                 if (!sendResult.IsSucceed)
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<IEnumerable<T>>();
 
@@ -264,11 +265,12 @@ namespace Ping9719.IoT.Protocol
             }
             catch (Exception ex)
             {
-                return new IoTResult<IEnumerable<T>>().AddError(ex);
+                return sendResult.AddError(ex).ToVal<IEnumerable<T>>();
             }
         }
         private IoTResult WriteIn<T>(string address, IEnumerable<T> value)
         {
+            IoTResult<byte[]> sendResult = new IoTResult<byte[]>();
             try
             {
                 var result = ModbusAddress.Analysis(address, stationNumber);
@@ -280,7 +282,7 @@ namespace Ping9719.IoT.Protocol
                     return comm;
 
                 //获取响应报文
-                var sendResult = Client.SendReceive(comm.Value);
+                sendResult = Client.SendReceive(comm.Value);
                 if (!sendResult.IsSucceed)
                     return sendResult.AddError($"写入[{result.Value}]失败。");
 
@@ -294,7 +296,7 @@ namespace Ping9719.IoT.Protocol
             }
             catch (Exception ex)
             {
-                return new IoTResult<IEnumerable<T>>().AddError(ex);
+                return sendResult.AddError(ex);
             }
         }
         #endregion
