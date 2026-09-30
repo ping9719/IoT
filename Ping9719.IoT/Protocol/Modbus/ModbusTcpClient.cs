@@ -39,10 +39,7 @@ namespace Ping9719.IoT.Protocol
         public ModbusTcpClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
         {
             Client = client;
-            //Client.TimeOut = 1500;
-            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            //Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.EndianFormat = format;
             this.stationNumber = stationNumber;
@@ -67,7 +64,7 @@ namespace Ping9719.IoT.Protocol
             return new byte[] { (byte)random.Next(255), (byte)random.Next(255) };
         }
 
-        #region IReadWrite
+        #region IClientData
         /// <summary>
         /// 读取
         /// </summary>
@@ -89,7 +86,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result.ToVal<string>();
 
@@ -188,7 +185,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result.ToVal<IEnumerable<T>>();
 
@@ -203,12 +200,12 @@ namespace Ping9719.IoT.Protocol
 
                 //验证
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
-                    return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<IEnumerable<T>>();
+                    return sendResult.AddError($"读取[{result.Value}]失败。标识校验失败").ToVal<IEnumerable<T>>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
                     return sendResult.AddError(ModbusErr.ErrMsg(sendResult.Value[8])).ToVal<IEnumerable<T>>();
 
                 //数据
-                var data = sendResult.Value.Skip(9).Take(sendResult.Value[8]).ToArray();
+                var data = sendResult.Value.Skip(9).Take(sendResult.Value[8]);
                 var tType = typeof(T);
                 IEnumerable<T> val2 = null;
                 if (tType == typeof(bool))
@@ -274,7 +271,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result;
 

@@ -27,10 +27,7 @@ namespace Ping9719.IoT.Protocol
         public ModbusAsciiClient(ClientBase client, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1)
         {
             Client = client;
-            //Client.TimeOut = 1500;
-            //Client.ReceiveMode = ReceiveMode.ParseTime();
             Client.Encoding = Encoding.ASCII;
-            //Client.ConnectionMode = ConnectionMode.AutoOpen;
 
             this.EndianFormat = format;
             this.stationNumber = stationNumber;
@@ -70,7 +67,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result.ToVal<string>();
 
@@ -171,7 +168,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result.ToVal<IEnumerable<T>>();
 
@@ -262,7 +259,7 @@ namespace Ping9719.IoT.Protocol
         {
             try
             {
-                var result = ModbusInfo.AddressAnalysis(address, stationNumber);
+                var result = ModbusAddress.Analysis(address, stationNumber);
                 if (!result.IsSucceed)
                     return result;
 

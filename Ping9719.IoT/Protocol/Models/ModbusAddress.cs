@@ -11,7 +11,7 @@ namespace Ping9719.IoT.Protocol.Models
     /// <summary>
     /// Modbus信息
     /// </summary>
-    public class ModbusInfo
+    public class ModbusAddress
     {
         /// <summary>
         /// 地址 (0-65535)
@@ -36,11 +36,14 @@ namespace Ping9719.IoT.Protocol.Models
         /// <param name="address">全写法"s=2;x=3;100"，对应站号，功能码，地址</param>
         /// <param name="stationNumber">默认站号</param>
         /// <returns></returns>
-        public static IoTResult<ModbusInfo> AddressAnalysis(string address, byte stationNumber)
+        public static IoTResult<ModbusAddress> Analysis(string address, byte stationNumber)
         {
             //s=2;x=3;100"，对应站号，功能码，地址
-            var result = new IoTResult<ModbusInfo>() { Value = new ModbusInfo() };
+            var result = new IoTResult<ModbusAddress>() { Value = new ModbusAddress() };
             result.Value.StationNumber = stationNumber;
+
+            if (string.IsNullOrWhiteSpace(address))
+                return result.AddError("address地址不能为空。");
 
             //解析地址
             var addressSplit = address.Split(new char[] { ';', '；' }, StringSplitOptions.RemoveEmptyEntries);
@@ -85,69 +88,6 @@ namespace Ping9719.IoT.Protocol.Models
                     }
                 }
             }
-
-            ////赋值功能码
-            //var tType = typeof(T);
-            //if (!result.Value.FunctionCode.HasValue)
-            //{
-            //    if (isRead)
-            //    {
-            //        result.Value.FunctionCode = tType == typeof(bool) ? ModbusCode.读线圈 : ModbusCode.读寄存器;
-            //    }
-            //    //else
-            //    //{
-            //    //    if (tType == typeof(bool))
-            //    //        x = Writevalue.Length == 1 ? (byte)5 : (byte)0x0f;
-            //    //    else
-            //    //        x = 0x10;
-            //    //}
-            //}
-
-            //byte[] list1 = new byte[] { };
-            ////赋值类型
-            //DataTypeEnum dataTypeEnum = DataTypeEnum.None;
-            //if (tType == typeof(bool))
-            //{
-            //    dataTypeEnum = DataTypeEnum.Bool;
-            //    if (Writevalue.Length == 1)
-            //    {
-            //        list1 = (bool)(object)Writevalue[0] == true ? new byte[] { 0xFF, 0x00 } : new byte[] { 0x00, 0x00 };
-            //    }
-            //    else
-            //    {
-            //        list1 = WordHelp.SplitBlock(Writevalue.Select(o => ((bool)(object)o) ? 1 : 0), 8, 1, 0).Select(o => Convert.ToByte(string.Join("", o), 2)).ToArray();
-            //    }
-            //}
-            //else if (tType == typeof(byte))
-            //{ dataTypeEnum = DataTypeEnum.Byte; list1 = Writevalue.Select(o => (byte)(object)o).ToArray(); }
-            //else if (tType == typeof(short))
-            //{ dataTypeEnum = DataTypeEnum.Int16; list1 = Writevalue.SelectMany(o =>BitConverter.GetBytes((short)(object)o)).ToArray(); }
-            //else if (tType == typeof(ushort))
-            //{ dataTypeEnum = DataTypeEnum.UInt16; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ushort)(object)o)).ToArray(); }
-            //else if (tType == typeof(int))
-            //{ dataTypeEnum = DataTypeEnum.Int32; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((int)(object)o)).ToArray(); }
-            //else if (tType == typeof(uint))
-            //{ dataTypeEnum = DataTypeEnum.UInt32; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((uint)(object)o)).ToArray(); }
-            //else if (tType == typeof(long))
-            //{ dataTypeEnum = DataTypeEnum.Int64; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((long)(object)o)).ToArray(); }
-            //else if (tType == typeof(ulong))
-            //{ dataTypeEnum = DataTypeEnum.UInt64; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((ulong)(object)o)).ToArray(); }
-            //else if (tType == typeof(float))
-            //{ dataTypeEnum = DataTypeEnum.Float; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((float)(object)o)).ToArray(); }
-            //else if (tType == typeof(double))
-            //{ dataTypeEnum = DataTypeEnum.Double; list1 = Writevalue.SelectMany(o => BitConverter.GetBytes((double)(object)o)).ToArray(); }
-            //else if (tType == typeof(string))
-            //    dataTypeEnum = DataTypeEnum.String;
-            //else
-            //    dataTypeEnum = DataTypeEnum.None;
-
-            //result.Value = new ModbusInfo()
-            //{
-            //    Address = a,
-            //    Bit = isb ? b : null,
-            //    StationNumber = s,
-            //    FunctionCode = (ModbusCode)x,
-            //};
 
             return result;
         }
@@ -403,7 +343,7 @@ namespace Ping9719.IoT.Protocol.Models
         }
 
         /// <summary>
-        /// 得到ModbusTcp读或写的命令
+        /// 得到ModbusRtu读或写的命令
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="readCount">读的数量</param>
