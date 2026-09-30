@@ -128,12 +128,17 @@ namespace Ping9719.IoT.Protocol.Models
                     ModbusCode functionCode;
                     if (FunctionCode.HasValue)
                         functionCode = FunctionCode.Value;
+                    else if (Bit.HasValue && typeof(T) == typeof(bool))
+                        functionCode = ModbusCode.读寄存器;
                     else
                         functionCode = tType == typeof(bool) ? ModbusCode.读线圈 : ModbusCode.读寄存器;
 
                     //计算真实数量
                     var rCount = DataHelp.GetWordCount<T>();
-                    rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
+                    if (Bit != null && typeof(T) == typeof(bool))
+                        rCount = Convert.ToUInt16(readCount / 16.0 + 1.0);//这里未考虑从中间取跨的问题，不是最佳方案
+                    else
+                        rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
                     result.AddRange(BitConverter.GetBytes(rCount).AsEnumerable().Reverse());
                     result[7] = (byte)functionCode;
@@ -373,8 +378,7 @@ namespace Ping9719.IoT.Protocol.Models
                     ModbusCode functionCode;
                     if (FunctionCode.HasValue)
                         functionCode = FunctionCode.Value;
-                    //位读取
-                    else if (Bit != null && typeof(T) == typeof(bool))
+                    else if (Bit.HasValue && typeof(T) == typeof(bool))
                         functionCode = ModbusCode.读寄存器;
                     else
                         functionCode = tType == typeof(bool) ? ModbusCode.读线圈 : ModbusCode.读寄存器;
