@@ -499,25 +499,6 @@ namespace Ping9719.IoT.Communication
         public virtual IoTResult<string> SendReceiveToString(byte[] data, int timeOut, Encoding encoding = null) => SendReceiveToString(data, ReceiveMode.SetTimeOut(ReceiveMode, timeOut), encoding);
 
         /// <summary>
-        /// 是否超时
-        /// </summary>
-        /// <param name="beginTime">开始时间</param>
-        /// <param name="timeOut">超时（毫秒，-1永久 -2默认）</param>
-        /// <returns></returns>
-        public bool IsOutTime(DateTime beginTime, int timeOut)
-        {
-            var TimeOutVal = TimeOut;
-            if (timeOut == -1 || timeOut < -2)
-                TimeOutVal = -1;
-            else if (timeOut == -2)
-                TimeOutVal = TimeOut;
-            else if (timeOut >= 0)
-                TimeOutVal = timeOut;
-
-            return TimeOutVal < 0 ? false : DateTime.Now - beginTime > TimeSpan.FromMilliseconds(TimeOutVal);
-        }
-
-        /// <summary>
         /// 剩余时间
         /// </summary>
         /// <param name="beginTime">开始时间</param>
