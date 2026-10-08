@@ -1,12 +1,8 @@
-﻿using Ping9719.IoT.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -175,7 +171,23 @@ namespace Ping9719.IoT.Communication
             catch (Exception ex)
             {
                 result.AddError(ex);
-                SetOpenCts(false);
+                //打开失败时关闭
+                try
+                {
+                    IsAutoOpen = false;
+                    //IsUserClose = false;
+                    SetOpenCts(false);
+                    CloseCore();
+                }
+                finally
+                {
+                    if (ConnectionMode != ConnectionMode.AutoReconnection)
+                    {
+                        task?.Wait();
+                        task2?.Wait();
+                        dataEri = null;
+                    }
+                }
             }
             return result.ToEnd();
         }
@@ -234,12 +246,35 @@ namespace Ping9719.IoT.Communication
         //内部打开，非用户打开
         void OpenIn()
         {
-            openData = OpenCore();
-            dataEri = new QueueByteFixed(ReceiveBufferSize, true);
-            SetOpenCts(true);
-            ReconnectionCount = 0;
-            lastReceiveTime = DateTime.Now;
-            Opened?.Invoke(this);
+            try
+            {
+                openData = OpenCore();
+                dataEri = new QueueByteFixed(ReceiveBufferSize, true);
+                SetOpenCts(true);
+                ReconnectionCount = 0;
+                lastReceiveTime = DateTime.Now;
+                Opened?.Invoke(this);
+            }
+            catch
+            {
+                //打开失败时关闭
+                try
+                {
+                    IsAutoOpen = false;
+                    //IsUserClose = false;
+                    SetOpenCts(false);
+                    CloseCore();
+                }
+                finally
+                {
+                    //if (ConnectionMode != ConnectionMode.AutoReconnection)
+                    //{
+                    //    task?.Wait();
+                    //    task2?.Wait();
+                    //    dataEri = null;
+                    //}
+                }
+            }
         }
 
         /// <summary>
@@ -773,7 +808,7 @@ namespace Ping9719.IoT.Communication
             else if (receiveMode.Type == ReceiveModeEnum.Time)
             {
                 var idleTime = Convert.ToInt32(receiveMode.Data);
-                if (idleTime <= 0) 
+                if (idleTime <= 0)
                     idleTime = 10;
 
                 if (isevent)
