@@ -2,7 +2,7 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
-## v0.13.0（...） 
+## v0.13.0（26-10-08） 
 *1.[更名]plc属性Version改为Type  
 *3.[更改]plc和modbus归于Protocol名称空间  
 *4.[删除]MengXunFct  
@@ -16,6 +16,8 @@
 12.[优化]提升`ClientBase`接收消息的速度  
 13.[优化]用户关闭可能等较久  
 14.[优化]ModbusTcp支持位  
+15.[优化]ClientBase由事件失败时关闭  
+16.[优化]其他若干优化  
 ## v0.12.0（26-09-08）
 1.[优化]JsonParse会尝试寻找Newtonsoft.Json  
 2.[新增]JsonParse默认使用函数  
