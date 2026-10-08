@@ -1,6 +1,5 @@
 ﻿using Ping9719.IoT.Common;
 using Ping9719.IoT.Device.Rfid;
-using Ping9719.IoT.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +24,14 @@ namespace Ping9719.IoT.WPF
             InitializeComponent();
         }
 
-        public IReadWrite DeviceData
+        public IClientData DeviceData
         {
-            get { return (IReadWrite)GetValue(DeviceDataProperty); }
+            get { return (IClientData)GetValue(DeviceDataProperty); }
             set { SetValue(DeviceDataProperty, value); }
         }
 
         public static readonly DependencyProperty DeviceDataProperty =
-            DependencyProperty.Register("DeviceData", typeof(IReadWrite), typeof(RfidView), new PropertyMetadata(null));
+            DependencyProperty.Register("DeviceData", typeof(IClientData), typeof(RfidView), new PropertyMetadata(null));
 
         /// <summary>
         /// 区域
