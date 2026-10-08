@@ -68,7 +68,7 @@ namespace Ping9719.IoT.Communication
         }
 
         /// <summary>
-        /// 初始化客户端
+        /// 初始化TCP服务端
         /// </summary>
         /// <param name="connectString">比如：127.0.0.1:502。</param>
         public TcpService(string connectString)

@@ -120,7 +120,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 读取
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datetime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <returns>结果</returns>
         public virtual IoTResult<object> Read(string type, string address)
@@ -177,7 +177,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 读取多个
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datetime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="number">数量</param>
         /// <returns>结果</returns>
@@ -237,7 +237,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 写入
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datetime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="value">写入的值。大部分进行<see cref="Convert"/>转换</param>
         /// <returns>结果</returns>
@@ -299,7 +299,7 @@ namespace Ping9719.IoT
         /// <summary>
         /// 写入多个
         /// </summary>
-        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datatime，timespan，char，）</param>
+        /// <param name="type">不区分大小写的类型。（bool，byte，int16，int32，int64，uint16，uint32，uint64，float，double，string，datetime，timespan，char，）</param>
         /// <param name="address">地址</param>
         /// <param name="values">写入的值。大部分进行<see cref="Convert"/>转换</param>
         /// <returns>结果</returns>

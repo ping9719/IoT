@@ -68,8 +68,8 @@ namespace Ping9719.IoT.Communication
 
         protected override void CloseCore()
         {
-            udpClient?.Client?.Shutdown(SocketShutdown.Both);
             udpClient?.Close();
+            udpClient = null;
         }
     }
 }
