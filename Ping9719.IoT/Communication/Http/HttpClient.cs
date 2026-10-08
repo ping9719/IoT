@@ -147,7 +147,7 @@ namespace Ping9719.IoT.Communication
                     myContent = content?.Headers?.ContentType?.ToString();
                 }
 
-                var re = httpClient.SendAsync(httpRequestMessage).Result;
+                var re = httpClient.SendAsync(httpRequestMessage).GetAwaiter().GetResult();
                 if (!re.IsSuccessStatusCode)
                 {
                     ReceivedHttp?.Invoke(new ApiHelpRequestMessage()
@@ -161,7 +161,7 @@ namespace Ping9719.IoT.Communication
                     return result.AddError(re.StatusCode.ToString()).ToEnd();
                 }
 
-                var con = re.Content.ReadAsStringAsync().Result;
+                var con = re.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
                 ReceivedHttp?.Invoke(new ApiHelpRequestMessage()
                 {

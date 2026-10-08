@@ -133,7 +133,11 @@ namespace Ping9719.IoT.Communication
 
             var connectResult = tcpClient.BeginConnect(address, port, null, null);
             if (!connectResult.AsyncWaitHandle.WaitOne(Math.Max(100, OpenTimeOut)))//阻塞当前线程
+            {
+                tcpClient.Close();
+                tcpClient = null;
                 throw new TimeoutException("连接超时");
+            }
             tcpClient.EndConnect(connectResult);
 
             return new OpenClientData(tcpClient.Client);

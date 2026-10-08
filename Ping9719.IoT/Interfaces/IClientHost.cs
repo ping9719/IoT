@@ -100,11 +100,12 @@ namespace Ping9719.IoT
             //}
             else if (client.ConnectionMode == ConnectionMode.AutoReconnection && isAutoOpen)
             {
-                /* 
+                /*
                              打开  用户关闭 重连中
                  IsOpen       o       x       x
                  IsUserClose  x       o       x
                  */
+                //isOpen = !Client.IsUserClose;
                 isOpen = (Client.IsOpen && !Client.IsUserClose) || (!Client.IsOpen && !Client.IsUserClose);
             }
 

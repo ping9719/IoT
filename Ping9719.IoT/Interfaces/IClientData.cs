@@ -159,7 +159,7 @@ namespace Ping9719.IoT
                         return Read<double>(address).ToVal<object>(o => (object)o, true);
                     case "string":
                         return Read<string>(address).ToVal<object>(o => (object)o, true);
-                    case "datatime":
+                    case "datetime":
                         return Read<DateTime>(address).ToVal<object>(o => (object)o, true);
                     case "timespan":
                         return Read<TimeSpan>(address).ToVal<object>(o => (object)o, true);
@@ -217,7 +217,7 @@ namespace Ping9719.IoT
                         return Read<double>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "string":
                         return Read<string>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
-                    case "datatime":
+                    case "datetime":
                         return Read<DateTime>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
                     case "timespan":
                         return Read<TimeSpan>(address, number).ToVal<IEnumerable<object>>(o => o.Select(o2 => (object)o2), true);
@@ -281,7 +281,7 @@ namespace Ping9719.IoT
                         return Write<double>(address, Convert.ToDouble(value));
                     case "string":
                         return Write<string>(address, Convert.ToString(value));
-                    case "datatime":
+                    case "datetime":
                         return Write<DateTime>(address, Convert.ToDateTime(value));
                     case "timespan":
                         return Write<TimeSpan>(address, (TimeSpan)value);
@@ -344,7 +344,7 @@ namespace Ping9719.IoT
                         return Write<double>(address, values.Select(o => Convert.ToDouble(o)).ToArray());
                     case "string":
                         return Write<string>(address, values.Select(o => Convert.ToString(o)).ToArray());
-                    case "datatime":
+                    case "datetime":
                         return Write<DateTime>(address, values.Select(o => Convert.ToDateTime(o)).ToArray());
                     case "timespan":
                         return Write<TimeSpan>(address, values.Select(o => (TimeSpan)o).ToArray());

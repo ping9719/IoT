@@ -83,6 +83,10 @@ namespace Ping9719.IoT.Protocol
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<string>();
 
                 //验证
+                if (sendResult.Value.Length <= 3)
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应报文长度不足").ToVal<string>();
+                if (sendResult.Value[0] != comm.Value[0])
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应站号校验失败").ToVal<string>();
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<string>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
@@ -181,6 +185,10 @@ namespace Ping9719.IoT.Protocol
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<IEnumerable<T>>();
 
                 //验证
+                if (sendResult.Value.Length <= 3)
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应报文长度不足").ToVal<IEnumerable<T>>();
+                if (sendResult.Value[0] != comm.Value[0])
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应站号校验失败").ToVal<IEnumerable<T>>();
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<IEnumerable<T>>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))
@@ -269,6 +277,10 @@ namespace Ping9719.IoT.Protocol
                     return sendResult.AddError($"写入[{result.Value}]失败。");
 
                 //验证
+                if (sendResult.Value.Length <= 3)
+                    return sendResult.AddError($"写入[{result.Value}]失败。响应报文长度不足");
+                if (sendResult.Value[0] != comm.Value[0])
+                    return sendResult.AddError($"写入[{result.Value}]失败。响应站号校验失败");
                 if (!CRC.CheckCrc16Modbus(sendResult.Value))
                     return sendResult.AddError($"写入[{result.Value}]失败。响应结果校验失败");
                 if (ModbusErr.VerifyFunctionCode(comm.Value[1], sendResult.Value[1]))

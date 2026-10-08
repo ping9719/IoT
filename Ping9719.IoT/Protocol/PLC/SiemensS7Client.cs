@@ -91,8 +91,8 @@ namespace Ping9719.IoT.Protocol
 
             Client.Opened += (a) =>
             {
-                var Command1 = SiemensConstant.Command1;
-                var Command2 = SiemensConstant.Command2;
+                    var Command1 = SiemensConstant.Command1;
+                    var Command2 = SiemensConstant.Command2;
 
                 switch (type)
                 {
@@ -223,7 +223,7 @@ namespace Ping9719.IoT.Protocol
                         else if (dataPackage[21] != 0xFF)
                         {
 
-                            result.AddError($"读取{address}失败，异常代码[{21}]:{dataPackage[21]}");
+                            result.AddError($"读取{address}失败，位置[21]的异常代码:{dataPackage[21]}");
                             return result;
                         }
                     }

@@ -215,17 +215,17 @@ namespace Ping9719.IoT.Communication
         {
             try
             {
-            IsUserClose = false;
+                IsUserClose = false;
                 SetOpenCts(false);
-            Closed?.Invoke(this, code);
-            CloseCore();
+                Closed?.Invoke(this, code);
+                CloseCore();
                 return true;
-        }
+            }
             catch (Exception)
             {
                 return false;
             }
-            finally 
+            finally
             {
                 dataEri = null;
             }
@@ -296,7 +296,7 @@ namespace Ping9719.IoT.Communication
             }
             finally
             {
-                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && (isHmOpen || IsAutoOpen) && IsAutoClose)
+                if (IsOpen && ConnectionMode == ConnectionMode.AutoOpen && isHmOpen && IsAutoClose)
                     Close();
 
                 isSendReceive = false;
@@ -580,14 +580,14 @@ namespace Ping9719.IoT.Communication
 
                                                 var bytes = cc.dataEri.DequeueAll();
                                                 if (bytes != null && bytes.Length > 0)
-                                                    cc.Received?.Invoke(this, DataProcessors(bytes, false));
+                                                    cc.Received?.Invoke(cc, DataProcessors(bytes, false));
                                             }, TaskContinuationOptions.ExecuteSynchronously);
                                         }
                                         else
                                         {
                                             var bytes = cc.ReceiveCore(cc.ReceiveModeReceived, true);
                                             if (bytes != null && bytes.Length > 0)
-                                                cc.Received?.Invoke(this, DataProcessors(bytes, false));
+                                                cc.Received?.Invoke(cc, DataProcessors(bytes, false));
                                         }
                                     }
                                 }
@@ -730,7 +730,6 @@ namespace Ping9719.IoT.Communication
                     {
                         if (!WaitSignal(RemaTime(beginTime, timeOut)))
                             throw new TimeoutException("已超时");
-                        var aa = DateTime.Now;
                     }
                     value = dataEri?.Dequeue(countMax);
                 }

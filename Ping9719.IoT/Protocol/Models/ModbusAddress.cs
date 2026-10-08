@@ -136,7 +136,7 @@ namespace Ping9719.IoT.Protocol.Models
                     //计算真实数量
                     var rCount = DataHelp.GetWordCount<T>();
                     if (Bit != null && typeof(T) == typeof(bool))
-                        rCount = Convert.ToUInt16(readCount / 16.0 + 1.0);//这里未考虑从中间取跨的问题，不是最佳方案
+                        rCount = Convert.ToUInt16((Bit.Value + readCount + 15) / 16);
                     else
                         rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
@@ -386,7 +386,7 @@ namespace Ping9719.IoT.Protocol.Models
                     //计算真实数量
                     var rCount = DataHelp.GetWordCount<T>();
                     if (Bit != null && typeof(T) == typeof(bool))
-                        rCount = Convert.ToUInt16(readCount / 16.0 + 1.0);//这里未考虑从中间取跨的问题，不是最佳方案
+                        rCount = Convert.ToUInt16((Bit.Value + readCount + 15) / 16);
                     else
                         rCount = Convert.ToUInt16(rCount == 0 ? readCount : readCount * rCount);
 
@@ -576,7 +576,6 @@ namespace Ping9719.IoT.Protocol.Models
                         result.AddRange(BitConverter.GetBytes(vCount).AsEnumerable().Reverse());
                         result.Add(Convert.ToByte(list1.Length));
                         result.AddRange(list1);
-                        var sl2 = BitConverter.GetBytes(Convert.ToUInt16(result.Count() - 6));
                         result[1] = (byte)functionCode;
                     }
                     else

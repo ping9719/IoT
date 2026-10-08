@@ -41,7 +41,7 @@ namespace Ping9719.IoT.Device.Rfid
         /// <param name="length">读取长度</param>
         /// <param name="encoding">编码，null为16机制表示的字符串</param>
         /// <returns></returns>
-        public IoTResult<string> ReadString(string address, int length = -1, Encoding encoding = null)
+        public new IoTResult<string> ReadString(string address, int length = -1, Encoding encoding = null)
         {
             try
             {
@@ -167,7 +167,7 @@ namespace Ping9719.IoT.Device.Rfid
             }
         }
 
-        public IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
+        public new IoTResult WriteString(string address, string value, int length = -1, Encoding encoding = null)
         {
             try
             {

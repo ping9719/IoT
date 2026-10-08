@@ -56,6 +56,8 @@ namespace Ping9719.IoT.Common
         {
             if (source == null || oldBytes == null || newBytes == null)
                 return source;
+            if (oldBytes.Length == 0)
+                return source;
 
             List<byte> result = new List<byte>();
             int i = 0;
@@ -243,12 +245,13 @@ namespace Ping9719.IoT.Common
         /// <param name="bool1To8">bool转换是否采用1对8的方式</param>
         /// <param name="bool1To8Reverse">采用了1对8的方式后是否进行反转</param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public static T[] EndianToObj<T>(this byte[] value, EndianFormat format = EndianFormat.ABCD, bool bool1To8 = false, bool bool1To8Reverse = true)
         {
             var sl = DataHelp.GetByteCount<T>();
+            if (sl == 0)
+                throw new NotSupportedException($"暂不支持的类型{typeof(T).Name}");
             if (value.Length % sl != 0)
-                throw new NotImplementedException($"转换失败，类型{typeof(T).Name}不为{sl}的倍数");
+                throw new ArgumentException($"转换失败，类型{typeof(T).Name}的字节数[{sl}]不能被数据长度[{value.Length}]整除");
 
             var tType = typeof(T);
             if (tType == typeof(bool))

@@ -35,21 +35,21 @@ namespace Ping9719.IoT.Device.Robot
             if (info.IsSucceed && info.Value.StartsWith("#Login,0"))
             {
                 Thread.Sleep(300);
-                var returnms = Client.SendReceive("$Stop\r\n");
+                var stop = Client.SendReceive("$Stop\r\n");
                 Thread.Sleep(300);
 
-                if (returnms.IsSucceed && returnms.Value.StartsWith("#Stop,0"))
+                if (stop.IsSucceed && stop.Value.StartsWith("#Stop,0"))
                 {
                     Thread.Sleep(300);
-                    var mmooo = Client.SendReceive("$Start,0\r\n");
-                    if (mmooo.IsSucceed && mmooo.Value.Contains("#Start,0"))
-                    {
-                        return mmooo;
-                    }
+                    var start = Client.SendReceive("$Start,0\r\n");
+                    if (start.IsSucceed && start.Value.Contains("#Start,0"))
+                        return start;
+
+                    return start.AddError("机器人启动指令($Start)未得到确认");
                 }
+                return stop.AddError("机器人停止指令($Stop)未得到确认");
             }
-            info.IsSucceed = false;
-            return info;
+            return info.AddError("机器人登录指令($Login)未得到确认");
         }
 
         /// <summary>
@@ -61,8 +61,7 @@ namespace Ping9719.IoT.Device.Robot
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Pause"))
                 return returnmes;
 
-            returnmes.IsSucceed = false;
-            return returnmes;
+            return returnmes.AddError("机器人暂停指令($Pause)未得到确认");
         }
 
         /// <summary>
@@ -74,8 +73,7 @@ namespace Ping9719.IoT.Device.Robot
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Continue"))
                 return returnmes;
 
-            returnmes.IsSucceed = false;
-            return returnmes;
+            return returnmes.AddError("机器人继续指令($Continue)未得到确认");
         }
 
         /// <summary>
@@ -87,8 +85,7 @@ namespace Ping9719.IoT.Device.Robot
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Reset,0"))
                 return returnmes;
 
-            returnmes.IsSucceed = false;
-            return returnmes;
+            return returnmes.AddError("机器人复位指令($Reset)未得到确认");
         }
 
         /// <summary>
@@ -100,8 +97,7 @@ namespace Ping9719.IoT.Device.Robot
             if (returnmes.IsSucceed && returnmes.Value.StartsWith("#Stop"))
                 return returnmes;
 
-            returnmes.IsSucceed = false;
-            return returnmes;
+            return returnmes.AddError("机器人停止指令($Stop)未得到确认");
         }
     }
 }

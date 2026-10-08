@@ -100,6 +100,8 @@ namespace Ping9719.IoT.Protocol
                     return result.AddError($"读取[{result.Value}]失败。").ToVal<string>();
 
                 //验证
+                if (sendResult.Value.Length <= 9)
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应报文长度不足").ToVal<string>();
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"读取[{result.Value}]失败。响应结果校验失败").ToVal<string>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
@@ -200,6 +202,8 @@ namespace Ping9719.IoT.Protocol
                     return sendResult.AddError($"读取[{result.Value}]失败。").ToVal<IEnumerable<T>>();
 
                 //验证
+                if (sendResult.Value.Length <= 9)
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应报文长度不足").ToVal<IEnumerable<T>>();
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"读取[{result.Value}]失败。标识校验失败").ToVal<IEnumerable<T>>();
                 if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))
@@ -287,6 +291,8 @@ namespace Ping9719.IoT.Protocol
                     return sendResult.AddError($"写入[{result.Value}]失败。");
 
                 //验证
+                if (sendResult.Value.Length <= 9)
+                    return sendResult.AddError($"读取[{result.Value}]失败。响应报文长度不足");
                 if (comm.Value[0] != sendResult.Value[0] || comm.Value[1] != sendResult.Value[1] || comm.Value[7] != sendResult.Value[7])
                     return sendResult.AddError($"写入[{result.Value}]失败。响应结果校验失败");
                 if (ModbusErr.VerifyFunctionCode(comm.Value[7], sendResult.Value[7]))

@@ -105,7 +105,7 @@ namespace Ping9719.IoT.Communication
                     {
                         try
                         {
-                            if (HttpListener == null)
+                            if (cc.HttpListener == null)
                                 break;
 
                             var context = await cc.HttpListener.GetContextAsync();
@@ -147,23 +147,32 @@ namespace Ping9719.IoT.Communication
                             }
                             finally
                             {
-                                //处理返回的数据
-                                if (data != null)
+                                try
                                 {
-                                    if (data is string dStr)
+                                    //处理返回的数据
+                                    if (data != null)
                                     {
-                                        var enco = context.Response.ContentEncoding ?? Encoding.UTF8;
-                                        var Dbyte = enco.GetBytes(dStr);
-                                        context.Response.ContentLength64 = Dbyte.Length;
-                                        context.Response.OutputStream.Write(Dbyte, 0, Dbyte.Length);
-                                    }
-                                    else if (data is byte[] bBy)
-                                    {
-                                        context.Response.ContentLength64 = bBy.Length;
-                                        context.Response.OutputStream.Write(bBy, 0, bBy.Length);
+                                        if (data is string dStr)
+                                        {
+                                            var enco = context.Response.ContentEncoding ?? Encoding.UTF8;
+                                            var Dbyte = enco.GetBytes(dStr);
+                                            context.Response.ContentLength64 = Dbyte.Length;
+                                            context.Response.OutputStream.Write(Dbyte, 0, Dbyte.Length);
+                                        }
+                                        else if (data is byte[] bBy)
+                                        {
+                                            context.Response.ContentLength64 = bBy.Length;
+                                            context.Response.OutputStream.Write(bBy, 0, bBy.Length);
+                                        }
                                     }
                                 }
-
+                                catch (Exception)
+                                {
+                                }
+                                finally
+                                {
+                                    try { context.Response.Close(); } catch (Exception) { }
+                                }
                             }
 
                         }
