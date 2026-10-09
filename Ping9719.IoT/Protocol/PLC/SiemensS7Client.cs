@@ -1,4 +1,4 @@
-﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,18 +91,19 @@ namespace Ping9719.IoT.Protocol
 
             Client.Opened += (a) =>
             {
-                    var Command1 = SiemensConstant.Command1;
-                    var Command2 = SiemensConstant.Command2;
+                //克隆一份防止被串改
+                var Command1 = (byte[])SiemensConstant.Command1.Clone();
+                var Command2 = (byte[])SiemensConstant.Command2.Clone();
 
                 switch (type)
                 {
                     case SiemensVersion.S7_200:
-                        Command1 = SiemensConstant.Command1_200;
-                        Command2 = SiemensConstant.Command2_200;
+                        Command1 = (byte[])SiemensConstant.Command1_200.Clone();
+                        Command2 = (byte[])SiemensConstant.Command2_200.Clone();
                         break;
                     case SiemensVersion.S7_200Smart:
-                        Command1 = SiemensConstant.Command1_200Smart;
-                        Command2 = SiemensConstant.Command2_200Smart;
+                        Command1 = (byte[])SiemensConstant.Command1_200Smart.Clone();
+                        Command2 = (byte[])SiemensConstant.Command2_200Smart.Clone();
                         break;
                     case SiemensVersion.S7_300:
                         Command1[21] = (byte)(Rack * 0x20 + Slot); //0x02;

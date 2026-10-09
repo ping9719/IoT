@@ -681,7 +681,7 @@ namespace Ping9719.IoT.Communication
                         {
                             System.Threading.Thread.Sleep(100);
 
-                            if (cc.task.IsCompleted)
+                            if (cc.task == null || cc.task.IsCompleted)
                                 break;
                             //关闭下不进行心跳
                             if (!cc.IsOpen)

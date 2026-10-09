@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -71,7 +71,7 @@ namespace Ping9719.IoT.Common
                 IsAvailable = _deserializeMethod != null && _serializeMethod != null;
             }
 
-            public static bool IsAvailable;
+            public static bool IsAvailable { get; private set; }
             public static object Deserialize(string json, Type type) => _deserializeMethod.Invoke(null, new object[] { json, type });
             public static string Serialize(object obj) => (string)_serializeMethod.Invoke(null, new object[] { obj });
         }

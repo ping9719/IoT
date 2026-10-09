@@ -1,4 +1,4 @@
-﻿using Ping9719.IoT.Communication;
+using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,42 +51,49 @@ namespace Ping9719.IoT
         /// <returns></returns>
         public IoTResult SetClient(ClientBase client, bool useOldSet = true, bool isAutoOpen = true)
         {
+            if (client == null)
+                return IoTResult.Create().AddError("新的客户端不能为null");
+
             if (Client == null)
             {
                 Client = client;
                 return IoTResult.Create();
             }
 
+            if (ReferenceEquals(Client, client))
+                return IoTResult.Create();
+
+            var oldClient = Client;
             if (useOldSet)
             {
-                client.ConnectionMode = Client.ConnectionMode;
-                //client.IsAutoOpen = Client.IsAutoOpen;
-                //client.IsAutoClose = Client.IsAutoClose;
-                client.SendDataProcessors = Client.SendDataProcessors;
-                client.ReceivedDataProcessors = Client.ReceivedDataProcessors;
-                client.MaxReconnectionTime = Client.MaxReconnectionTime;
-                client.ReceiveBufferSize = Client.ReceiveBufferSize;
-                client.HeartbeatTime = Client.HeartbeatTime;
-                client.HeartbeatReceiveTime = Client.HeartbeatReceiveTime;
-                client.IsAutoDiscard = Client.IsAutoDiscard;
-                client.Encoding = Client.Encoding;
-                client.TimeOut = Client.TimeOut;
-                client.ReceiveMode = Client.ReceiveMode;
-                client.ReceiveModeReceived = Client.ReceiveModeReceived;
+                client.ConnectionMode = oldClient.ConnectionMode;
+                //client.IsAutoOpen = oldClient.IsAutoOpen;
+                //client.IsAutoClose = oldClient.IsAutoClose;
+                client.SendDataProcessors = oldClient.SendDataProcessors;
+                client.ReceivedDataProcessors = oldClient.ReceivedDataProcessors;
+                client.MaxReconnectionTime = oldClient.MaxReconnectionTime;
+                client.ReceiveBufferSize = oldClient.ReceiveBufferSize;
+                client.HeartbeatTime = oldClient.HeartbeatTime;
+                client.HeartbeatReceiveTime = oldClient.HeartbeatReceiveTime;
+                client.IsAutoDiscard = oldClient.IsAutoDiscard;
+                client.Encoding = oldClient.Encoding;
+                client.TimeOut = oldClient.TimeOut;
+                client.ReceiveMode = oldClient.ReceiveMode;
+                client.ReceiveModeReceived = oldClient.ReceiveModeReceived;
 
-                client.Opening = Client.Opening;
-                client.Opened = Client.Opened;
-                client.Closing = Client.Closing;
-                client.Closed = Client.Closed;
-                client.Received = Client.Received;
-                client.Heartbeat = Client.Heartbeat;
+                client.Opening = oldClient.Opening;
+                client.Opened = oldClient.Opened;
+                client.Closing = oldClient.Closing;
+                client.Closed = oldClient.Closed;
+                client.Received = oldClient.Received;
+                client.Heartbeat = oldClient.Heartbeat;
 
-                Client.Opening = null;
-                Client.Opened = null;
-                Client.Closing = null;
-                Client.Closed = null;
-                Client.Received = null;
-                Client.Heartbeat = null;
+                oldClient.Opening = null;
+                oldClient.Opened = null;
+                oldClient.Closing = null;
+                oldClient.Closed = null;
+                oldClient.Received = null;
+                oldClient.Heartbeat = null;
             }
 
             bool isOpen = false;
@@ -100,11 +107,11 @@ namespace Ping9719.IoT
             //}
             else if (client.ConnectionMode == ConnectionMode.AutoReconnection && isAutoOpen)
             {
-                /*
-                             打开  用户关闭 重连中
-                 IsOpen       o       x       x
-                 IsUserClose  x       o       x
-                 */
+            /*
+                         打开  用户关闭 重连中
+             IsOpen       o       x       x
+             IsUserClose  x       o       x
+             */
                 //isOpen = !Client.IsUserClose;
                 isOpen = (Client.IsOpen && !Client.IsUserClose) || (!Client.IsOpen && !Client.IsUserClose);
             }

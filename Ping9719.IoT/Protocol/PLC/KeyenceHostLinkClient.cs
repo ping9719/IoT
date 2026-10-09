@@ -1,4 +1,4 @@
-﻿using Ping9719.IoT.Common;
+using Ping9719.IoT.Common;
 using Ping9719.IoT.Communication;
 using System;
 using System.Collections.Generic;
@@ -262,8 +262,13 @@ public class KeyenceHostLinkClient : ClientDataBase
         if (string.IsNullOrEmpty(response))
             throw new Exception("PLC返回空响应，通讯异常");
 
+        //错误响应如“ER,1”
+        var trimmed = response.Trim();
+        if (trimmed.StartsWith(ResponseError, StringComparison.OrdinalIgnoreCase))
+            throw new Exception($"PLC返回错误响应：{trimmed}");
+
         // 拆分响应数据
-        string[] parts = response.Split(new char[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = trimmed.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length < expectedCount)
             throw new Exception($"PLC响应数据不足：预期{expectedCount}个值，实际{parts.Length}个，响应内容：{response}");
@@ -284,6 +289,8 @@ public class KeyenceHostLinkClient : ClientDataBase
         try
         {
             int registerCount = DataHelp.GetWordCount<T>();
+            if (registerCount == 0)
+                throw new NotSupportedException($"暂不支持的类型：{typeof(T).Name}");
             string typeSuffix = GetTypeSuffix<T>();
 
             string command = registerCount == 1 ? CmdReadSingle : CmdReadMultiple;
@@ -321,6 +328,8 @@ public class KeyenceHostLinkClient : ClientDataBase
 
             // 获取每个数据需要的寄存器数量和类型后缀
             int registersPerItem = DataHelp.GetWordCount<T>();
+            if (registersPerItem == 0)
+                throw new NotSupportedException($"暂不支持的类型：{typeof(T).Name}");
             string typeSuffix = GetTypeSuffix<T>();
             int totalRegisters = number * registersPerItem;
 
@@ -431,6 +440,10 @@ public class KeyenceHostLinkClient : ClientDataBase
                 WriteSingleBool(address, Convert.ToBoolean(value), out bool success);
                 result.IsSucceed = success;
             }
+            else if (registerCount == 0)
+            {
+                throw new NotSupportedException($"暂不支持的类型：{typeof(T).Name}");
+            }
             else if (registerCount == 1)
             {
                 // 单寄存器写入
@@ -475,6 +488,8 @@ public class KeyenceHostLinkClient : ClientDataBase
                 throw new ArgumentException("写入值集合不能为空", nameof(values));
 
             int registerCount = DataHelp.GetWordCount<T>();
+            if (registerCount == 0)
+                throw new NotSupportedException($"暂不支持的类型：{typeof(T).Name}");
             string typeSuffix = GetTypeSuffix<T>();
 
             if (registerCount != 1)
@@ -537,7 +552,13 @@ public class KeyenceHostLinkClient : ClientDataBase
                 return receiveResult;
 
             var cleanResponse = receiveResult.Value.Trim().ToUpper();
+            //错误响应
+            if (cleanResponse.StartsWith(ResponseError, StringComparison.OrdinalIgnoreCase))
+                return result.AddError($"PLC返回错误响应：{receiveResult.Value.Trim()}").ToEnd();
+
             result.IsSucceed = string.IsNullOrEmpty(cleanResponse) || cleanResponse == "0" || cleanResponse == "OK";
+            if (!result.IsSucceed)
+                result.AddError($"写入返回异常：{receiveResult.Value.Trim()}");
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -71,8 +71,13 @@ namespace Ping9719.IoT
             if (isSucceed.HasValue)
                 IsSucceed = isSucceed.Value;
 
+            if (error != null)
+                return this;
+
             foreach (var err in error)
             {
+                if (err == null)
+                    continue;
                 if (!Error.Any(o => o.Message == err.Message))
                     Error.Add(err);
             }
@@ -82,12 +87,12 @@ namespace Ping9719.IoT
         /// <summary>
         /// 添加错误
         /// </summary>
-        public IoTResult AddError(Exception error, bool? isSucceed = false) => AddError(new[] { error }, isSucceed);
+        public IoTResult AddError(Exception error, bool? isSucceed = false) => error == null ? this : AddError(new[] { error }, isSucceed);
 
         /// <summary>
         /// 添加错误
         /// </summary>
-        public IoTResult AddError(string error, bool? isSucceed = false) => AddError(new Exception(error), isSucceed);
+        public IoTResult AddError(string error, bool? isSucceed = false) => string.IsNullOrEmpty(error) ? this : AddError(new Exception(error), isSucceed);
 
         /// <summary>
         /// 设为结束
@@ -118,11 +123,11 @@ namespace Ping9719.IoT
             if (result != null)
             {
                 IsSucceed = result.IsSucceed;
-                Requests = result.Requests.ToList();
-                Responses = result.Responses.ToList();
+                Requests = result.Requests?.ToList() ?? new List<byte[]>();
+                Responses = result.Responses?.ToList() ?? new List<byte[]>();
                 StartTime = result.StartTime;
                 EndTime = result.EndTime;
-                Error = result.Error.ToList();
+                Error = result.Error?.ToList() ?? new List<Exception>();
             }
 
             this.Value = value;

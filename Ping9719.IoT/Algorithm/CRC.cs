@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +24,9 @@ namespace Ping9719.IoT.Algorithm
         /// <returns>追加的结果</returns>
         public static bool CheckCrc8(byte[] data, byte poly = 0x07, byte init = 0x00, bool ref_in = false, bool ref_out = false, byte xor_out = 0x00)
         {
+            if (data == null || data.Length < 2)
+                return false;
+
             var aa = Crc8Base(data, 0, data.Length - 1, 0, poly, init, ref_in, ref_out, xor_out);
             return aa[data.Length - 1] == data[data.Length - 1];
         }
@@ -88,6 +91,9 @@ namespace Ping9719.IoT.Algorithm
         /// <returns>追加的结果</returns>
         public static bool CheckCrc16(byte[] data, ushort poly = 0x8005, ushort init = 0xFFFF, bool ref_in = true, bool ref_out = true, ushort xor_out = 0x0000, bool is_little_endian = true)
         {
+            if (data == null || data.Length < 3)
+                return false;
+
             var aa = Crc16Base(data, 0, data.Length - 2, 0, poly, init, ref_in, ref_out, xor_out, is_little_endian);
             return aa[data.Length - 1] == data[data.Length - 1] && aa[data.Length - 2] == data[data.Length - 2];
         }
@@ -165,6 +171,9 @@ namespace Ping9719.IoT.Algorithm
         /// <returns>追加的结果</returns>
         public static bool CheckCrc32(byte[] data, uint poly = 0x04C11DB7, uint init = 0xFFFFFFFF, bool ref_in = true, bool ref_out = true, uint xor_out = 0xFFFFFFFF, bool is_little_endian = true)
         {
+            if (data == null || data.Length < 5)
+                return false;
+
             var aa = Crc32Base(data, 0, data.Length - 4, poly, init, ref_in, ref_out, xor_out, is_little_endian);
             return aa[data.Length - 1] == data[data.Length - 1] && aa[data.Length - 2] == data[data.Length - 2] && aa[data.Length - 3] == data[data.Length - 3] && aa[data.Length - 4] == data[data.Length - 4];
         }

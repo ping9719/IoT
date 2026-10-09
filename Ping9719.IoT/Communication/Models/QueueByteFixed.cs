@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -221,10 +221,7 @@ namespace Ping9719.IoT.Communication
         {
             lock (_syncRoot)
             {
-                if (_count == 0)
-                    return new byte[] { };
-
-                return Dequeue(_count);
+                return _count == 0 ? new byte[0] : Dequeue(_count);
             }
         }
         /// <summary>

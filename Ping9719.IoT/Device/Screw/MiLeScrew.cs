@@ -1,4 +1,4 @@
-﻿using Ping9719.IoT;
+using Ping9719.IoT;
 using Ping9719.IoT.Protocol;
 using System;
 using System.Collections.Generic;
@@ -51,7 +51,7 @@ namespace Ping9719.IoT.Device.Screw
         public IoTResult<double> ReadTorque(int sleep = 0)
         {
             var aaa = Read<short>("4103");
-            return new IoTResult<double>(aaa, aaa.Value / 100.00);
+            return aaa.IsSucceed ? new IoTResult<double>(aaa, aaa.Value / 100.00) : aaa.ToVal<double>();
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Ping9719.IoT.Device.Screw
         public IoTResult<double> ReadCycles(int sleep = 0)
         {
             var aaa = Read<short>("4128");
-            return new IoTResult<double>(aaa, aaa.Value / 100.00);
+            return aaa.IsSucceed ? new IoTResult<double>(aaa, aaa.Value / 100.00) : aaa.ToVal<double>();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Ping9719.IoT.Device.Screw
         public IoTResult<double> ReadWorkTimes(int sleep = 0)
         {
             var tmp = Read<Int16>("4116");
-            return new IoTResult<double>(tmp, ((double)tmp.Value) / 100.00);
+            return tmp.IsSucceed ? new IoTResult<double>(tmp, ((double)tmp.Value) / 100.00) : tmp.ToVal<double>();
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Ping9719.IoT.Device.Screw
         public IoTResult<int> ReadScrewStatus(int sleep = 0)
         {
             var tmp = Read<Int16>("4102");
-            return new IoTResult<int>(tmp);
+            return tmp.IsSucceed ? new IoTResult<int>(tmp, tmp.Value) : tmp.ToVal<int>();
         }
 
     }

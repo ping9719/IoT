@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +19,9 @@ namespace Ping9719.IoT.Common
         public static ushort GetByteCount<T>()
         {
             var tType = typeof(T);
-            if (tType == typeof(bool) || tType == typeof(byte))
+            if (tType == typeof(bool) || tType == typeof(byte) || tType == typeof(sbyte))
                 return 1;
-            else if (tType == typeof(short) || tType == typeof(ushort))
+            else if (tType == typeof(short) || tType == typeof(ushort) || tType == typeof(char))
                 return 2;
             else if (tType == typeof(int) || tType == typeof(uint) || tType == typeof(float))
                 return 4;
@@ -38,7 +38,7 @@ namespace Ping9719.IoT.Common
         public static ushort GetWordCount<T>()
         {
             var tType = typeof(T);
-            if (tType == typeof(bool) || tType == typeof(byte) || tType == typeof(short) || tType == typeof(ushort))
+            if (tType == typeof(bool) || tType == typeof(byte) || tType == typeof(sbyte) || tType == typeof(short) || tType == typeof(ushort) || tType == typeof(char))
                 return 1;
             else if (tType == typeof(int) || tType == typeof(uint) || tType == typeof(float))
                 return 2;

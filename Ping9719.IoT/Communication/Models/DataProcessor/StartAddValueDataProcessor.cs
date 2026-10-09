@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,30 +11,30 @@ namespace Ping9719.IoT.Communication
     /// </summary>
     public class StartAddValueDataProcessor : IDataProcessor
     {
-        byte[] _dataEnd = new byte[] { };
+        byte[] _dataStart = new byte[] { };
 
         /// <summary>
         /// 向开头添加固定的值。
         /// </summary>
-        /// <param name="dataEnd"></param>
-        public StartAddValueDataProcessor(params byte[] dataEnd)
+        /// <param name="dataStart">添加的内容</param>
+        public StartAddValueDataProcessor(params byte[] dataStart)
         {
-            _dataEnd = dataEnd ?? new byte[] { };
+            _dataStart = dataStart ?? new byte[] { };
         }
 
         /// <summary>
         /// 向开头添加固定的值。
         /// </summary>
-        /// <param name="dataEnd"></param>
-        /// <param name="encoding"></param>
-        public StartAddValueDataProcessor(string dataEnd, Encoding encoding)
+        /// <param name="dataStart">添加的内容</param>
+        /// <param name="encoding">字符串编码</param>
+        public StartAddValueDataProcessor(string dataStart, Encoding encoding)
         {
-            _dataEnd = string.IsNullOrEmpty(dataEnd) ? new byte[] { } : encoding.GetBytes(dataEnd);
+            _dataStart = string.IsNullOrEmpty(dataStart) ? new byte[] { } : encoding.GetBytes(dataStart);
         }
 
         public byte[] DataProcess(byte[] data)
         {
-            return _dataEnd.Concat(data ?? new byte[] { }).ToArray();
+            return _dataStart.Concat(data ?? new byte[] { }).ToArray();
         }
     }
 }

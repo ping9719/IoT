@@ -93,7 +93,7 @@ namespace Ping9719.IoT.Protocol
                         0x20, 0x02, 0x24, 0x01
                     };
                     var aaa = Client.SendReceive(command);
-                    if (!aaa.IsSucceed || aaa.Value.Length < 43)
+                    if (!aaa.IsSucceed || aaa.Value == null || aaa.Value.Length < 43)
                     {
                         throw new Exception("打开扩展请求失败。");
                     }
