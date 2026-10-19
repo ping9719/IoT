@@ -71,7 +71,7 @@ namespace Ping9719.IoT
             if (isSucceed.HasValue)
                 IsSucceed = isSucceed.Value;
 
-            if (error != null)
+            if (error == null)
                 return this;
 
             foreach (var err in error)
