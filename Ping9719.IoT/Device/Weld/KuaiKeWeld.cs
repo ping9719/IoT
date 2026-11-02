@@ -112,8 +112,10 @@ namespace Ping9719.IoT.Device.Weld
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
             var sendResult = Client.SendReceive(commandCRC16);
-            if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
+            if (!sendResult.IsSucceed)
                 return sendResult;
+            if (sendResult.Value == null || sendResult.Value.Length != 7)
+                return sendResult.AddError($"响应报文长度错误，预期7字节，实际{sendResult.Value?.Length ?? 0}字节").ToEnd();
 
             sendResult.IsSucceed = sendResult.Value[4] == 1;
             if (!sendResult.IsSucceed)
@@ -137,8 +139,10 @@ namespace Ping9719.IoT.Device.Weld
             bytes.AddRange(values);
             var commandCRC16 = CRC.Crc16(bytes.ToArray());
             var sendResult = Client.SendReceive(commandCRC16);
-            if (!sendResult.IsSucceed || sendResult.Value == null || sendResult.Value.Length != 7)
+            if (!sendResult.IsSucceed)
                 return sendResult;
+            if (sendResult.Value == null || sendResult.Value.Length != 7)
+                return sendResult.AddError($"响应报文长度错误，预期7字节，实际{sendResult.Value?.Length ?? 0}字节").ToEnd();
 
             sendResult.IsSucceed = sendResult.Value[4] == 1;
             if (!sendResult.IsSucceed)

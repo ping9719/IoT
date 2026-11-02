@@ -2,6 +2,8 @@
 ## 版本记录：[version history]   
 > *表示部分功能可能与前版本不兼容 [*For some code is incompatible with previous versions]
 
+## v0.14.0（...） 
+*1.`ModbusTcpClient`默认端口502
 ## v0.13.0（26-10-08） 
 *1.[更名]plc属性Version改为Type  
 *3.[更改]plc和modbus归于Protocol名称空间  

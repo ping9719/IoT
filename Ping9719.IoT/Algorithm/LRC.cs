@@ -37,7 +37,8 @@ namespace Ping9719.IoT.Algorithm
         /// <returns></returns>
         public static bool CheckLRC(byte[] value)
         {
-            if (value == null) throw new ArgumentNullException("参数为null");
+            if (value == null || value.Length < 2)
+                throw new ArgumentNullException("参数为null");
 
             int length = value.Length;
             byte[] buffer = new byte[length - 1];

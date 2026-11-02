@@ -43,7 +43,7 @@ namespace Ping9719.IoT.Device.Screw
 
                 var valList = data.Value.ToList();
                 if (valList.Count != 11)
-                    return new IoTResult<KuaiKeScrewElectricBatchInfo>(data).ToEnd();
+                    return new IoTResult<KuaiKeScrewElectricBatchInfo>(data).AddError($"读取数据数量不足11个").ToEnd();
 
                 result.Value = new KuaiKeScrewElectricBatchInfo();
                 result.Value.任务号 = valList[0];
