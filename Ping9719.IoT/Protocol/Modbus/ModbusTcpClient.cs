@@ -52,7 +52,7 @@ namespace Ping9719.IoT.Protocol
         /// <param name="port">端口</param>
         /// <param name="format">数据格式</param>
         /// <param name="stationNumber">站号</param>
-        public ModbusTcpClient(string ip, int port = 1500, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1) : this(new TcpClient(ip, port), format, stationNumber) { }
+        public ModbusTcpClient(string ip, int port = 502, EndianFormat format = EndianFormat.ABCD, byte stationNumber = 1) : this(new TcpClient(ip, port), format, stationNumber) { }
 
         /// <summary>
         /// 获取随机校验头
