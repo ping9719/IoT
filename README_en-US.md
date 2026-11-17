@@ -1,6 +1,6 @@
 ﻿# Ping9719.IoT
 
-Cross-platform industrial communication library. It includes mainstream communication methods (TCP, UDP, MQTT, USB, Bluetooth, etc.) and mainstream communication protocols (Modbus, S7, CIP, MC, FINS, etc.). It is ready to use, simple, and convenient.
+Cross-platform industrial communication library. It includes mainstream communication methods (TCP, UDP, USB, Bluetooth, etc.) and mainstream communication protocols (Modbus, S7, CIP, MC, FINS, etc.). It is ready to use, simple, and convenient.
 
 ## Language Selection
 [简体中文](README.md) || [English](README_en-US.md)    

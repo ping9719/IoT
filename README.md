@@ -1,6 +1,6 @@
 ﻿# Ping9719.IoT
 
-跨平台工业通讯库。包含主流的通讯方式（TCP、UDP、MQTT、USB、蓝牙……）和主流的通讯协议（Modbus、S7、CIP、MC、FINS……），开箱即用，简单方便。
+跨平台工业通讯库。包含主流的通讯方式（TCP、UDP、USB、蓝牙……）和主流的通讯协议（Modbus、S7、CIP、MC、FINS……），开箱即用，简单方便。
 
 ## 语言选择
 [简体中文](README.md) || [English](README_en-US.md)    
